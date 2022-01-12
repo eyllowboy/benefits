@@ -38,12 +38,12 @@ databaseChangeLog:
                     name: start_date
                     type: date
                     constraints:
-                      nullable: true
+                      nullable: false
                 - column:
                     name: end_date
                     type: date
                     constraints:
-                      nullable: false
+                      nullable: true
                 - column:
                     name: area
                     type: int
@@ -51,6 +51,6 @@ databaseChangeLog:
                       nullable: false
                 - column:
                     name: image
-                    type: bytea
+                    type: varchar(300)
                     constraints:
-                      nullable: false
+                      nullable: true
