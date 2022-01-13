@@ -1,4 +1,4 @@
-package com.andersenlab.a.benefits;
+package com.andersenlab.benefits;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
