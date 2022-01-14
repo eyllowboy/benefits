@@ -27,7 +27,7 @@ public class DiscountService {
      }
 
      public List<Discount> findAllDiscounts(){
-        discountRepository.findAll();
+        return discountRepository.findAll();
      }
 
      public void createDiscount(Discount discount){
