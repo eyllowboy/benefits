@@ -5,6 +5,7 @@ import com.andersenlab.benefits.repository.DiscountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -25,7 +26,7 @@ public class DiscountService {
         return discountRepository.getById(id);
      }
 
-     public void findAllDiscounts(){
+     public List<Discount> findAllDiscounts(){
         discountRepository.findAll();
      }
 
@@ -33,7 +34,7 @@ public class DiscountService {
         discountRepository.save(discount);
      }
 
-     public void updateDiscount(Integer id){
+     public void updateDiscountById(Integer id){
         Optional<Discount> discount = discountRepository.findById(id);
         Discount discountNew = new Discount();
         discountNew.setTitle(discount.get().getTitle());
@@ -45,7 +46,7 @@ public class DiscountService {
         discountRepository.save(discountNew);
      }
 
-     public void deleteDiscount(Integer id){
+     public void deleteDiscountById(Integer id){
         discountRepository.deleteById(id);
      }
 
