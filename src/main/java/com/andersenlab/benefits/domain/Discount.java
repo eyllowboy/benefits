@@ -4,7 +4,7 @@ package com.andersenlab.benefits.domain;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.Objects;
 
 
@@ -17,10 +17,10 @@ public class Discount {
     @Column(name="id", nullable=false)
     private Integer id;
 
-    @Column(name="company_id")
+    @Column(name="company_id", insertable=false, updatable=false)
     private Integer CategoryId;
 
-    @Column(name="company_id")
+    @Column(name="company_id", insertable=false, updatable=false)
     private Integer CompanyId;
 
     @Column(name="title", nullable=false)
@@ -32,16 +32,15 @@ public class Discount {
     private String description;
 
     @Column(name="size", nullable=false)
-    @Size(max = 100)
-    private Byte sizeDiscount;
+    private Integer sizeDiscount;
 
     @Column(name="start_date", nullable=false)
     @Temporal(TemporalType.DATE)
-    private LocalDate dateBegin;
+    private Date dateBegin;
 
     @Column(name="end_date")
     @Temporal(TemporalType.DATE)
-    private LocalDate dateFinish;
+    private Date dateFinish;
 
     @Column(name="area", nullable=false)
     private Integer area;
@@ -51,6 +50,18 @@ public class Discount {
     private String imageDiscount;
 
     public Discount() {
+    }
+
+    public Discount(Integer categoryId, Integer companyId, String title, String description, Integer sizeDiscount, Date dateBegin, Date dateFinish, Integer area, String imageDiscount) {
+        CategoryId = categoryId;
+        CompanyId = companyId;
+        this.title = title;
+        this.description = description;
+        this.sizeDiscount = sizeDiscount;
+        this.dateBegin = dateBegin;
+        this.dateFinish = dateFinish;
+        this.area = area;
+        this.imageDiscount = imageDiscount;
     }
 
     public Integer getId() {
@@ -93,27 +104,27 @@ public class Discount {
         this.description = description;
     }
 
-    public Byte getSizeDiscount() {
+    public Integer getSizeDiscount() {
         return sizeDiscount;
     }
 
-    public void setSizeDiscount(Byte sizeDiscount) {
+    public void setSizeDiscount(Integer sizeDiscount) {
         this.sizeDiscount = sizeDiscount;
     }
 
-    public LocalDate getDateBegin() {
+    public Date getDateBegin() {
         return dateBegin;
     }
 
-    public void setDateBegin(LocalDate dateBegin) {
+    public void setDateBegin(Date dateBegin) {
         this.dateBegin = dateBegin;
     }
 
-    public LocalDate getDateFinish() {
+    public Date getDateFinish() {
         return dateFinish;
     }
 
-    public void setDateFinish(LocalDate dateFinish) {
+    public void setDateFinish(Date dateFinish) {
         this.dateFinish = dateFinish;
     }
 
