@@ -24,10 +24,10 @@ public class Discount {
     @Column(name="id", nullable=false)
     private Integer id;
 
-    @Column(name="company_id", insertable=false, updatable=false)
+    @Column(name="company_id", insertable=true, updatable=false)
     private Integer CategoryId;
 
-    @Column(name="company_id", insertable=false, updatable=false)
+    @Column(name="company_id", insertable=true, updatable=false)
     private Integer CompanyId;
 
     @Column(name="title", nullable=false)
