@@ -11,30 +11,37 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class DiscountServiceTest {
 
     @Mock
     private DiscountRepository discountRepository;
 
-    @Autowired
     private DiscountService discountService;
 
 
     @BeforeEach
     void setUp() {
         discountService = new DiscountService(discountRepository);
+
     }
 
     @AfterEach
@@ -44,50 +51,88 @@ class DiscountServiceTest {
     @Test
     void findByIdDiscount() {
         Discount discount = new Discount(1, 2, 3, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
-        //when(discountRepository.findById(1)).thenReturn(Optional.of(discount));
-        //assertEquals(1, discountService.findByIdDiscount(1).getId());
+        discountService.createDiscount(discount);
+        when(discountService.findByIdDiscount(1)).thenReturn(Optional.of(discount));
+        Optional<Discount> actual = discountService.findByIdDiscount(1);
+        assertEquals(Optional.of(discount), actual);
 
-        //int id = 1;
-        //Discount discount = discountService.findByIdDiscount(id);
-        //assertThat(discount.getId()).isEqualTo(1);
 
-        //int id=1;
-        //when(discountRepository.findById(any())).thenReturn(Optional.of(discount));
-        //Discount actual = discountService.findByIdDiscount(id);
-        //assertEquals(discount, actual);
-        //verify(discountRepository).findById(any());
 
     }
 
     @Test
     void shouldFindAllDiscounts() {
-        discountService.findAllDiscounts();
-
+        List<Discount> listDiscounts = new ArrayList<>();
+        Discount oldDiscount1 = new Discount(1, 2, 6, "title1", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount oldDiscount2 = new Discount(2, 3, 2, "title2", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount oldDiscount3 = new Discount(3, 1, 3, "title3", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount oldDiscount4 = new Discount(4, 5, 1, "title3", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount oldDiscount5 = new Discount(5, 5, 3, "title4", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        listDiscounts.add(oldDiscount1);
+        listDiscounts.add(oldDiscount2);
+        listDiscounts.add(oldDiscount3);
+        listDiscounts.add(oldDiscount4);
+        listDiscounts.add(oldDiscount5);
+        when(discountRepository.findAll()).thenReturn(listDiscounts);
+        List<Discount> discountList = discountService.findAllDiscounts();
         verify(discountRepository).findAll();
+        assertEquals(5, discountList.size());
     }
 
     @Test
     void createDiscount() {
         Discount discount = new Discount(1, 2, 3, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
-
         discountService.createDiscount(discount);
-
         ArgumentCaptor<Discount> discountArgumentCaptor = ArgumentCaptor.forClass(Discount.class);
-
         verify(discountRepository).save(discountArgumentCaptor.capture());
-
         Discount captureDiscount = discountArgumentCaptor.getValue();
-
         assertThat(captureDiscount).isEqualTo(discount);
     }
 
     @Test
-    @Disabled
     void updateDiscountById() {
+        Discount oldDiscount = new Discount(1, 2, 3, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        discountService.createDiscount(oldDiscount);
+        given(discountRepository.findById(oldDiscount.getId())).willReturn(Optional.of(oldDiscount));
+        discountService.updateDiscountById(oldDiscount.getId());
+        oldDiscount.setTitle("new title");
+        discountService.createDiscount(oldDiscount);
+        assertEquals("new title", oldDiscount.getTitle());
+
     }
 
     @Test
-    @Disabled
     void deleteDiscountById() {
+        Discount discount = new Discount(1, 2, 3, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        discountService.createDiscount(discount);
+        discountService.deleteDiscountById(1);
+        verify(discountRepository).deleteById(1);
+        Optional<Discount> discount1 = discountService.findByIdDiscount(1);
+        assertThat(discount1.isEmpty());
+
+
+
+    }
+
+
+    @Test
+    void filterNameDiscount() {
+        List<Discount> listDiscounts = new ArrayList<>();
+        Discount oldDiscount1 = new Discount(1, 2, 6, "title1", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount oldDiscount2 = new Discount(2, 3, 2, "title2", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount oldDiscount3 = new Discount(3, 1, 3, "title3", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount oldDiscount4 = new Discount(4, 5, 1, "title3", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount oldDiscount5 = new Discount(5, 5, 3, "title4", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        listDiscounts.add(oldDiscount1);
+        listDiscounts.add(oldDiscount2);
+        listDiscounts.add(oldDiscount3);
+        listDiscounts.add(oldDiscount4);
+        listDiscounts.add(oldDiscount5);
+
+        when(discountService.filterNameDiscount("title3")).thenReturn(listDiscounts);
+        List<Discount> discountList = discountService.filterNameDiscount("title3");
+        assertEquals(2, discountList.size());
+
+
     }
 }
