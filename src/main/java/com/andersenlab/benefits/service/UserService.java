@@ -37,10 +37,6 @@ public class UserService {
         throw new BenefitsServiceException();
     }
 
-    public void updateUser(UserEntity user) {
-        userRepository.save(user);
-    }
-
     public void deleteUser(Integer id) {
         userRepository.deleteById(id);
     }
