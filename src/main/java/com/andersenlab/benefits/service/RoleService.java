@@ -9,8 +9,12 @@ import java.util.List;
 
 @Service
 public class RoleService {
-    @Autowired
     private RoleRepository roleRepository;
+    
+    @Autowired
+    public RoleService(RoleRepository roleRepository) {
+        this.roleRepository = roleRepository;
+    }
     
     public List<RoleEntity> findAll() {
         return roleRepository.findAll();

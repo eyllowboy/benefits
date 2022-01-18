@@ -10,11 +10,14 @@ import java.util.List;
 
 @Service
 public class UserService {
-    @Autowired
     private UserRepository userRepository;
-
-    @Autowired
     private RoleRepository roleRepository;
+    
+    @Autowired
+    public UserService(UserRepository userRepository, RoleRepository roleRepository) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+    }
 
     public List<UserEntity> findAll() {
         return userRepository.findAll();
