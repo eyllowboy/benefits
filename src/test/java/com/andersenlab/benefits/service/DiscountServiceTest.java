@@ -4,17 +4,11 @@ import com.andersenlab.benefits.domain.Discount;
 import com.andersenlab.benefits.repository.DiscountRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,14 +16,12 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class DiscountServiceTest {
 
     @Mock
@@ -49,16 +41,22 @@ class DiscountServiceTest {
     }
 
     @Test
-    void findByIdDiscount() {
+    void shouldFindByIdDiscount() {
         Discount discount = new Discount(1, 2, 3, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
         discountService.createDiscount(discount);
         when(discountService.findByIdDiscount(1)).thenReturn(Optional.of(discount));
         Optional<Discount> actual = discountService.findByIdDiscount(1);
         assertEquals(Optional.of(discount), actual);
 
+    }
 
+    @Test
+    void shouldFindByIdDiscountIsNotPresent() {
+        Optional<Discount> discount = discountService.findByIdDiscount(1);
+        assertEquals(discount, Optional.empty());
 
     }
+
 
     @Test
     void shouldFindAllDiscounts() {
@@ -111,28 +109,7 @@ class DiscountServiceTest {
         assertThat(discount1.isEmpty());
 
 
-
     }
 
 
-    @Test
-    void filterNameDiscount() {
-        List<Discount> listDiscounts = new ArrayList<>();
-        Discount oldDiscount1 = new Discount(1, 2, 6, "title1", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
-        Discount oldDiscount2 = new Discount(2, 3, 2, "title2", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
-        Discount oldDiscount3 = new Discount(3, 1, 3, "title3", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
-        Discount oldDiscount4 = new Discount(4, 5, 1, "title3", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
-        Discount oldDiscount5 = new Discount(5, 5, 3, "title4", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
-        listDiscounts.add(oldDiscount1);
-        listDiscounts.add(oldDiscount2);
-        listDiscounts.add(oldDiscount3);
-        listDiscounts.add(oldDiscount4);
-        listDiscounts.add(oldDiscount5);
-
-        when(discountService.filterNameDiscount("title3")).thenReturn(listDiscounts);
-        List<Discount> discountList = discountService.filterNameDiscount("title3");
-        assertEquals(2, discountList.size());
-
-
-    }
 }

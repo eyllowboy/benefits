@@ -34,19 +34,13 @@
             <scope>provided</scope>
         </dependency>
 
-        <!--        Util -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
 
         <!--        Swagger -->
-        <dependency>
+    <!--    <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
             <version>${springdoc-openapi.version}</version>
-        </dependency>
+        </dependency>-->
 
         <!--        Tests -->
         <dependency>
@@ -66,17 +60,16 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
+      <!--  <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
         </dependency>
-
+-->
         <!--        lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.22</version>
-            <scope>provided</scope>
         </dependency>
 
     </dependencies>
