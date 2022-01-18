@@ -25,7 +25,7 @@ public class DiscountController {
 
 
     @GetMapping("/discounts")
-    List<Discount> allDiscount() {
+    public List<Discount> allDiscount() {
         return discountService.findAllDiscounts();
     }
 
@@ -40,7 +40,7 @@ public class DiscountController {
 
     @GetMapping("/discount/{id}")
     @ResponseStatus(HttpStatus.OK)
-    Optional<Discount> oneDiscount(@PathVariable Integer id) {
+    public Optional<Discount> oneDiscount(@PathVariable Integer id) {
         if (id == null) {
             new ResponseEntity<Discount>(HttpStatus.NO_CONTENT);
         }
@@ -50,7 +50,7 @@ public class DiscountController {
 
     @PutMapping("/discount/{id}")
     @ResponseStatus(HttpStatus.OK)
-    Discount updateDiscount(@RequestBody Discount discount, @PathVariable Integer id) {
+    public Discount updateDiscount(@RequestBody Discount discount, @PathVariable Integer id) {
         if (id == null) {
             new ResponseEntity<Discount>(HttpStatus.BAD_REQUEST);
         }
@@ -60,7 +60,7 @@ public class DiscountController {
 
     @DeleteMapping("/discount/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deleteDiscount(@PathVariable Integer id) {
+    public void deleteDiscount(@PathVariable Integer id) {
         if (id == null) {
             new ResponseEntity<Discount>(HttpStatus.NO_CONTENT);
         }
@@ -69,7 +69,7 @@ public class DiscountController {
     }
 
     @PostMapping("/discount/{title}")
-    void filterDiscountByTitle(@PathVariable String title) {
+    public void filterDiscountByTitle(@PathVariable String title) {
         List<Discount> discounts = discountService.filterByTitle(title);
 
         if (discounts == null) {
