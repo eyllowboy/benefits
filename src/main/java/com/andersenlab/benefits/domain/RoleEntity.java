@@ -13,7 +13,7 @@ import java.util.Objects;
 @AllArgsConstructor
 public class RoleEntity {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	
 	@Column
@@ -21,6 +21,11 @@ public class RoleEntity {
 	
 	@Column
 	private String code;
+	
+	public RoleEntity(String name, String code) {
+		this.name = name;
+		this.code = code;
+	}
 	
 	@Override
 	public boolean equals(Object o) {

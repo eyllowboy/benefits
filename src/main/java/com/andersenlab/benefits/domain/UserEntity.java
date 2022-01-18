@@ -14,7 +14,7 @@ import java.util.Objects;
 @AllArgsConstructor()
 public class UserEntity {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	
 	@Column
@@ -23,6 +23,11 @@ public class UserEntity {
 	@ManyToOne
 	@JoinColumn(name = "role_id")
 	private RoleEntity roleEntity;
+	
+	public UserEntity(String login, RoleEntity roleEntity) {
+		this.login = login;
+		this.roleEntity = roleEntity;
+	}
 	
 	@Override
 	public boolean equals(Object o) {
