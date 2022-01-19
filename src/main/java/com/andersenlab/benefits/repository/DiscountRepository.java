@@ -12,13 +12,13 @@ public interface DiscountRepository extends JpaRepository<Discount, Integer> {
 
     List<Discount> findByTitle(String title);
 
-    List<Discount> findByCategoryId(Integer category);
+    //List<Discount> findByCategoryId(Integer category);
 
-    List<Discount> findBySizeDiscount(Integer size);
+    //List<Discount> findBySizeDiscount(Integer size);
 
-    List<Discount> findByArea(String area);
+    //List<Discount> findByArea(String area);
 
-    List<Discount> findByTitleOrderByIdDesc(Integer id);
+    //List<Discount> findByTitleOrderByIdDesc(Integer id);
 
 
 }

@@ -36,11 +36,11 @@
 
 
         <!--        Swagger -->
-    <!--    <dependency>
+        <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
             <version>${springdoc-openapi.version}</version>
-        </dependency>-->
+        </dependency>
 
         <!--        Tests -->
         <dependency>
@@ -60,11 +60,11 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-      <!--  <dependency>
+       <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
         </dependency>
--->
+
         <!--        lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
