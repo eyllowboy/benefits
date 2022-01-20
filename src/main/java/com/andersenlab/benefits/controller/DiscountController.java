@@ -69,6 +69,7 @@ public class DiscountController {
     }
 
     @GetMapping("/discount-{title}")
+    @ResponseStatus(HttpStatus.OK)
     public List<Discount> filterDiscountByTitle(@PathVariable String title) {
         List<Discount> discounts = discountService.filterByTitle(title);
 
@@ -79,15 +80,9 @@ public class DiscountController {
         }
         return discounts;
 
-        /*@GetMapping("/discount/{id}")
-        @ResponseStatus(HttpStatus.OK)
-        public Optional<Discount> oneDiscount(@PathVariable Integer id) {
-            if (id == null) {
-                new ResponseEntity<Discount>(HttpStatus.NO_CONTENT);
-            }
-            return discountService.findByIdDiscount(id);*/
-
     }
+
+
 
 
 }
