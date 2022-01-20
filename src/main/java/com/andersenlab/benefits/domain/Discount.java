@@ -18,16 +18,15 @@ import java.util.Date;
 public class Discount {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "category_id", insertable = false, updatable = false)
+    @Column(name = "category_id", nullable = false, updatable = false)
     private Integer CategoryId;
 
-    @Column(name = "company_id", insertable = false, updatable = false)
+    @Column(name = "company_id", nullable = false, updatable = false)
     private Integer CompanyId;
-
     @Column(name = "title", nullable = false, length = 50)
     private String title;
 
@@ -45,7 +44,7 @@ public class Discount {
     @Temporal(TemporalType.DATE)
     private Date dateFinish;
 
-    @Column(name = "area", nullable = false)
+    @Column(name = "area", nullable = false, updatable = false)
     private Integer area;
 
     @Column(name = "image", nullable = false, length = 300)

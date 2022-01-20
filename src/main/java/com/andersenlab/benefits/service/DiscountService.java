@@ -21,7 +21,6 @@ public class DiscountService {
         this.discountRepository = discountRepository;
     }
 
-
     public Optional<Discount> findByIdDiscount(Integer id) {
         return discountRepository.findById(id);
     }
@@ -30,13 +29,15 @@ public class DiscountService {
         return discountRepository.findAll();
     }
 
-    public Discount createDiscount(Discount discount) {
+    public Discount createDiscount(Discount discount) throws IllegalArgumentException {
+        if(discount == null)
+            throw new IllegalArgumentException("Discount not found");
+
         return discountRepository.save(discount);
 
     }
 
-    public Discount updateDiscountById(Integer id) {
-        Discount newDiscount = new Discount();
+    public Discount updateDiscountById(Integer id, Discount newDiscount) {
         discountRepository.findById(id)
                 .map(discount -> {
                     discount.setTitle(newDiscount.getTitle());
@@ -59,7 +60,6 @@ public class DiscountService {
     public void deleteDiscountById(Integer id) {
         discountRepository.deleteById(id);
     }
-
 
     public List<Discount> filterByTitle(String name) {
         return discountRepository.findByTitle(name);

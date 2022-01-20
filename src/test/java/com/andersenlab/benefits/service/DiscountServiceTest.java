@@ -2,6 +2,7 @@ package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.Discount;
 import com.andersenlab.benefits.repository.DiscountRepository;
+import liquibase.pro.packaged.D;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -92,10 +93,12 @@ class DiscountServiceTest {
         Discount oldDiscount = new Discount(1, 2, 3, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
         discountService.createDiscount(oldDiscount);
         given(discountRepository.findById(oldDiscount.getId())).willReturn(Optional.of(oldDiscount));
-        discountService.updateDiscountById(oldDiscount.getId());
-        oldDiscount.setTitle("new title");
+        Discount newDiscount = new Discount();
+        discountService.updateDiscountById(oldDiscount.getId(),  newDiscount);
+        newDiscount.setTitle("title2");
+        oldDiscount.setTitle(newDiscount.getTitle());
         discountService.createDiscount(oldDiscount);
-        assertEquals("new title", oldDiscount.getTitle());
+        assertEquals("title2", oldDiscount.getTitle());
 
     }
 

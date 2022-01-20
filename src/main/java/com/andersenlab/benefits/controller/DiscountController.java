@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping(path = "/benefits/api/v1/", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class DiscountController {
 
     private final DiscountService discountService;
@@ -50,12 +50,12 @@ public class DiscountController {
 
     @PutMapping("/discount/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Discount updateDiscount(@RequestBody Discount discount, @PathVariable Integer id) {
+    public Discount updateDiscount(@PathVariable Integer id, @RequestBody Discount discount) {
         if (id == null) {
             new ResponseEntity<Discount>(HttpStatus.BAD_REQUEST);
         }
 
-        return discountService.updateDiscountById(id);
+        return discountService.updateDiscountById(id, discount);
     }
 
     @DeleteMapping("/discount/{id}")
@@ -68,13 +68,24 @@ public class DiscountController {
         discountService.deleteDiscountById(id);
     }
 
-    @PostMapping("/discount/{title}")
-    public void filterDiscountByTitle(@PathVariable String title) {
+    @GetMapping("/discount-{title}")
+    public List<Discount> filterDiscountByTitle(@PathVariable String title) {
         List<Discount> discounts = discountService.filterByTitle(title);
 
         if (discounts == null) {
-            discountService.findAllDiscounts();
+            new ResponseEntity<Discount>(HttpStatus.NO_CONTENT);
+
+
         }
+        return discounts;
+
+        /*@GetMapping("/discount/{id}")
+        @ResponseStatus(HttpStatus.OK)
+        public Optional<Discount> oneDiscount(@PathVariable Integer id) {
+            if (id == null) {
+                new ResponseEntity<Discount>(HttpStatus.NO_CONTENT);
+            }
+            return discountService.findByIdDiscount(id);*/
 
     }
 
