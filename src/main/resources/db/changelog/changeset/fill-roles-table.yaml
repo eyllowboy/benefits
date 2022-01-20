@@ -1,4 +1,4 @@
-databaseChangeLog:
+jdatabaseChangeLog:
   -  changeSet:
        id:  insert-roles
        author:  Andrei Rabchun
@@ -24,7 +24,7 @@ databaseChangeLog:
                    value: HR department employee
                - column:
                    name: code
-                   value: ROLE_HR
+                   value: ROLE_MODERATOR
          - insert:
              tableName: roles
              schemaName: public

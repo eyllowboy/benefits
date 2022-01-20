@@ -25,3 +25,4 @@ databaseChangeLog:
                      type:  varchar(50)
                      constraints:
                        nullable:  false
+                       unique:  true
