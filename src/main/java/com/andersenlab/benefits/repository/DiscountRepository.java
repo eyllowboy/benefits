@@ -8,17 +8,17 @@ import java.util.List;
 
 
 @Repository
-public interface DiscountRepository extends JpaRepository<Discount, Integer> {
+public interface DiscountRepository extends JpaRepository<Discount, Long> {
 
     List<Discount> findByTitle(String title);
 
-    //List<Discount> findByCategoryId(Integer category);
+    //List<Discount> findByCategoryId(Long category);
 
-    //List<Discount> findBySizeDiscount(Integer size);
+    //List<Discount> findBySizeDiscount(Long size);
 
     //List<Discount> findByArea(String area);
 
-    //List<Discount> findByTitleOrderByIdDesc(Integer id);
+    //List<Discount> findByTitleOrderByIdDesc(Long id);
 
 
 }

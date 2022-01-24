@@ -2,7 +2,6 @@ package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.Discount;
 import com.andersenlab.benefits.repository.DiscountRepository;
-import liquibase.pro.packaged.D;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,17 +22,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class DiscountServiceTest {
+class DiscountServiceImplTest {
 
     @Mock
     private DiscountRepository discountRepository;
 
-    private DiscountService discountService;
+    private DiscountServiceImpl discountService;
 
 
     @BeforeEach
     void setUp() {
-        discountService = new DiscountService(discountRepository);
+        discountService = new DiscountServiceImpl(discountRepository);
 
     }
 
@@ -43,17 +42,18 @@ class DiscountServiceTest {
 
     @Test
     void shouldFindByIdDiscount() {
-        Discount discount = new Discount(1, 2, 3, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount discount = new Discount(1L, 2L, 3L, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
         discountService.createDiscount(discount);
-        when(discountService.findByIdDiscount(1)).thenReturn(Optional.of(discount));
-        Optional<Discount> actual = discountService.findByIdDiscount(1);
+        when(discountService.findByIdDiscount(1L)).thenReturn(Optional.of(discount));
+        Optional<Discount> actual = discountService.findByIdDiscount(1L);
         assertEquals(Optional.of(discount), actual);
 
     }
 
+
     @Test
     void shouldFindByIdDiscountIsNotPresent() {
-        Optional<Discount> discount = discountService.findByIdDiscount(1);
+        Optional<Discount> discount = discountService.findByIdDiscount(1L);
         assertEquals(discount, Optional.empty());
 
     }
@@ -62,11 +62,11 @@ class DiscountServiceTest {
     @Test
     void shouldFindAllDiscounts() {
         List<Discount> listDiscounts = new ArrayList<>();
-        Discount oldDiscount1 = new Discount(1, 2, 6, "title1", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
-        Discount oldDiscount2 = new Discount(2, 3, 2, "title2", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
-        Discount oldDiscount3 = new Discount(3, 1, 3, "title3", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
-        Discount oldDiscount4 = new Discount(4, 5, 1, "title3", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
-        Discount oldDiscount5 = new Discount(5, 5, 3, "title4", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount oldDiscount1 = new Discount(1L, 2L, 6L, "title1", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount oldDiscount2 = new Discount(2L, 3L, 2L, "title2", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount oldDiscount3 = new Discount(3L, 1L, 3L, "title3", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount oldDiscount4 = new Discount(4L, 5L, 1L, "title3", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount oldDiscount5 = new Discount(5L, 5L, 3L, "title4", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
         listDiscounts.add(oldDiscount1);
         listDiscounts.add(oldDiscount2);
         listDiscounts.add(oldDiscount3);
@@ -80,7 +80,7 @@ class DiscountServiceTest {
 
     @Test
     void createDiscount() {
-        Discount discount = new Discount(1, 2, 3, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount discount = new Discount(1L, 2L, 3L, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
         discountService.createDiscount(discount);
         ArgumentCaptor<Discount> discountArgumentCaptor = ArgumentCaptor.forClass(Discount.class);
         verify(discountRepository).save(discountArgumentCaptor.capture());
@@ -90,7 +90,7 @@ class DiscountServiceTest {
 
     @Test
     void updateDiscountById() {
-        Discount oldDiscount = new Discount(1, 2, 3, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount oldDiscount = new Discount(1L, 2L, 3L, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
         discountService.createDiscount(oldDiscount);
         given(discountRepository.findById(oldDiscount.getId())).willReturn(Optional.of(oldDiscount));
         Discount newDiscount = new Discount();
@@ -104,11 +104,11 @@ class DiscountServiceTest {
 
     @Test
     void deleteDiscountById() {
-        Discount discount = new Discount(1, 2, 3, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount discount = new Discount(1L, 2L, 3L, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
         discountService.createDiscount(discount);
-        discountService.deleteDiscountById(1);
-        verify(discountRepository).deleteById(1);
-        Optional<Discount> discount1 = discountService.findByIdDiscount(1);
+        discountService.deleteDiscountById(1L);
+        verify(discountRepository).deleteById(1L);
+        Optional<Discount> discount1 = discountService.findByIdDiscount(1L);
         assertThat(discount1.isEmpty());
 
 

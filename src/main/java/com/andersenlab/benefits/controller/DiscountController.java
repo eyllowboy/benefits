@@ -2,7 +2,7 @@ package com.andersenlab.benefits.controller;
 
 
 import com.andersenlab.benefits.domain.Discount;
-import com.andersenlab.benefits.service.DiscountService;
+import com.andersenlab.benefits.service.DiscountServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,10 +16,10 @@ import java.util.Optional;
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class DiscountController {
 
-    private final DiscountService discountService;
+    private final DiscountServiceImpl discountService;
 
     @Autowired
-    public DiscountController(DiscountService discountService) {
+    public DiscountController(DiscountServiceImpl discountService) {
         this.discountService = discountService;
     }
 
@@ -40,7 +40,7 @@ public class DiscountController {
 
     @GetMapping("/discount/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Optional<Discount> oneDiscount(@PathVariable Integer id) {
+    public Optional<Discount> oneDiscount(@PathVariable Long id) {
         if (id == null) {
             new ResponseEntity<Discount>(HttpStatus.NO_CONTENT);
         }
@@ -50,7 +50,7 @@ public class DiscountController {
 
     @PutMapping("/discount/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Discount updateDiscount(@PathVariable Integer id, @RequestBody Discount discount) {
+    public Discount updateDiscount(@PathVariable Long id, @RequestBody Discount discount) {
         if (id == null) {
             new ResponseEntity<Discount>(HttpStatus.BAD_REQUEST);
         }
@@ -60,7 +60,7 @@ public class DiscountController {
 
     @DeleteMapping("/discount/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteDiscount(@PathVariable Integer id) {
+    public void deleteDiscount(@PathVariable Long id) {
         if (id == null) {
             new ResponseEntity<Discount>(HttpStatus.NO_CONTENT);
         }

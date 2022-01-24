@@ -20,13 +20,14 @@ public class Discount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @Column(name = "category_id", nullable = false, updatable = false)
-    private Integer CategoryId;
+    private Long CategoryId;
 
     @Column(name = "company_id", nullable = false, updatable = false)
-    private Integer CompanyId;
+    private Long CompanyId;
+
     @Column(name = "title", nullable = false, length = 50)
     private String title;
 

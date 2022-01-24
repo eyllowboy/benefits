@@ -1,69 +1,23 @@
 package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.Discount;
-import com.andersenlab.benefits.repository.DiscountRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-
-@Service
-public class DiscountService {
+public interface DiscountService {
 
 
-    private final DiscountRepository discountRepository;
+    Optional<Discount> findByIdDiscount(Long id);
 
+    List<Discount> findAllDiscounts();
 
-    @Autowired
-    public DiscountService(DiscountRepository discountRepository) {
-        this.discountRepository = discountRepository;
-    }
+    Discount createDiscount(Discount discount);
 
-    public Optional<Discount> findByIdDiscount(Integer id) {
-        return discountRepository.findById(id);
-    }
+    Discount updateDiscountById(Long id, Discount newDiscount);
 
-    public List<Discount> findAllDiscounts() {
-        return discountRepository.findAll();
-    }
+    void deleteDiscountById(Long id);
 
-    public Discount createDiscount(Discount discount) throws IllegalArgumentException {
-        if(discount == null)
-            throw new IllegalArgumentException("Discount not found");
-
-        return discountRepository.save(discount);
-
-    }
-
-    public Discount updateDiscountById(Integer id, Discount newDiscount) {
-        discountRepository.findById(id)
-                .map(discount -> {
-                    discount.setTitle(newDiscount.getTitle());
-                    discount.setDescription(newDiscount.getDescription());
-                    discount.setDateBegin(newDiscount.getDateBegin());
-                    discount.setDateFinish(newDiscount.getDateFinish());
-                    discount.setSizeDiscount(newDiscount.getSizeDiscount());
-                    discount.setImageDiscount(newDiscount.getImageDiscount());
-                    discount.setArea(newDiscount.getArea());
-                    return discountRepository.save(discount);
-                })
-                .orElseGet(() -> {
-                    newDiscount.setId(id);
-                    return discountRepository.save(newDiscount);
-                });
-
-        return newDiscount;
-    }
-
-    public void deleteDiscountById(Integer id) {
-        discountRepository.deleteById(id);
-    }
-
-    public List<Discount> filterByTitle(String name) {
-        return discountRepository.findByTitle(name);
-    }
-
+    List<Discount> filterByTitle(String name);
 
 }
