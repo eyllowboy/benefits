@@ -1,12 +1,12 @@
-jdatabaseChangeLog:
+databaseChangeLog:
   -  changeSet:
        id:  insert-roles
        author:  Andrei Rabchun
+       dbms: 'postgresql'
+       schemaName: public
        changes:
          -  insert:
               tableName:  roles
-              schemaName:  public
-              dbms:  'postgresql'
               columns:
                 -  column:
                      name:  name
@@ -16,8 +16,6 @@ jdatabaseChangeLog:
                      value:  ROLE_ADMIN
          - insert:
              tableName: roles
-             schemaName: public
-             dbms: 'postgresql'
              columns:
                - column:
                    name: name
@@ -27,8 +25,6 @@ jdatabaseChangeLog:
                    value: ROLE_MODERATOR
          - insert:
              tableName: roles
-             schemaName: public
-             dbms: 'postgresql'
              columns:
                - column:
                    name: name

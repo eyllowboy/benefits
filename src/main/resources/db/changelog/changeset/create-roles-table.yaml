@@ -2,14 +2,15 @@ databaseChangeLog:
   -  changeSet:
        id:  create-roles
        author:  Andrei Rabchun
+       dbms: 'postgresql'
        changes:
          -  createTable:
               tableName:  roles
               columns:
                 -  column:
                      name:  id
-                     type:  int
-                     autoIncrement:  true
+                     type:  BIGINT
+                     defaultValueSequenceNext:  role_id
                      constraints:
                        primaryKey:  true
                        nullable:  false

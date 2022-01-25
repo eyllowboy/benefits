@@ -2,20 +2,21 @@ databaseChangeLog:
   -  changeSet:
        id:  create-users
        author:  Andrei Rabchun
+       dbms: 'postgresql'
        changes:
          -  createTable:
               tableName:  users
               columns:
                 -  column:
                      name:  id
-                     type:  int
-                     autoIncrement:  true
+                     type:  BIGINT
+                     defaultValueSequenceNext:  user_id
                      constraints:
                        primaryKey:  true
                        nullable:  false
                 -  column:
                      name:  role_id
-                     type:  int
+                     type:  BIGINT
                      constraints:
                        nullable:  false
                        foreignKeyName:  fk_id_roles
