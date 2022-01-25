@@ -15,14 +15,20 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
+
 @ExtendWith(SpringExtension.class)
-@SpringBootTest
+@SpringBootTest(properties = "spring.main.lazy-initialization=true",
+		classes = {RoleService.class, RoleServiceImpl.class})
 class RoleServiceTest {
-	@Autowired
-	private RoleService roleService;
-	
+	private final RoleService roleService;
+
 	@MockBean
 	private RoleRepository roleRepository;
+	
+	@Autowired
+	RoleServiceTest(RoleService roleService) {
+		this.roleService = roleService;
+	}
 	
 	@Test
 	void findAll() {
@@ -30,34 +36,23 @@ class RoleServiceTest {
 				new RoleEntity("user", "user"),
 				new RoleEntity("user1", "user1"),
 				new RoleEntity("user2", "user2"));
-		
+
 		when(roleRepository.findAll()).thenReturn(roleEntities);
-		List<RoleEntity> foundRoleEntities = roleService.findAll();
+		List<RoleEntity> foundRoleEntities = roleService.findAll().stream().map(Optional::orElseThrow).toList();
 		assertEquals(roleEntities, foundRoleEntities);
-		
+
 		verify(roleRepository, times(1)).findAll();
 	}
-	
+
 	@Test
 	void findById() {
 		RoleEntity roleEntity = new RoleEntity("user", "user");
-		
-		when(roleRepository.findById(anyInt())).thenReturn(Optional.of(roleEntity));
-		RoleEntity foundRoleEntity = roleService.findById(1);
+
+		when(roleRepository.findById(anyLong())).thenReturn(Optional.of(roleEntity));
+		RoleEntity foundRoleEntity = roleService.findById(1L).orElseThrow();
 		assertEquals(roleEntity, foundRoleEntity);
-		
-		verify(roleRepository, times(1)).findById(1);
-	}
-	
-	@Test
-	void findByCode() {
-		RoleEntity roleEntity = new RoleEntity("user", "user");
-		
-		when(roleRepository.findByCode(anyString())).thenReturn(roleEntity);
-		RoleEntity foundRoleEntity = roleService.findByCode("user");
-		assertEquals(roleEntity, foundRoleEntity);
-		
-		verify(roleRepository, times(1)).findByCode("user");
+
+		verify(roleRepository, times(1)).findById(1L);
 	}
 	
 	@Test
@@ -65,15 +60,34 @@ class RoleServiceTest {
 		RoleEntity roleEntity = new RoleEntity("user", "user");
 		
 		when(roleRepository.save(any(RoleEntity.class))).thenReturn(roleEntity);
-		RoleEntity savedRoleEntity = roleService.save(roleEntity);
+		RoleEntity savedRoleEntity = roleService.save(roleEntity).orElseThrow();
 		assertEquals(roleEntity, savedRoleEntity);
 		
 		verify(roleRepository, times(1)).save(roleEntity);
 	}
 	
 	@Test
-	void deleteRole() {
-		roleService.deleteRole(anyInt());
-		verify(roleRepository, times(1)).deleteById(anyInt());
+	void delete() {
+		roleService.delete(anyLong());
+		verify(roleRepository, times(1)).deleteById(anyLong());
 	}
+	
+	@Test
+	void updateRoleEntity() {
+		roleRepository.updateRoleEntity(anyLong(), anyString(), anyString());
+		verify(roleRepository, times(1)).updateRoleEntity(anyLong(), anyString(), anyString());
+	}
+
+	@Test
+	void findByCode() {
+		RoleEntity roleEntity = new RoleEntity("user", "user");
+
+		when(roleRepository.findByCode(anyString())).thenReturn(roleEntity);
+		RoleEntity foundRoleEntity = roleService.findByCode("user").orElseThrow();
+		assertEquals(roleEntity, foundRoleEntity);
+
+		verify(roleRepository, times(1)).findByCode("user");
+	}
+
+
 }
