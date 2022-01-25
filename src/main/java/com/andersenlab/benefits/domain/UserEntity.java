@@ -14,8 +14,9 @@ import java.util.Objects;
 @AllArgsConstructor()
 public class UserEntity {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="user_id_seq")
+	@SequenceGenerator(name="user_id_seq", sequenceName="user_id", allocationSize=1)
+	private Long id;
 	
 	@Column
 	private String login;
