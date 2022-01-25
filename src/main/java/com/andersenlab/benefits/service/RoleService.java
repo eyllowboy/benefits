@@ -1,38 +1,12 @@
 package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.RoleEntity;
-import com.andersenlab.benefits.repository.RoleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Optional;
 
 @Service
-public class RoleService {
-    private RoleRepository roleRepository;
-    
-    @Autowired
-    public RoleService(RoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
-    }
-    
-    public List<RoleEntity> findAll() {
-        return roleRepository.findAll();
-    }
-    
-    public RoleEntity findById(Integer id) {
-        return roleRepository.findById(id).get();
-    }
-    
-    public RoleEntity findByCode(String code) {
-        return roleRepository.findByCode(code);
-    }
-    
-    public RoleEntity save(RoleEntity role) {
-        return roleRepository.save(role);
-    }
-    
-    public void deleteRole(Integer id) {
-        roleRepository.deleteById(id);
-    }
+public interface RoleService extends CrudService<RoleEntity> {
+    Optional<RoleEntity> findByCode(String code);
+    void updateRoleEntity(Long id, String name, String code);
 }
