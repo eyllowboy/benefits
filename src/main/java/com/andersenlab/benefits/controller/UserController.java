@@ -43,7 +43,7 @@ public class UserController {
 		Optional<RoleEntity> roleEntityInDataBase = roleService.findById(userEntity.getRoleEntity().getId());
 		roleEntityInDataBase
 				.orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
-		
+				
 		Optional<UserEntity> userEntityWithSameLogin = userService.findByLogin(userEntity.getLogin());
 		
 		if (userEntityWithSameLogin.isPresent()
@@ -52,7 +52,7 @@ public class UserController {
 		} else {
 			userService.updateUserEntity(userEntity.getId(),
 					userEntity.getLogin(),
-					userEntity.getRoleEntity());
+					roleEntityInDataBase.get());
 		}
 	}
 	
@@ -64,7 +64,8 @@ public class UserController {
 			@RequestParam(value = "roleId") Long roleId) {
 		
 		userService.findByLogin(login)
-				.ifPresent(userEntity -> {throw new RuntimeException("User with such 'login' is already exists");});
+				.ifPresent(userEntity -> {
+					throw new IllegalStateException("User with such 'login' is already exists");});
 		
 		Optional<RoleEntity> roleEntityInDataBase = roleService.findById(roleId);
 		roleEntityInDataBase

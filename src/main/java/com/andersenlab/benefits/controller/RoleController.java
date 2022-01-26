@@ -37,7 +37,9 @@ public class RoleController {
 		
 		Optional<RoleEntity> roleEntityWithExistCode = roleService.findByCode(roleEntity.getCode());
 		
-		if (roleEntityWithExistCode.isEmpty()) {
+		if (roleEntityWithExistCode.isEmpty() ||
+				roleEntity.getId().equals(
+						roleEntityWithExistCode.get().getId())) {
 			roleService.updateRoleEntity(roleEntity.getId(), roleEntity.getName(), roleEntity.getCode());
 			
 		} else {
@@ -55,7 +57,7 @@ public class RoleController {
 					String code) {
 		
 		roleService.findByCode(code)
-				.ifPresent(roleEntity -> {throw new RuntimeException("Role with such 'code' is already exists");});
+				.ifPresent(roleEntity -> {throw new IllegalStateException("Role with such 'code' is already exists");});
 		
 		RoleEntity roleEntityToWrite = new RoleEntity(name, code);
 		Optional<RoleEntity> savedRoleEntity = roleService.save(roleEntityToWrite);
