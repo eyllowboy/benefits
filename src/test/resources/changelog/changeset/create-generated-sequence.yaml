@@ -1,0 +1,21 @@
+databaseChangeLog:
+  -  changeSet:
+       id:  create-sequence
+       author:  Andrei Rabchun
+       dbms: 'postgresql'
+       changes:
+         -  createSequence:
+              dataType: BIGINT
+              incrementBy: 1
+              sequenceName:  role_id
+              startValue: 1
+         - createSequence:
+             dataType: BIGINT
+             incrementBy: 1
+             sequenceName:  user_id
+             startValue: 1
+         - createSequence:
+             dataType: BIGINT
+             incrementBy: 1
+             sequenceName:  discount_id
+             startValue: 1
