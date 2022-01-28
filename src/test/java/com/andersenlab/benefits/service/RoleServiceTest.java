@@ -15,13 +15,12 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(properties = "spring.main.lazy-initialization=true",
 		classes = {RoleService.class, RoleServiceImpl.class})
 class RoleServiceTest {
 	private final RoleService roleService;
-
+	
 	@MockBean
 	private RoleRepository roleRepository;
 	
@@ -36,22 +35,22 @@ class RoleServiceTest {
 				new RoleEntity("user", "user"),
 				new RoleEntity("user1", "user1"),
 				new RoleEntity("user2", "user2"));
-
+		
 		when(roleRepository.findAll()).thenReturn(roleEntities);
-		List<RoleEntity> foundRoleEntities = roleService.findAll().stream().map(Optional::orElseThrow).toList();
+		List<RoleEntity> foundRoleEntities = roleService.findAll();
 		assertEquals(roleEntities, foundRoleEntities);
-
+		
 		verify(roleRepository, times(1)).findAll();
 	}
-
+	
 	@Test
 	void findById() {
-		RoleEntity roleEntity = new RoleEntity("user", "user");
-
-		when(roleRepository.findById(anyLong())).thenReturn(Optional.of(roleEntity));
-		RoleEntity foundRoleEntity = roleService.findById(1L).orElseThrow();
+		Optional<RoleEntity> roleEntity = Optional.of(new RoleEntity("user", "user"));
+		
+		when(roleRepository.findById(anyLong())).thenReturn(roleEntity);
+		Optional<RoleEntity> foundRoleEntity = roleService.findById(1L);
 		assertEquals(roleEntity, foundRoleEntity);
-
+		
 		verify(roleRepository, times(1)).findById(1L);
 	}
 	
@@ -60,7 +59,7 @@ class RoleServiceTest {
 		RoleEntity roleEntity = new RoleEntity("user", "user");
 		
 		when(roleRepository.save(any(RoleEntity.class))).thenReturn(roleEntity);
-		RoleEntity savedRoleEntity = roleService.save(roleEntity).orElseThrow();
+		RoleEntity savedRoleEntity = roleService.save(roleEntity);
 		assertEquals(roleEntity, savedRoleEntity);
 		
 		verify(roleRepository, times(1)).save(roleEntity);
@@ -77,17 +76,15 @@ class RoleServiceTest {
 		roleRepository.updateRoleEntity(anyLong(), anyString(), anyString());
 		verify(roleRepository, times(1)).updateRoleEntity(anyLong(), anyString(), anyString());
 	}
-
+	
 	@Test
 	void findByCode() {
-		RoleEntity roleEntity = new RoleEntity("user", "user");
-
+		Optional<RoleEntity> roleEntity = Optional.of(new RoleEntity("user", "user"));
+		
 		when(roleRepository.findByCode(anyString())).thenReturn(roleEntity);
-		RoleEntity foundRoleEntity = roleService.findByCode("user").orElseThrow();
+		Optional<RoleEntity> foundRoleEntity = roleService.findByCode("user");
 		assertEquals(roleEntity, foundRoleEntity);
-
+		
 		verify(roleRepository, times(1)).findByCode("user");
 	}
-
-
 }

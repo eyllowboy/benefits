@@ -39,7 +39,7 @@ class UserServiceTest {
 				new UserEntity("user2", new RoleEntity("user2", "user2")));
 
 		when(userRepository.findAll()).thenReturn(userEntities);
-		List<UserEntity> foundUserEntities = userService.findAll().stream().map(Optional::orElseThrow).toList();
+		List<UserEntity> foundUserEntities = userService.findAll();
 		assertEquals(userEntities, foundUserEntities);
 
 		verify(userRepository, times(1)).findAll();
@@ -61,16 +61,10 @@ class UserServiceTest {
 		UserEntity userEntity = new UserEntity("user", new RoleEntity("user", "user"));
 		
 		when(userRepository.save(any(UserEntity.class))).thenReturn(userEntity);
-		UserEntity foundUserEntity = userService.save(userEntity).get();
+		UserEntity foundUserEntity = userService.save(userEntity);
 		assertEquals(userEntity, foundUserEntity);
 		
 		verify(userRepository, times(1)).save(userEntity);
-	}
-	
-	@Test
-	void saveNull() {
-		Assertions.assertThrows(IllegalStateException.class,
-				() ->  userService.save(new UserEntity("user", null)));
 	}
 	
 	@Test
@@ -81,10 +75,11 @@ class UserServiceTest {
 	
 	@Test
 	void findByLogin() {
-		UserEntity userEntity = new UserEntity("user", new RoleEntity("user", "user"));
+		Optional<UserEntity> userEntity =
+				Optional.of(new UserEntity("user", new RoleEntity("user", "user")));
 
 		when(userRepository.findByLogin(anyString())).thenReturn(userEntity);
-		UserEntity foundUserEntity = userService.findByLogin("u").orElseThrow();
+		Optional<UserEntity> foundUserEntity = userService.findByLogin("u");
 		assertEquals(userEntity, foundUserEntity);
 
 		verify(userRepository, times(1)).findByLogin("u");

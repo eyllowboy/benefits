@@ -10,6 +10,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
@@ -46,7 +48,7 @@ class RoleServiceDBTest {
 	@Test
 	void save() {
 		RoleEntity roleEntity = new RoleEntity("sys", "romul");
-		RoleEntity save = roleService.save(roleEntity).get();
+		RoleEntity save = roleService.save(roleEntity);
 		System.out.println(save);
 	}
 	
@@ -66,6 +68,6 @@ class RoleServiceDBTest {
 	
 	@Test
 	void findByCode() {
-		System.out.println(roleService.findByCode("ROLE_ADMIN").get());
+		System.out.println(roleService.findByCode("ROLE_ADMIN"));
 	}
 }

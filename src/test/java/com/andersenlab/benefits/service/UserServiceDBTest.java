@@ -46,9 +46,9 @@ class UserServiceDBTest {
 
 	@Test
 	void save() {
-		RoleEntity roleEntity = roleService.findById(1L).get();
+		RoleEntity roleEntity = roleService.findById(1L).orElse(new RoleEntity());
 		UserEntity log1 = new UserEntity("log", roleEntity);
-		UserEntity save1 = userService.save(log1).get();
+		UserEntity save1 = userService.save(log1);
 		System.out.println(save1);
 	}
 	
