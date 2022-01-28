@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -20,11 +19,8 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
-    public List<Optional<UserEntity>> findAll() {
-        return userRepository.findAll()
-                .stream()
-                .map(x -> Optional.of(Objects.requireNonNullElseGet(x, UserEntity::new)))
-                .toList();
+    public List<UserEntity> findAll() {
+        return userRepository.findAll();
     }
     
     @Override
@@ -34,21 +30,12 @@ public class UserServiceImpl implements UserService {
     
     @Override
     public Optional<UserEntity> findByLogin(String login) {
-        UserEntity userEntity = userRepository.findByLogin(login);
-        if (userEntity == null) {
-            return Optional.empty();
-        } else {
-            return Optional.of(userEntity);
-        }
+        return userRepository.findByLogin(login);
     }
     
     @Override
-    public Optional<UserEntity> save(UserEntity employee) {
-        if (employee.getRoleEntity() != null) {
-            return Optional.of(userRepository.save(employee));
-        }
-        
-        throw new IllegalStateException("Role must be specified");
+    public UserEntity save(UserEntity employee) {
+            return userRepository.save(employee);
     }
     
     @Override

@@ -7,11 +7,11 @@ import java.util.Optional;
 
 @Service
 public interface CrudService<T> {
-	List<Optional<T>> findAll();
+	List<T> findAll();
 	
 	Optional<T> findById(Long id);
 	
-	Optional<T> save(T entity);
+	T save(T entity);
 	
 	void delete(Long id);
 }

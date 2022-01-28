@@ -3,6 +3,7 @@ package com.andersenlab.benefits.service;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import com.andersenlab.benefits.repository.RoleRepository;
+import liquibase.pro.packaged.O;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,11 +22,8 @@ public class RoleServiceImpl implements RoleService {
     }
     
     @Override
-    public List<Optional<RoleEntity>> findAll() {
-        return roleRepository.findAll()
-                .stream()
-                .map(x -> Optional.of(Objects.requireNonNullElseGet(x, RoleEntity::new)))
-                .toList();
+    public List<RoleEntity> findAll() {
+        return roleRepository.findAll();
     }
     
     @Override
@@ -35,17 +33,12 @@ public class RoleServiceImpl implements RoleService {
     
     @Override
     public Optional<RoleEntity> findByCode(String code) {
-        RoleEntity roleEntity = roleRepository.findByCode(code);
-        if (roleEntity == null) {
-            return Optional.empty();
-        } else {
-            return Optional.of(roleEntity);
-        }
+        return roleRepository.findByCode(code);
     }
     
     @Override
-    public Optional<RoleEntity> save(RoleEntity role) {
-        return Optional.of(roleRepository.save(role));
+    public RoleEntity save(RoleEntity role) {
+        return roleRepository.save(role);
     }
     
     @Override
