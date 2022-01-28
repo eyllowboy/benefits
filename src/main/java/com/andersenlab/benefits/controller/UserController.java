@@ -4,16 +4,21 @@ import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import com.andersenlab.benefits.service.RoleService;
 import com.andersenlab.benefits.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.Size;
 import java.util.List;
 import java.util.Optional;
 
+@Tag(name="User controller", description="Controller for performing operations on users.")
 @RestController
 public class UserController {
 	private final UserService userService;
@@ -25,15 +30,29 @@ public class UserController {
 		this.roleService = roleService;
 	}
 	
+	@Operation(summary = "This is to fetch all the users stored in DB")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200",
+					description = "Details of all the users",
+					content = @Content(mediaType = "application/json")),
+			@ApiResponse(responseCode = "500",
+					description = "Internal Server Error",
+					content = @Content)
+	})
 	@GetMapping("/users")
 	public List<UserEntity> getUsers() {
-		return userService.findAll()
-				.stream()
-				.map(x -> x.orElseThrow(
-				() -> new IllegalStateException("Having trouble getting data from the database")))
-				.toList();
+		return userService.findAll();
 	}
 	
+	@Operation(summary = "This is to update the user")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200",
+					description = "User has been updated",
+					content = @Content),
+			@ApiResponse(responseCode = "500",
+					description = "Internal Server Error",
+					content = @Content)
+	})
 	@PutMapping("/users")
 	public void updateUser(@RequestBody UserEntity userEntity) {
 		Optional<UserEntity> userEntityInDataBaseForUpdate = userService.findById(userEntity.getId());
@@ -42,7 +61,7 @@ public class UserController {
 		
 		Optional<RoleEntity> roleEntityInDataBase = roleService.findById(userEntity.getRoleEntity().getId());
 		roleEntityInDataBase
-				.orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
+				.orElseThrow(() -> new IllegalStateException("User with this id was not found in the database"));
 				
 		Optional<UserEntity> userEntityWithSameLogin = userService.findByLogin(userEntity.getLogin());
 		
@@ -56,10 +75,18 @@ public class UserController {
 		}
 	}
 	
+	@Operation(summary = "This is to create new user")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "201",
+					description = "User has been created",
+					content = @Content),
+			@ApiResponse(responseCode = "500",
+					description = "Internal Server Error",
+					content = @Content)
+	})
 	@PostMapping("/users")
 	public ResponseEntity<?> addUser(
 			@RequestParam(value = "login")
-			@Size(min = 3, max = 20, message = "Login length is between 3 and 20 characters.")
 					String login,
 			@RequestParam(value = "roleId") Long roleId) {
 		
@@ -69,16 +96,22 @@ public class UserController {
 		
 		Optional<RoleEntity> roleEntityInDataBase = roleService.findById(roleId);
 		roleEntityInDataBase
-				.orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
+				.orElseThrow(() -> new IllegalStateException("User with this id was not found in the database"));
 		
-		Optional<UserEntity> savedUserEntity = userService.save(new UserEntity(login, roleEntityInDataBase.get()));
+		UserEntity savedUserEntity = userService.save(new UserEntity(login, roleEntityInDataBase.get()));
 		
-		return new ResponseEntity<>(
-				savedUserEntity.orElseThrow(
-						() -> new IllegalStateException("Having trouble saving to the database"))
-				, HttpStatus.CREATED);
+		return new ResponseEntity<>(savedUserEntity, HttpStatus.CREATED);
 	}
 	
+	@Operation(summary = "This is to get the user")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200",
+					description = "User has been received",
+					content = @Content),
+			@ApiResponse(responseCode = "500",
+					description = "Internal Server Error",
+					content = @Content)
+	})
 	@GetMapping("/users/{id}")
 	public UserEntity getUser(@PathVariable @DecimalMin("1") Long id) {
 		Optional<UserEntity> userEntity = userService.findById(id);
@@ -87,6 +120,15 @@ public class UserController {
 				() -> new IllegalStateException("User with this id was not found in the database"));
 	}
 	
+	@Operation(summary = "This is to remove the user")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200",
+					description = "User has been removed",
+					content = @Content),
+			@ApiResponse(responseCode = "500",
+					description = "Internal Server Error",
+					content = @Content)
+	})
 	@DeleteMapping("/users/{id}")
 	public void deleteUser(@PathVariable @DecimalMin("1") Long id) {
 		userService.findById(id)
