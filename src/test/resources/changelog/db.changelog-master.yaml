@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - include:
+      file: changelog/changeset/create-generated-sequence.yaml
+  - include:
+      file: changelog/changeset/create-discounts-table.yaml
+  - include:
+      file: changelog/changeset/create-roles-table.yaml
+  - include:
+      file: changelog/changeset/create-users-table.yaml
+  - include:
+      file: changelog/changeset/fill-roles-table.yaml
+  - include:
+      file: changelog/changeset/fill_discount.sql

@@ -16,10 +16,10 @@ databaseChangeLog:
                        nullable:  false
                 -  column:
                      name:  category_id
-                     type:  BIGINT
+                     type:  int
                 -  column:
                      name:  company_id
-                     type:  BIGINT
+                     type:  int
                 -  column:
                      name: title
                      type: varchar(50)

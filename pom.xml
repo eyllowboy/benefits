@@ -41,6 +41,11 @@
             <artifactId>springdoc-openapi-ui</artifactId>
             <version>${springdoc-openapi.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.6.4</version>
+        </dependency>
 
         <!--        Tests -->
         <dependency>
@@ -63,7 +68,31 @@
        <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
+       </dependency>
+
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-bom</artifactId>
+            <version>1.16.2</version>
+            <type>pom</type>
+            <scope>import</scope>
         </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>1.16.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>1.16.2</version>
+            <scope>test</scope>
+        </dependency>
+
+
+
 
         <!--        lombok -->
         <dependency>
@@ -84,6 +113,28 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <version>3.10.2</version>
+                <configuration>
+                    <verbose>true</verbose>
+                    <driver>org.postgresql.Driver</driver>
+                    <url>jdbc:postgresql://localhost:5432/benefits</url>
+                    <username>benefits</username>
+                    <password>ben0147</password>
+                    <outputChangeLogFile>src/main/resources/db/changelog/db.changelog-master-init.yaml</outputChangeLogFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>generate-change-log</id>
+                        <goals>
+                            <goal>generateChangeLog</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

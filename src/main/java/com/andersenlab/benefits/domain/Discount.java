@@ -18,14 +18,15 @@ import java.util.Date;
 public class Discount {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "discount_id_seq")
+    @SequenceGenerator(name = "discount_id_seq", sequenceName = "discount_id", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "category_id", nullable = false, updatable = false)
+    @Column(name = "category_id")
     private Long CategoryId;
 
-    @Column(name = "company_id", nullable = false, updatable = false)
+    @Column(name = "company_id")
     private Long CompanyId;
 
     @Column(name = "title", nullable = false, length = 50)
@@ -50,6 +51,5 @@ public class Discount {
 
     @Column(name = "image", nullable = false, length = 300)
     private String imageDiscount;
-
 
 }

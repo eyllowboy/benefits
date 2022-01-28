@@ -6,11 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import java.util.Objects;
 import java.util.Optional;
 
 
 @Service
-public class DiscountServiceImpl implements DiscountService{
+public class DiscountServiceImpl implements DiscountService {
 
 
     private final DiscountRepository discountRepository;
@@ -27,47 +29,37 @@ public class DiscountServiceImpl implements DiscountService{
     }
 
     @Override
-    public List<Discount> findAllDiscounts() {
-        return discountRepository.findAll();
+    public List<Optional<Discount>> findAllDiscounts() {
+        return discountRepository.findAll().stream().map(discount -> Optional.of(Objects.requireNonNullElseGet(discount, Discount::new))).toList();
     }
 
     @Override
-    public Discount createDiscount(Discount discount) throws IllegalArgumentException {
-        if(discount == null)
-            throw new IllegalArgumentException("Discount not found");
-
-        return discountRepository.save(discount);
-
+    public Optional<Discount> createDiscount(Discount discount) {
+        return Optional.of(discountRepository.save(discount));
     }
 
     @Override
-    public Discount updateDiscountById(Long id, Discount newDiscount) {
-        discountRepository.findById(id)
-                .map(discount -> {
-                    discount.setTitle(newDiscount.getTitle());
-                    discount.setDescription(newDiscount.getDescription());
-                    discount.setDateBegin(newDiscount.getDateBegin());
-                    discount.setDateFinish(newDiscount.getDateFinish());
-                    discount.setSizeDiscount(newDiscount.getSizeDiscount());
-                    discount.setImageDiscount(newDiscount.getImageDiscount());
-                    discount.setArea(newDiscount.getArea());
-                    return discountRepository.save(discount);
-                })
-                .orElseGet(() -> {
-                    newDiscount.setId(id);
-                    return discountRepository.save(newDiscount);
-                });
+    public Optional<Discount> updateDiscountById(Long id, Discount newDiscount) {
+        discountRepository.findById(id).map(discount -> {
+            discount.setTitle(newDiscount.getTitle());
+            discount.setDescription(newDiscount.getDescription());
+            discount.setDateBegin(newDiscount.getDateBegin());
+            discount.setDateFinish(newDiscount.getDateFinish());
+            discount.setSizeDiscount(newDiscount.getSizeDiscount());
+            discount.setImageDiscount(newDiscount.getImageDiscount());
+            discount.setArea(newDiscount.getArea());
+            return discountRepository.save(discount);
+        }).orElseGet(() -> {
+            newDiscount.setId(id);
+            return discountRepository.save(newDiscount);
+        });
 
-        return newDiscount;
+        return Optional.of(newDiscount);
     }
 
+    @Override
     public void deleteDiscountById(Long id) {
         discountRepository.deleteById(id);
     }
-
-    public List<Discount> filterByTitle(String name) {
-        return discountRepository.findByTitle(name);
-    }
-
 
 }
