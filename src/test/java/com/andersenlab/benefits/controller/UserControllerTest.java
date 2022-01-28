@@ -124,7 +124,7 @@ class UserControllerTest {
 		assertEquals(IllegalStateException.class,
 				nestedServletException.getCause().getClass());
 		
-		assertEquals("Role with this id was not found in the database",
+		assertEquals("User with this id was not found in the database",
 				nestedServletException.getCause().getMessage());
 	}
 	
@@ -176,7 +176,7 @@ class UserControllerTest {
 		assertEquals(IllegalStateException.class,
 				nestedServletException.getCause().getClass());
 		
-		assertEquals("Role with this id was not found in the database",
+		assertEquals("User with this id was not found in the database",
 				nestedServletException.getCause().getMessage());
 	}
 	
