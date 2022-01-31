@@ -13,12 +13,12 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
-	Optional<UserEntity> findByLogin(String login);
+	Optional<UserEntity> findByLogin(final String login);
 	
 	@Modifying
 	@Transactional
 	@Query("update UserEntity u set u.login = :login, u.roleEntity = :roleEntity where u.id = :id")
-	void updateUserEntity(@Param(value = "id") Long id,
-	                      @Param(value = "login") String login,
-	                      @Param(value = "roleEntity") RoleEntity roleEntity);
+	void updateUserEntity(@Param(value = "id") final Long id,
+	                      @Param(value = "login") final String login,
+	                      @Param(value = "roleEntity") final RoleEntity roleEntity);
 }

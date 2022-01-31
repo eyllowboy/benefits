@@ -12,12 +12,12 @@ import java.util.Optional;
 
 @Repository
 public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
-	Optional<RoleEntity> findByCode(String code);
+	Optional<RoleEntity> findByCode(final String code);
 	
 	@Modifying
 	@Transactional
 	@Query("update RoleEntity r set r.name = :name, r.code = :code where r.id = :id")
-	void updateRoleEntity(@Param(value = "id") Long id,
-	                      @Param(value = "name") String name,
-	                      @Param(value = "code") String code);
+	void updateRoleEntity(@Param(value = "id") final Long id,
+	                      @Param(value = "name") final String name,
+	                      @Param(value = "code") final String code);
 }
