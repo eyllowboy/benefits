@@ -22,7 +22,7 @@ public class RoleController {
 	private final RoleService roleService;
 	
 	@Autowired
-	public RoleController(RoleService roleService) {
+	public RoleController(final RoleService roleService) {
 		this.roleService = roleService;
 	}
 	
@@ -50,11 +50,11 @@ public class RoleController {
 					content = @Content)
 	})
 	@PutMapping("/roles")
-	public void updateRole(@RequestBody RoleEntity roleEntity) {
+	public void updateRole(@RequestBody final RoleEntity roleEntity) {
 		roleService.findById(roleEntity.getId())
 				.orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
 		
-		Optional<RoleEntity> roleEntityWithExistCode = roleService.findByCode(roleEntity.getCode());
+		final Optional<RoleEntity> roleEntityWithExistCode = roleService.findByCode(roleEntity.getCode());
 		
 		if (roleEntityWithExistCode.isEmpty() ||
 				roleEntity.getId().equals(
@@ -77,15 +77,15 @@ public class RoleController {
 	})
 	@PostMapping("/roles")
 	public ResponseEntity<?> addRole(
-			@RequestParam(value = "name") String name,
-			@RequestParam(value = "code") String code) {
+			@RequestParam(value = "name") final String name,
+			@RequestParam(value = "code") final String code) {
 		
 		roleService.findByCode(code)
 				.ifPresent(roleEntity -> {
 					throw new IllegalStateException("Role with such 'code' is already exists");});
 		
-		RoleEntity roleEntityToWrite = new RoleEntity(name, code);
-		RoleEntity savedRoleEntity = roleService.save(roleEntityToWrite);
+		final RoleEntity roleEntityToWrite = new RoleEntity(name, code);
+		final RoleEntity savedRoleEntity = roleService.save(roleEntityToWrite);
 		
 		return new ResponseEntity<>(savedRoleEntity, HttpStatus.CREATED);
 	}
@@ -102,7 +102,7 @@ public class RoleController {
 	})
 	@GetMapping("/roles/{id}")
 	public RoleEntity getRole(@PathVariable @DecimalMin("1") Long id) {
-		Optional<RoleEntity> roleEntity = roleService.findById(id);
+		final Optional<RoleEntity> roleEntity = roleService.findById(id);
 		
 		return roleEntity.orElseThrow(
 				() -> new IllegalStateException("Role with this id was not found in the database"));

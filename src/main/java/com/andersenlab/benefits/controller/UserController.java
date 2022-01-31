@@ -25,7 +25,7 @@ public class UserController {
 	private final RoleService roleService;
 	
 	@Autowired
-	public UserController(UserService userService, RoleService roleService) {
+	public UserController(final UserService userService, final RoleService roleService) {
 		this.userService = userService;
 		this.roleService = roleService;
 	}
@@ -54,16 +54,16 @@ public class UserController {
 					content = @Content)
 	})
 	@PutMapping("/users")
-	public void updateUser(@RequestBody UserEntity userEntity) {
-		Optional<UserEntity> userEntityInDataBaseForUpdate = userService.findById(userEntity.getId());
+	public void updateUser(@RequestBody final UserEntity userEntity) {
+		final Optional<UserEntity> userEntityInDataBaseForUpdate = userService.findById(userEntity.getId());
 		userEntityInDataBaseForUpdate
 				.orElseThrow(() -> new IllegalStateException("User with this id was not found in the database"));
 		
-		Optional<RoleEntity> roleEntityInDataBase = roleService.findById(userEntity.getRoleEntity().getId());
+		final Optional<RoleEntity> roleEntityInDataBase = roleService.findById(userEntity.getRoleEntity().getId());
 		roleEntityInDataBase
-				.orElseThrow(() -> new IllegalStateException("User with this id was not found in the database"));
-				
-		Optional<UserEntity> userEntityWithSameLogin = userService.findByLogin(userEntity.getLogin());
+				.orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
+		
+		final Optional<UserEntity> userEntityWithSameLogin = userService.findByLogin(userEntity.getLogin());
 		
 		if (userEntityWithSameLogin.isPresent()
 				&& !userEntityWithSameLogin.get().getId().equals(userEntity.getId())) {
@@ -87,18 +87,18 @@ public class UserController {
 	@PostMapping("/users")
 	public ResponseEntity<?> addUser(
 			@RequestParam(value = "login")
-					String login,
-			@RequestParam(value = "roleId") Long roleId) {
+			final String login,
+			@RequestParam(value = "roleId") final Long roleId) {
 		
 		userService.findByLogin(login)
 				.ifPresent(userEntity -> {
 					throw new IllegalStateException("User with such 'login' is already exists");});
 		
-		Optional<RoleEntity> roleEntityInDataBase = roleService.findById(roleId);
+		final Optional<RoleEntity> roleEntityInDataBase = roleService.findById(roleId);
 		roleEntityInDataBase
-				.orElseThrow(() -> new IllegalStateException("User with this id was not found in the database"));
+				.orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
 		
-		UserEntity savedUserEntity = userService.save(new UserEntity(login, roleEntityInDataBase.get()));
+		final UserEntity savedUserEntity = userService.save(new UserEntity(login, roleEntityInDataBase.get()));
 		
 		return new ResponseEntity<>(savedUserEntity, HttpStatus.CREATED);
 	}
@@ -113,8 +113,8 @@ public class UserController {
 					content = @Content)
 	})
 	@GetMapping("/users/{id}")
-	public UserEntity getUser(@PathVariable @DecimalMin("1") Long id) {
-		Optional<UserEntity> userEntity = userService.findById(id);
+	public UserEntity getUser(@PathVariable @DecimalMin("1") final Long id) {
+		final Optional<UserEntity> userEntity = userService.findById(id);
 		
 		return userEntity.orElseThrow(
 				() -> new IllegalStateException("User with this id was not found in the database"));
@@ -130,7 +130,7 @@ public class UserController {
 					content = @Content)
 	})
 	@DeleteMapping("/users/{id}")
-	public void deleteUser(@PathVariable @DecimalMin("1") Long id) {
+	public void deleteUser(@PathVariable @DecimalMin("1") final Long id) {
 		userService.findById(id)
 				.orElseThrow(
 						() -> new IllegalStateException("User with this id was not found in the database"));
