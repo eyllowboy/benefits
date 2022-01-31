@@ -49,9 +49,8 @@ public class DiscountServiceImpl implements DiscountService {
             discount.setImageDiscount(newDiscount.getImageDiscount());
             discount.setArea(newDiscount.getArea());
             return discountRepository.save(discount);
-        }).orElseGet(() -> {
-            newDiscount.setId(id);
-            return discountRepository.save(newDiscount);
+        }).orElseThrow(() -> {
+            return new RuntimeException("The problem with update discount");
         });
 
         return Optional.of(newDiscount);
