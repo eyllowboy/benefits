@@ -3,7 +3,6 @@ package com.andersenlab.benefits.service;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import com.andersenlab.benefits.repository.UserRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,46 +21,46 @@ import static org.mockito.Mockito.*;
 		classes = {UserService.class, UserServiceImpl.class})
 class UserServiceTest {
 	private final UserService userService;
-
+	
 	@MockBean
 	private UserRepository userRepository;
 	
 	@Autowired
-	UserServiceTest(UserService userService) {
+	UserServiceTest(final UserService userService) {
 		this.userService = userService;
 	}
 	
 	@Test
 	void findAll() {
-		List<UserEntity> userEntities = List.of(
+		final List<UserEntity> userEntities = List.of(
 				new UserEntity("user", new RoleEntity("user", "user")),
 				new UserEntity("user1", new RoleEntity("user1", "user1")),
 				new UserEntity("user2", new RoleEntity("user2", "user2")));
-
+		
 		when(userRepository.findAll()).thenReturn(userEntities);
-		List<UserEntity> foundUserEntities = userService.findAll();
+		final List<UserEntity> foundUserEntities = userService.findAll();
 		assertEquals(userEntities, foundUserEntities);
-
+		
 		verify(userRepository, times(1)).findAll();
 	}
-
+	
 	@Test
 	void findById() {
-		UserEntity userEntity = new UserEntity("user", new RoleEntity("user", "user"));
-
+		final UserEntity userEntity = new UserEntity("user", new RoleEntity("user", "user"));
+		
 		when(userRepository.findById(anyLong())).thenReturn(Optional.of(userEntity));
-		UserEntity foundUserEntity = userService.findById(1L).get();
+		final UserEntity foundUserEntity = userService.findById(1L).get();
 		assertEquals(userEntity, foundUserEntity);
-
+		
 		verify(userRepository, times(1)).findById(1L);
 	}
 	
 	@Test
 	void save() {
-		UserEntity userEntity = new UserEntity("user", new RoleEntity("user", "user"));
+		final UserEntity userEntity = new UserEntity("user", new RoleEntity("user", "user"));
 		
 		when(userRepository.save(any(UserEntity.class))).thenReturn(userEntity);
-		UserEntity foundUserEntity = userService.save(userEntity);
+		final UserEntity foundUserEntity = userService.save(userEntity);
 		assertEquals(userEntity, foundUserEntity);
 		
 		verify(userRepository, times(1)).save(userEntity);
@@ -75,19 +74,19 @@ class UserServiceTest {
 	
 	@Test
 	void findByLogin() {
-		Optional<UserEntity> userEntity =
+		final Optional<UserEntity> userEntity =
 				Optional.of(new UserEntity("user", new RoleEntity("user", "user")));
-
+		
 		when(userRepository.findByLogin(anyString())).thenReturn(userEntity);
-		Optional<UserEntity> foundUserEntity = userService.findByLogin("u");
+		final Optional<UserEntity> foundUserEntity = userService.findByLogin("u");
 		assertEquals(userEntity, foundUserEntity);
-
+		
 		verify(userRepository, times(1)).findByLogin("u");
 	}
 	
 	@Test
 	void updateUserEntity() {
-		RoleEntity roleEntity = new RoleEntity(1L, "abc", "def");
+		final RoleEntity roleEntity = new RoleEntity(1L, "abc", "def");
 		userRepository.updateUserEntity(1L, "abc", roleEntity);
 		verify(userRepository, times(1))
 				.updateUserEntity(1L, "abc", roleEntity);

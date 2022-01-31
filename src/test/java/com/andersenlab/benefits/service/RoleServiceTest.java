@@ -25,19 +25,19 @@ class RoleServiceTest {
 	private RoleRepository roleRepository;
 	
 	@Autowired
-	RoleServiceTest(RoleService roleService) {
+	RoleServiceTest(final RoleService roleService) {
 		this.roleService = roleService;
 	}
 	
 	@Test
 	void findAll() {
-		List<RoleEntity> roleEntities = List.of(
+		final List<RoleEntity> roleEntities = List.of(
 				new RoleEntity("user", "user"),
 				new RoleEntity("user1", "user1"),
 				new RoleEntity("user2", "user2"));
 		
 		when(roleRepository.findAll()).thenReturn(roleEntities);
-		List<RoleEntity> foundRoleEntities = roleService.findAll();
+		final List<RoleEntity> foundRoleEntities = roleService.findAll();
 		assertEquals(roleEntities, foundRoleEntities);
 		
 		verify(roleRepository, times(1)).findAll();
@@ -45,10 +45,10 @@ class RoleServiceTest {
 	
 	@Test
 	void findById() {
-		Optional<RoleEntity> roleEntity = Optional.of(new RoleEntity("user", "user"));
+		final Optional<RoleEntity> roleEntity = Optional.of(new RoleEntity("user", "user"));
 		
 		when(roleRepository.findById(anyLong())).thenReturn(roleEntity);
-		Optional<RoleEntity> foundRoleEntity = roleService.findById(1L);
+		final Optional<RoleEntity> foundRoleEntity = roleService.findById(1L);
 		assertEquals(roleEntity, foundRoleEntity);
 		
 		verify(roleRepository, times(1)).findById(1L);
@@ -56,10 +56,10 @@ class RoleServiceTest {
 	
 	@Test
 	void save() {
-		RoleEntity roleEntity = new RoleEntity("user", "user");
+		final RoleEntity roleEntity = new RoleEntity("user", "user");
 		
 		when(roleRepository.save(any(RoleEntity.class))).thenReturn(roleEntity);
-		RoleEntity savedRoleEntity = roleService.save(roleEntity);
+		final RoleEntity savedRoleEntity = roleService.save(roleEntity);
 		assertEquals(roleEntity, savedRoleEntity);
 		
 		verify(roleRepository, times(1)).save(roleEntity);
@@ -79,10 +79,10 @@ class RoleServiceTest {
 	
 	@Test
 	void findByCode() {
-		Optional<RoleEntity> roleEntity = Optional.of(new RoleEntity("user", "user"));
+		final Optional<RoleEntity> roleEntity = Optional.of(new RoleEntity("user", "user"));
 		
 		when(roleRepository.findByCode(anyString())).thenReturn(roleEntity);
-		Optional<RoleEntity> foundRoleEntity = roleService.findByCode("user");
+		final Optional<RoleEntity> foundRoleEntity = roleService.findByCode("user");
 		assertEquals(roleEntity, foundRoleEntity);
 		
 		verify(roleRepository, times(1)).findByCode("user");
