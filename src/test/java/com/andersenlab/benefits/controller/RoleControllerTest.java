@@ -32,13 +32,13 @@ class RoleControllerTest {
 	private MockMvc mockMvc;
 	
 	@Container
-	public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres")
+	public static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres")
 			.withDatabaseName("benefits")
 			.withUsername("benefits")
 			.withPassword("ben0147");
 	
 	@DynamicPropertySource
-	public static void postgreSQLProperties(DynamicPropertyRegistry registry) {
+	public static void postgreSQLProperties(final DynamicPropertyRegistry registry) {
 		registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
 	}
 	
@@ -67,7 +67,7 @@ class RoleControllerTest {
 	
 	@Test
 	void getRoleWithIncorrectId() {
-		NestedServletException nestedServletException = assertThrows(NestedServletException.class,
+		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(get("/roles/{id}", Long.MAX_VALUE)));
 		
 		assertEquals(IllegalStateException.class,
@@ -94,7 +94,7 @@ class RoleControllerTest {
 	
 	@Test
 	void addRoleWithIncorrectCode() {
-		NestedServletException nestedServletException = assertThrows(NestedServletException.class,
+		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.post("/roles")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -110,8 +110,8 @@ class RoleControllerTest {
 	
 	@Test
 	void updateRolePositiveScenarioWithUpdateNameAndCode() throws Exception {
-		RoleEntity roleEntity = new RoleEntity(5L, "name", "new_role_code_2");
-		String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(roleEntity);
+		final RoleEntity roleEntity = new RoleEntity(5L, "name", "new_role_code_2");
+		final String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(roleEntity);
 		
 		mockMvc.perform(MockMvcRequestBuilders
 						.put("/roles")
@@ -123,8 +123,8 @@ class RoleControllerTest {
 	
 	@Test
 	void updateRolePositiveScenarioWithUpdateName() throws Exception {
-		RoleEntity roleEntity = new RoleEntity(2L, "name", "ROLE_MODERATOR");
-		String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(roleEntity);
+		final RoleEntity roleEntity = new RoleEntity(2L, "name", "ROLE_MODERATOR");
+		final String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(roleEntity);
 		
 		mockMvc.perform(MockMvcRequestBuilders
 						.put("/roles")
@@ -136,10 +136,10 @@ class RoleControllerTest {
 	
 	@Test
 	void updateRoleWithIncorrectCode() throws Exception {
-		RoleEntity roleEntity = new RoleEntity(1L, "name", "ROLE_USER");
-		String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(roleEntity);
+		final RoleEntity roleEntity = new RoleEntity(1L, "name", "ROLE_USER");
+		final String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(roleEntity);
 		
-		NestedServletException nestedServletException = assertThrows(NestedServletException.class,
+		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.put("/roles")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -154,10 +154,10 @@ class RoleControllerTest {
 	
 	@Test
 	void updateRoleWithIncorrectId() throws Exception {
-		RoleEntity roleEntity = new RoleEntity(Long.MAX_VALUE, "name", "code");
-		String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(roleEntity);
+		final RoleEntity roleEntity = new RoleEntity(Long.MAX_VALUE, "name", "code");
+		final String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(roleEntity);
 		
-		NestedServletException nestedServletException = assertThrows(NestedServletException.class,
+		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.put("/roles")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -181,7 +181,7 @@ class RoleControllerTest {
 	
 	@Test
 	void deleteRoleWithIncorrectId() {
-		NestedServletException nestedServletException = assertThrows(NestedServletException.class,
+		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.delete("/roles/{id}", Long.MAX_VALUE)));
 		

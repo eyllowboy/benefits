@@ -33,13 +33,13 @@ class UserControllerTest {
 	private MockMvc mockMvc;
 	
 	@Container
-	public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres")
+	public static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres")
 			.withDatabaseName("benefits")
 			.withUsername("benefits")
 			.withPassword("ben0147");
 	
 	@DynamicPropertySource
-	public static void postgreSQLProperties(DynamicPropertyRegistry registry) {
+	public static void postgreSQLProperties(final DynamicPropertyRegistry registry) {
 		registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
 	}
 	
@@ -70,7 +70,7 @@ class UserControllerTest {
 	
 	@Test
 	void getUserWithIncorrectId() {
-		NestedServletException nestedServletException = assertThrows(NestedServletException.class,
+		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(get("/users/{id}", Long.MAX_VALUE)));
 		
 		assertEquals(IllegalStateException.class,
@@ -98,7 +98,7 @@ class UserControllerTest {
 	
 	@Test
 	void addUserWithIncorrectLogin() {
-		NestedServletException nestedServletException = assertThrows(NestedServletException.class,
+		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.post("/users")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -114,7 +114,7 @@ class UserControllerTest {
 	
 	@Test
 	void addUserWithIncorrectRole() {
-		NestedServletException nestedServletException = assertThrows(NestedServletException.class,
+		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.post("/users")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -124,15 +124,15 @@ class UserControllerTest {
 		assertEquals(IllegalStateException.class,
 				nestedServletException.getCause().getClass());
 		
-		assertEquals("User with this id was not found in the database",
+		assertEquals("Role with this id was not found in the database",
 				nestedServletException.getCause().getMessage());
 	}
 	
 	@Test
 	void updateUserPositiveScenarioWithUpdateNameAndCode() throws Exception {
-		RoleEntity roleEntity = new RoleEntity(6L, "incorrect_name_1", "incorrect_role_code_1");
-		UserEntity userEntity = new UserEntity(5L, "new_login_1", roleEntity);
-		String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(userEntity);
+		final RoleEntity roleEntity = new RoleEntity(6L, "incorrect_name_1", "incorrect_role_code_1");
+		final UserEntity userEntity = new UserEntity(5L, "new_login_1", roleEntity);
+		final String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(userEntity);
 		
 		mockMvc.perform(MockMvcRequestBuilders
 						.put("/users")
@@ -144,11 +144,11 @@ class UserControllerTest {
 	
 	@Test
 	void updateUserWithIncorrectLogin() throws Exception {
-		RoleEntity roleEntity = new RoleEntity(6L, "incorrect_name_1", "incorrect_role_code_1");
-		UserEntity userEntity = new UserEntity(5L, "admin", roleEntity);
-		String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(userEntity);
+		final RoleEntity roleEntity = new RoleEntity(6L, "incorrect_name_1", "incorrect_role_code_1");
+		final UserEntity userEntity = new UserEntity(5L, "admin", roleEntity);
+		final String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(userEntity);
 		
-		NestedServletException nestedServletException = assertThrows(NestedServletException.class,
+		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.put("/users")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -163,11 +163,11 @@ class UserControllerTest {
 	
 	@Test
 	void updateUserWithIncorrectRole() throws Exception {
-		RoleEntity roleEntity = new RoleEntity(Long.MAX_VALUE, "incorrect_name_1", "incorrect_role_code_1");
-		UserEntity userEntity = new UserEntity(5L, "new_login_2", roleEntity);
-		String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(userEntity);
+		final RoleEntity roleEntity = new RoleEntity(Long.MAX_VALUE, "incorrect_name_1", "incorrect_role_code_1");
+		final UserEntity userEntity = new UserEntity(5L, "new_login_2", roleEntity);
+		final String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(userEntity);
 		
-		NestedServletException nestedServletException = assertThrows(NestedServletException.class,
+		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.put("/users")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -176,17 +176,17 @@ class UserControllerTest {
 		assertEquals(IllegalStateException.class,
 				nestedServletException.getCause().getClass());
 		
-		assertEquals("User with this id was not found in the database",
+		assertEquals("Role with this id was not found in the database",
 				nestedServletException.getCause().getMessage());
 	}
 	
 	@Test
 	void updateUserWithIncorrectId() throws Exception {
-		RoleEntity roleEntity = new RoleEntity(1L, "incorrect_name_1", "incorrect_role_code_1");
-		UserEntity userEntity = new UserEntity(Long.MAX_VALUE, "new_login_3", roleEntity);
-		String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(userEntity);
+		final RoleEntity roleEntity = new RoleEntity(1L, "incorrect_name_1", "incorrect_role_code_1");
+		final UserEntity userEntity = new UserEntity(Long.MAX_VALUE, "new_login_3", roleEntity);
+		final String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(userEntity);
 		
-		NestedServletException nestedServletException = assertThrows(NestedServletException.class,
+		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.put("/users")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -210,7 +210,7 @@ class UserControllerTest {
 	
 	@Test
 	void deleteUserWithIncorrectId() {
-		NestedServletException nestedServletException = assertThrows(NestedServletException.class,
+		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.delete("/users/{id}", Long.MAX_VALUE)));
 		
