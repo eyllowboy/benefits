@@ -7,6 +7,6 @@ import java.util.Optional;
 
 @Service
 public interface RoleService extends CrudService<RoleEntity> {
-    Optional<RoleEntity> findByCode(String code);
-    void updateRoleEntity(Long id, String name, String code);
+    Optional<RoleEntity> findByCode(final String code);
+    void updateRoleEntity(final Long id, final String name, final String code);
 }

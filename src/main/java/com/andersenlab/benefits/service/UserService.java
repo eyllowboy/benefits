@@ -8,6 +8,6 @@ import java.util.Optional;
 
 @Service
 public interface UserService extends CrudService<UserEntity> {
-    Optional<UserEntity> findByLogin(String login);
-    void updateUserEntity(Long id, String login, RoleEntity roleEntity);
+    Optional<UserEntity> findByLogin(final String login);
+    void updateUserEntity(final Long id, final String login, final RoleEntity roleEntity);
 }

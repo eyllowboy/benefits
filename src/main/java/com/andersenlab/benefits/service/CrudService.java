@@ -9,9 +9,9 @@ import java.util.Optional;
 public interface CrudService<T> {
 	List<T> findAll();
 	
-	Optional<T> findById(Long id);
+	Optional<T> findById(final Long id);
 	
-	T save(T entity);
+	T save(final T entity);
 	
-	void delete(Long id);
+	void delete(final Long id);
 }

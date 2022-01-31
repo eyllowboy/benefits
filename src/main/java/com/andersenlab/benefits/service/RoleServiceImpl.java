@@ -17,7 +17,7 @@ public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;
     
     @Autowired
-    public RoleServiceImpl(RoleRepository roleRepository) {
+    public RoleServiceImpl(final RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
     }
     
@@ -27,27 +27,27 @@ public class RoleServiceImpl implements RoleService {
     }
     
     @Override
-    public Optional<RoleEntity> findById(Long id) {
+    public Optional<RoleEntity> findById(final Long id) {
         return roleRepository.findById(id);
     }
     
     @Override
-    public Optional<RoleEntity> findByCode(String code) {
+    public Optional<RoleEntity> findByCode(final String code) {
         return roleRepository.findByCode(code);
     }
     
     @Override
-    public RoleEntity save(RoleEntity role) {
+    public RoleEntity save(final RoleEntity role) {
         return roleRepository.save(role);
     }
     
     @Override
-    public void updateRoleEntity(Long id, String name, String code) {
+    public void updateRoleEntity(final Long id, final String name, final String code) {
         roleRepository.updateRoleEntity(id, name, code);
     }
     
     @Override
-    public void delete(Long id) {
+    public void delete(final Long id) {
         roleRepository.deleteById(id);
     }
 }

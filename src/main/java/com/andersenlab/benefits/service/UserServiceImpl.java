@@ -14,7 +14,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(final UserRepository userRepository) {
         this.userRepository = userRepository;
     }
     
@@ -24,27 +24,27 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
-    public Optional<UserEntity> findById(Long id) {
+    public Optional<UserEntity> findById(final Long id) {
         return userRepository.findById(id);
     }
     
     @Override
-    public Optional<UserEntity> findByLogin(String login) {
+    public Optional<UserEntity> findByLogin(final String login) {
         return userRepository.findByLogin(login);
     }
     
     @Override
-    public UserEntity save(UserEntity employee) {
+    public UserEntity save(final UserEntity employee) {
             return userRepository.save(employee);
     }
     
     @Override
-    public void updateUserEntity(Long id, String login, RoleEntity roleEntity) {
+    public void updateUserEntity(final Long id, final String login, final RoleEntity roleEntity) {
         userRepository.updateUserEntity(id, login, roleEntity);
     }
     
     @Override
-    public void delete(Long id) {
+    public void delete(final Long id) {
         userRepository.deleteById(id);
     }
 }
