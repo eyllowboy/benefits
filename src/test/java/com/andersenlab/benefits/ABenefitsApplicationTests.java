@@ -34,13 +34,14 @@ class ABenefitsApplicationTests {
     private UserRepository userRepository;
     
     @Container
-    public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres")
-            .withDatabaseName("benefits")
-            .withUsername("benefits")
-            .withPassword("ben0147");
+    static final PostgreSQLContainer<?> postgreSQLContainer =
+            new PostgreSQLContainer<>("postgres")
+                    .withDatabaseName("benefits")
+                    .withUsername("benefits")
+                    .withPassword("ben0147");
     
     @DynamicPropertySource
-    static void postgreSQLProperties(DynamicPropertyRegistry registry) {
+    static void postgreSQLProperties(final DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
     }
     
