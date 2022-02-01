@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(properties = "spring.main.lazy-initialization=true",
 		classes = {RoleService.class, RoleServiceImpl.class})
-class RoleServiceTest {
+public class RoleServiceTest {
 	private final RoleService roleService;
 	
 	@MockBean

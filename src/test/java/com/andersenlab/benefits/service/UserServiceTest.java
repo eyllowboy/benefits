@@ -19,7 +19,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(properties = "spring.main.lazy-initialization=true",
 		classes = {UserService.class, UserServiceImpl.class})
-class UserServiceTest {
+public class UserServiceTest {
 	private final UserService userService;
 	
 	@MockBean
