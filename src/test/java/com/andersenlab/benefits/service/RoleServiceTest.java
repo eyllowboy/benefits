@@ -25,66 +25,84 @@ class RoleServiceTest {
 	private RoleRepository roleRepository;
 	
 	@Autowired
-	RoleServiceTest(final RoleService roleService) {
+	public RoleServiceTest(final RoleService roleService) {
 		this.roleService = roleService;
 	}
 	
 	@Test
-	void findAll() {
+	public void  whenFindAll() {
+		// given
 		final List<RoleEntity> roleEntities = List.of(
 				new RoleEntity("user", "user"),
 				new RoleEntity("user1", "user1"),
 				new RoleEntity("user2", "user2"));
 		
+		// when
 		when(roleRepository.findAll()).thenReturn(roleEntities);
 		final List<RoleEntity> foundRoleEntities = roleService.findAll();
-		assertEquals(roleEntities, foundRoleEntities);
 		
+		// then
+		assertEquals(roleEntities, foundRoleEntities);
 		verify(roleRepository, times(1)).findAll();
 	}
 	
 	@Test
-	void findById() {
+	public void whenFindById() {
+		// given
 		final Optional<RoleEntity> roleEntity = Optional.of(new RoleEntity("user", "user"));
 		
+		// when
 		when(roleRepository.findById(anyLong())).thenReturn(roleEntity);
 		final Optional<RoleEntity> foundRoleEntity = roleService.findById(1L);
-		assertEquals(roleEntity, foundRoleEntity);
 		
+		// then
+		assertEquals(roleEntity, foundRoleEntity);
 		verify(roleRepository, times(1)).findById(1L);
 	}
 	
 	@Test
-	void save() {
+	public void whenSave() {
+		// given
 		final RoleEntity roleEntity = new RoleEntity("user", "user");
 		
+		// when
 		when(roleRepository.save(any(RoleEntity.class))).thenReturn(roleEntity);
 		final RoleEntity savedRoleEntity = roleService.save(roleEntity);
-		assertEquals(roleEntity, savedRoleEntity);
 		
+		// then
+		assertEquals(roleEntity, savedRoleEntity);
 		verify(roleRepository, times(1)).save(roleEntity);
 	}
 	
 	@Test
-	void delete() {
+	public void whenDelete() {
+		// when
 		roleService.delete(anyLong());
+		
+		// then
 		verify(roleRepository, times(1)).deleteById(anyLong());
 	}
 	
 	@Test
-	void updateRoleEntity() {
+	public void whenUpdate() {
+		// when
 		roleRepository.updateRoleEntity(anyLong(), anyString(), anyString());
+		
+		// then
 		verify(roleRepository, times(1)).updateRoleEntity(anyLong(), anyString(), anyString());
 	}
 	
 	@Test
-	void findByCode() {
+	public void whenFindByCode() {
+		// given
 		final Optional<RoleEntity> roleEntity = Optional.of(new RoleEntity("user", "user"));
 		
+		// when
 		when(roleRepository.findByCode(anyString())).thenReturn(roleEntity);
 		final Optional<RoleEntity> foundRoleEntity = roleService.findByCode("user");
-		assertEquals(roleEntity, foundRoleEntity);
 		
+		// then
+		assertEquals(roleEntity, foundRoleEntity);
 		verify(roleRepository, times(1)).findByCode("user");
 	}
 }

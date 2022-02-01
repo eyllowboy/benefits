@@ -26,68 +26,88 @@ class UserServiceTest {
 	private UserRepository userRepository;
 	
 	@Autowired
-	UserServiceTest(final UserService userService) {
+	public UserServiceTest(final UserService userService) {
 		this.userService = userService;
 	}
 	
 	@Test
-	void findAll() {
+	public void whenFindAll() {
+		// given
 		final List<UserEntity> userEntities = List.of(
 				new UserEntity("user", new RoleEntity("user", "user")),
 				new UserEntity("user1", new RoleEntity("user1", "user1")),
 				new UserEntity("user2", new RoleEntity("user2", "user2")));
 		
+		// when
 		when(userRepository.findAll()).thenReturn(userEntities);
 		final List<UserEntity> foundUserEntities = userService.findAll();
-		assertEquals(userEntities, foundUserEntities);
 		
+		// then
+		assertEquals(userEntities, foundUserEntities);
 		verify(userRepository, times(1)).findAll();
 	}
 	
 	@Test
-	void findById() {
+	public void whenFindById() {
+		// given
 		final UserEntity userEntity = new UserEntity("user", new RoleEntity("user", "user"));
 		
+		// when
 		when(userRepository.findById(anyLong())).thenReturn(Optional.of(userEntity));
-		final UserEntity foundUserEntity = userService.findById(1L).get();
-		assertEquals(userEntity, foundUserEntity);
+		final UserEntity foundUserEntity = userService.findById(1L).orElseThrow();
 		
+		// then
+		assertEquals(userEntity, foundUserEntity);
 		verify(userRepository, times(1)).findById(1L);
 	}
 	
 	@Test
-	void save() {
+	public void whenSave() {
+		// given
 		final UserEntity userEntity = new UserEntity("user", new RoleEntity("user", "user"));
 		
+		// when
 		when(userRepository.save(any(UserEntity.class))).thenReturn(userEntity);
 		final UserEntity foundUserEntity = userService.save(userEntity);
-		assertEquals(userEntity, foundUserEntity);
 		
+		// then
+		assertEquals(userEntity, foundUserEntity);
 		verify(userRepository, times(1)).save(userEntity);
 	}
 	
 	@Test
-	void delete() {
+	public void whenDelete() {
+		// when
 		userService.delete(anyLong());
+		
+		// then
 		verify(userRepository, times(1)).deleteById(anyLong());
 	}
 	
 	@Test
-	void findByLogin() {
+	public void whenFindByLogin() {
+		// given
 		final Optional<UserEntity> userEntity =
 				Optional.of(new UserEntity("user", new RoleEntity("user", "user")));
 		
+		// when
 		when(userRepository.findByLogin(anyString())).thenReturn(userEntity);
 		final Optional<UserEntity> foundUserEntity = userService.findByLogin("u");
-		assertEquals(userEntity, foundUserEntity);
 		
+		// then
+		assertEquals(userEntity, foundUserEntity);
 		verify(userRepository, times(1)).findByLogin("u");
 	}
 	
 	@Test
-	void updateUserEntity() {
+	public void whenUpdate() {
+		// given
 		final RoleEntity roleEntity = new RoleEntity(1L, "abc", "def");
+		
+		// when
 		userRepository.updateUserEntity(1L, "abc", roleEntity);
+		
+		// then
 		verify(userRepository, times(1))
 				.updateUserEntity(1L, "abc", roleEntity);
 	}
