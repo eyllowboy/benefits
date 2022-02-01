@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Testcontainers
-class ABenefitsApplicationTests {
+public class ABenefitsApplicationTests {
     @Autowired
     private RoleController roleController;
     @Autowired
@@ -34,19 +34,20 @@ class ABenefitsApplicationTests {
     private UserRepository userRepository;
     
     @Container
-    static final PostgreSQLContainer<?> postgreSQLContainer =
+    public static final PostgreSQLContainer<?> postgreSQLContainer =
             new PostgreSQLContainer<>("postgres")
                     .withDatabaseName("benefits")
                     .withUsername("benefits")
                     .withPassword("ben0147");
     
     @DynamicPropertySource
-    static void postgreSQLProperties(final DynamicPropertyRegistry registry) {
+    public static void postgreSQLProperties(final DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
     }
     
     @Test
-    void contextLoads() {
+    public void whenContextLoadsIsSuccess() {
+        // then
         assertThat(roleController).isNotNull();
         assertThat(userController).isNotNull();
         assertThat(userService).isNotNull();
