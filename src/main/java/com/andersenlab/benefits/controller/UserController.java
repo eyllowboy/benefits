@@ -85,7 +85,7 @@ public class UserController {
 					content = @Content)
 	})
 	@PostMapping("/users")
-	public ResponseEntity<?> addUser(
+	public ResponseEntity<UserEntity> addUser(
 			@RequestParam(value = "login")
 			final String login,
 			@RequestParam(value = "roleId") final Long roleId) {

@@ -76,7 +76,7 @@ public class RoleController {
 					content = @Content)
 	})
 	@PostMapping("/roles")
-	public ResponseEntity<?> addRole(
+	public ResponseEntity<RoleEntity> addRole(
 			@RequestParam(value = "name") final String name,
 			@RequestParam(value = "code") final String code) {
 		
