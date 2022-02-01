@@ -47,7 +47,7 @@ public class Discount {
     private Date dateFinish;
 
     @Column(name = "area", nullable = false, updatable = false)
-    private Integer area;
+    private Long area;
 
     @Column(name = "image", nullable = false, length = 300)
     private String imageDiscount;

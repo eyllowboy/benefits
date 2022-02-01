@@ -2,7 +2,6 @@ package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.Discount;
 import com.andersenlab.benefits.repository.DiscountRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,20 +26,15 @@ class DiscountServiceTest {
 
     private DiscountServiceImpl discountService;
 
-
     @BeforeEach
     void setUp() {
         discountService = new DiscountServiceImpl(discountRepository);
 
     }
 
-    @AfterEach
-    void tearDown() throws Exception {
-    }
-
     @Test
     void shouldFindByIdDiscount() {
-        Discount discount = new Discount(1L, 2L, 3L, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        final Discount discount = new Discount(1L, 2L, 3L, "title", "description", 20, new Date(12022020), new Date(12032020), 1L, "image");
         when(discountService.findByIdDiscount(1L)).thenReturn(Optional.of(discount));
         Optional<Discount> actual = discountService.findByIdDiscount(1L);
         assertEquals(Optional.of(discount), actual);
@@ -49,22 +43,22 @@ class DiscountServiceTest {
 
     @Test
     void shouldFindByIdDiscountIsNotPresent() {
-        Optional<Discount> discount = discountService.findByIdDiscount(1L);
+        final Optional<Discount> discount = discountService.findByIdDiscount(1L);
         assertEquals(discount, Optional.empty());
     }
 
 
     @Test
     void shouldFindAllDiscounts() {
-        List<Discount> listDiscounts = List.of(
-                new Discount(1L, 2L, 6L, "title1", "description", 20, new Date(12022020), new Date(12032020), 1, "image"),
-                new Discount(2L, 3L, 2L, "title2", "description", 20, new Date(12022020), new Date(12032020), 1, "image"),
-                new Discount(3L, 1L, 3L, "title3", "description", 20, new Date(12022020), new Date(12032020), 1, "image"),
-                new Discount(4L, 5L, 1L, "title3", "description", 20, new Date(12022020), new Date(12032020), 1, "image"),
-                new Discount(5L, 5L, 3L, "title4", "description", 20, new Date(12022020), new Date(12032020), 1, "image")
+        final List<Discount> listDiscounts = List.of(
+                new Discount(1L, 2L, 6L, "title1", "description", 20, new Date(12022020), new Date(12032020), 1L, "image"),
+                new Discount(2L, 3L, 2L, "title2", "description", 20, new Date(12022020), new Date(12032020), 1L, "image"),
+                new Discount(3L, 1L, 3L, "title3", "description", 20, new Date(12022020), new Date(12032020), 1L, "image"),
+                new Discount(4L, 5L, 1L, "title3", "description", 20, new Date(12022020), new Date(12032020), 1L, "image"),
+                new Discount(5L, 5L, 3L, "title4", "description", 20, new Date(12022020), new Date(12032020), 1L, "image")
         );
         when(discountRepository.findAll()).thenReturn(listDiscounts);
-        List<Discount> discountList = discountService.findAllDiscounts().stream().map(Optional::orElseThrow).toList();
+        final List<Discount> discountList = discountService.findAllDiscounts().stream().map(Optional::orElseThrow).toList();
         assertEquals(listDiscounts, discountList);
         verify(discountRepository).findAll();
     }
@@ -72,16 +66,16 @@ class DiscountServiceTest {
 
     @Test
     void createDiscount() {
-        Discount discount = new Discount(1L, 2L, 3L, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        final Discount discount = new Discount(1L, 2L, 3L, "title", "description", 20, new Date(12022020), new Date(12032020), 1L, "image");
         when(discountRepository.save(any())).thenReturn(discount);
-        Optional<Discount> discountSaved = discountService.createDiscount(discount);
+        final Optional<Discount> discountSaved = discountService.createDiscount(discount);
         assertEquals(Optional.of(discount), discountSaved);
         verify(discountRepository, times(1)).save(discount);
     }
 
     @Test
     void updateDiscountById() {
-        Discount oldDiscount = new Discount(1L, 2L, 3L, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        Discount oldDiscount = new Discount(1L, 2L, 3L, "title", "description", 20, new Date(12022020), new Date(12032020), 1L, "image");
         when(discountRepository.save(any())).thenReturn(oldDiscount);
         discountService.createDiscount(oldDiscount);
         given(discountRepository.findById(oldDiscount.getId())).willReturn(Optional.of(oldDiscount));
@@ -98,9 +92,9 @@ class DiscountServiceTest {
 
     @Test
     void deleteDiscountById() {
-        Discount discount = new Discount(1L, 2L, 3L, "title", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        final Discount discount = new Discount(1L, 2L, 3L, "title", "description", 20, new Date(12022020), new Date(12032020), 1L, "image");
         discountService.deleteDiscountById(1L);
-        Optional<Discount> discount1 = discountService.findByIdDiscount(1L);
+        final Optional<Discount> discount1 = discountService.findByIdDiscount(1L);
         assertThat(discount1.isEmpty());
         verify(discountRepository).deleteById(1L);
 

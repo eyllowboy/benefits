@@ -58,7 +58,7 @@ public class DiscountController {
     })
     @PostMapping("/discount")
     ResponseEntity<Discount> newDiscount(@RequestBody Discount newDiscount) {
-        Optional<Discount> savedDiscount = discountService.createDiscount(newDiscount);
+        final Optional<Discount> savedDiscount = discountService.createDiscount(newDiscount);
         return new ResponseEntity<Discount>(
                 savedDiscount.orElseThrow(() -> new IllegalStateException("The discount with id: " + newDiscount.getId() + " do not saved in the database")), HttpStatus.CREATED);
     }
@@ -74,7 +74,7 @@ public class DiscountController {
     })
     @GetMapping("/discount/{id}")
     public Optional<Discount> oneDiscount(@PathVariable Long id) {
-        Optional<Discount> discount = discountService.findByIdDiscount(id);
+        final Optional<Discount> discount = discountService.findByIdDiscount(id);
         return Optional.ofNullable(discount.orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database")));
 
 

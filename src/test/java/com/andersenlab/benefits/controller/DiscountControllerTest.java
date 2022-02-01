@@ -41,14 +41,16 @@ class DiscountControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+
     @Container
-    public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres")
+    public static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres")
             .withDatabaseName("benefits")
             .withUsername("benefits")
             .withPassword("ben0147");
 
+
     @DynamicPropertySource
-    public static void postgreSQLProperties(DynamicPropertyRegistry registry) {
+    public static void postgreSQLProperties(final DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
     }
 
@@ -77,7 +79,7 @@ class DiscountControllerTest {
 
     @Test
     void shouldGetDiscountWithIncorrectId() throws Exception {
-        long id = 8L;
+        final long id = 8L;
         NestedServletException NestedServletException = assertThrows(NestedServletException.class,
                 () -> mockMvc.perform(get("/discount/{id}", id)));
         assertEquals(IllegalStateException.class,
@@ -90,7 +92,7 @@ class DiscountControllerTest {
     @Test
     void shouldAddDiscountPositiveScenario() throws Exception {
 
-        Discount discount = new Discount(6L, 2L, 3L, "title6", "description", 20, new Date(12022020), new Date(12032020), 1, "image");
+        final Discount discount = new Discount(6L, 2L, 3L, "title6", "description", 20, new Date(12022020), new Date(12032020), 1L, "image");
 
         this.mockMvc.perform(
                         post("/discount")
@@ -105,9 +107,9 @@ class DiscountControllerTest {
 
     @Test
     void shouldUpdatePositiveScenario() throws Exception {
-        Discount discount = new Discount(2L, 3L, 3L, "title4", "description4", 20, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 3, "image3");
+        final Discount discount = new Discount(2L, 3L, 3L, "title4", "description4", 20, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 3L, "image3");
 
-        String discountEntity = new ObjectMapper().writeValueAsString(discount);
+        final String discountEntity = new ObjectMapper().writeValueAsString(discount);
 
         this.mockMvc.perform(MockMvcRequestBuilders
                         .put("/discount/2")
@@ -120,7 +122,7 @@ class DiscountControllerTest {
 
     @Test
     void shouldUpdateNegativeScenario() throws JsonProcessingException {
-        Discount discount = new Discount(Long.MAX_VALUE, 2L, 2L, "title1", "description1", 15, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 2, "image2");
+        Discount discount = new Discount(Long.MAX_VALUE, 2L, 2L, "title1", "description1", 15, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 2L, "image2");
         String discountEntity = new ObjectMapper().writeValueAsString(discount);
 
         NestedServletException nestedServletException = assertThrows(NestedServletException.class,

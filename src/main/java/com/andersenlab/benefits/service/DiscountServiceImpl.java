@@ -50,7 +50,7 @@ public class DiscountServiceImpl implements DiscountService {
             discount.setArea(newDiscount.getArea());
             return discountRepository.save(discount);
         }).orElseThrow(() -> {
-            return new RuntimeException("The problem with update discount");
+            return new RuntimeException("The problem with updates discount");
         });
 
         return Optional.of(newDiscount);
