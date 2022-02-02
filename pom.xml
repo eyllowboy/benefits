@@ -34,17 +34,18 @@
             <scope>provided</scope>
         </dependency>
 
+        <!--        Util -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
 
         <!--        Swagger -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
             <version>${springdoc-openapi.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.4</version>
         </dependency>
 
         <!--        Tests -->
@@ -53,7 +54,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
 
         <!--        DB -->
         <dependency>
@@ -65,12 +65,10 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-       <dependency>
+        <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-       </dependency>
-
-
+        </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers-bom</artifactId>
@@ -90,22 +88,6 @@
             <version>1.16.2</version>
             <scope>test</scope>
         </dependency>
-
-
-
-
-        <!--        lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.22</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -114,7 +96,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-
             <plugin>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
@@ -125,7 +106,8 @@
                     <url>jdbc:postgresql://localhost:5432/benefits</url>
                     <username>benefits</username>
                     <password>ben0147</password>
-                    <outputChangeLogFile>src/main/resources/db/changelog/db.changelog-master-init.yaml</outputChangeLogFile>
+                    <outputChangeLogFile>src/main/resources/db/changelog/db.changelog-master-init.yaml
+                    </outputChangeLogFile>
                 </configuration>
                 <executions>
                     <execution>

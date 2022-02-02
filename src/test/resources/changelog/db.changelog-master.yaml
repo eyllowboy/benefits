@@ -10,4 +10,9 @@ databaseChangeLog:
   - include:
       file: changelog/changeset/fill-roles-table.yaml
   - include:
+      file: changelog/changeset/fill_user_role.sql
+  - include:
       file: changelog/changeset/fill_discount.sql
+
+
+
