@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
 import java.util.Objects;
 import java.util.Optional;
 
@@ -30,7 +29,10 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public List<Optional<Discount>> findAllDiscounts() {
-        return discountRepository.findAll().stream().map(discount -> Optional.of(Objects.requireNonNullElseGet(discount, Discount::new))).toList();
+        return discountRepository.findAll().stream()
+                .map(discount ->
+                Optional.of(Objects.requireNonNullElseGet(discount, Discount::new)))
+                .toList();
     }
 
     @Override

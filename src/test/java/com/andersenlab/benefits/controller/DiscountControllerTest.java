@@ -41,7 +41,6 @@ class DiscountControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-
     @Container
     public static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres")
             .withDatabaseName("benefits")
@@ -56,7 +55,7 @@ class DiscountControllerTest {
 
 
     @Test
-    void shouldGetAllDiscounts() throws Exception {
+    public void whenGetAllDiscountsIsOk() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/discounts")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -66,7 +65,7 @@ class DiscountControllerTest {
     }
 
     @Test
-    void shouldGetDiscountPositiveScenario() throws Exception {
+    public void whenGetDiscountPositiveScenario() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/discount/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -78,7 +77,7 @@ class DiscountControllerTest {
     }
 
     @Test
-    void shouldGetDiscountWithIncorrectId() throws Exception {
+    public void whenGetDiscountWithIncorrectId() throws Exception {
         final long id = 8L;
         NestedServletException NestedServletException = assertThrows(NestedServletException.class,
                 () -> mockMvc.perform(get("/discount/{id}", id)));
@@ -90,9 +89,9 @@ class DiscountControllerTest {
     }
 
     @Test
-    void shouldAddDiscountPositiveScenario() throws Exception {
+    public void whenAddDiscountPositiveScenario() throws Exception {
 
-        final Discount discount = new Discount(6L, 2L, 3L, "title6", "description", 20, new Date(12022020), new Date(12032020), 1L, "image");
+        final Discount discount = new Discount(6L, 2L, 3L, "title6", "description", 20, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image");
 
         this.mockMvc.perform(
                         post("/discount")
@@ -106,7 +105,7 @@ class DiscountControllerTest {
     }
 
     @Test
-    void shouldUpdatePositiveScenario() throws Exception {
+    public void whenUpdatePositiveScenario() throws Exception {
         final Discount discount = new Discount(2L, 3L, 3L, "title4", "description4", 20, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 3L, "image3");
 
         final String discountEntity = new ObjectMapper().writeValueAsString(discount);
@@ -121,7 +120,7 @@ class DiscountControllerTest {
     }
 
     @Test
-    void shouldUpdateNegativeScenario() throws JsonProcessingException {
+    public void whenUpdateNegativeScenario() throws JsonProcessingException {
         Discount discount = new Discount(Long.MAX_VALUE, 2L, 2L, "title1", "description1", 15, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 2L, "image2");
         String discountEntity = new ObjectMapper().writeValueAsString(discount);
 
@@ -135,7 +134,7 @@ class DiscountControllerTest {
     }
 
     @Test
-    void shouldDeletePositiveScenario() throws Exception {
+    public void whenDeletePositiveScenario() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders
                         .delete("/discount/1")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -145,7 +144,7 @@ class DiscountControllerTest {
 
 
     @Test
-    void shouldDeleteNegativeScenario() {
+    public void whenDeleteNegativeScenario() {
         NestedServletException nestedServletException = assertThrows(NestedServletException.class,
                 () -> this.mockMvc.perform(MockMvcRequestBuilders
                         .delete("/discount/{id}", Long.MAX_VALUE)));
