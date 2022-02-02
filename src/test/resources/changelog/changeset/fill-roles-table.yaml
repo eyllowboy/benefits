@@ -1,0 +1,35 @@
+databaseChangeLog:
+  -  changeSet:
+       id:  insert-roles
+       author:  Andrei Rabchun
+       dbms: 'postgresql'
+       schemaName: public
+       changes:
+         -  insert:
+              tableName:  roles
+              columns:
+                -  column:
+                     name:  name
+                     value:  System administrator
+                -  column:
+                     name:  code
+                     value:  ROLE_ADMIN
+         - insert:
+             tableName: roles
+             columns:
+               - column:
+                   name: name
+                   value: HR department employee
+               - column:
+                   name: code
+                   value: ROLE_MODERATOR
+         - insert:
+             tableName: roles
+             columns:
+               - column:
+                   name: name
+                   value: Company employee
+               - column:
+                   name: code
+                   value: ROLE_USER
+
