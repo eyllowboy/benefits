@@ -32,16 +32,16 @@ public class UserEntity {
 	@JoinColumn(name = "role_id")
 	private RoleEntity roleEntity;
 	
-	public UserEntity(String login, RoleEntity roleEntity) {
+	public UserEntity(final String login, final RoleEntity roleEntity) {
 		this.login = login;
 		this.roleEntity = roleEntity;
 	}
 	
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		UserEntity that = (UserEntity) o;
+		final UserEntity that = (UserEntity) o;
 		return login.equals(that.login);
 	}
 	
