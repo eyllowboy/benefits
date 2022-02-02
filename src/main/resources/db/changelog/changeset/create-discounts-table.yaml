@@ -2,23 +2,24 @@ databaseChangeLog:
   -  changeSet:
        id:  create-discounts
        author:  Andrei Rabchun
+       dbms: 'postgresql'
        changes:
          -  createTable:
               tableName:  discounts
               columns:
                 -  column:
                      name:  id
-                     type:  int
-                     autoIncrement:  true
+                     type:  BIGINT
+                     defaultValueSequenceNext:  discount_id
                      constraints:
                        primaryKey:  true
                        nullable:  false
                 -  column:
                      name:  category_id
-                     type:  int
+                     type:  BIGINT
                 -  column:
                      name:  company_id
-                     type:  int
+                     type:  BIGINT
                 -  column:
                      name: title
                      type: varchar(50)
