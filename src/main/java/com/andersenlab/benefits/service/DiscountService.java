@@ -9,14 +9,14 @@ import java.util.Optional;
 @Service
 public interface DiscountService {
 
-    Optional<Discount> findByIdDiscount(Long id);
+    Optional<Discount> findByIdDiscount(final Long id);
 
     List<Optional<Discount>> findAllDiscounts();
 
-    Optional<Discount> createDiscount(Discount discount);
+    Optional<Discount> createDiscount(final Discount discount);
 
-    Optional<Discount> updateDiscountById(Long id, Discount discount);
+    Optional<Discount> updateDiscountById(final Long id, final Discount discount);
 
-    void deleteDiscountById(Long id);
+    void deleteDiscountById(final Long id);
 
 }

@@ -33,14 +33,14 @@ public class DiscountController {
     @Operation(summary="This is to fetch all discounts from database.")
     @ApiResponses(value={
             @ApiResponse(responseCode="200",
-                    description="Details of all the roles",
+                    description="Details of all the discounts",
                     content= @Content(mediaType= "application/json")),
             @ApiResponse(responseCode="500",
                     description="Internal Server Error",
                     content= @Content)
     })
     @GetMapping("/discounts")
-    public List<Discount> allDiscount() {
+    public final List<Discount> allDiscount() {
         return discountService.findAllDiscounts()
                 .stream()
                 .map(d -> d.orElseThrow(() -> new IllegalStateException("We have some problems with the database")))
@@ -57,10 +57,10 @@ public class DiscountController {
                     content= @Content)
     })
     @PostMapping("/discount")
-    ResponseEntity<Discount> newDiscount(@RequestBody Discount newDiscount) {
+    public final ResponseEntity<Discount> newDiscount(@RequestBody final Discount newDiscount) {
         final Optional<Discount> savedDiscount = discountService.createDiscount(newDiscount);
         return new ResponseEntity<Discount>(
-                savedDiscount.orElseThrow(() -> new IllegalStateException("The discount with id: " + newDiscount.getId() + " do not saved in the database")), HttpStatus.CREATED);
+                savedDiscount.orElseThrow(() -> new IllegalStateException("The discount with id: " + newDiscount.getId() + " was not saved in the database")), HttpStatus.CREATED);
     }
 
     @Operation(summary="This is to get the discount.")
@@ -73,7 +73,7 @@ public class DiscountController {
                     content= @Content)
     })
     @GetMapping("/discount/{id}")
-    public Optional<Discount> oneDiscount(@PathVariable Long id) {
+    public final Optional<Discount> oneDiscount(@PathVariable final Long id) {
         final Optional<Discount> discount = discountService.findByIdDiscount(id);
         return Optional.ofNullable(discount.orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database")));
 
@@ -90,7 +90,7 @@ public class DiscountController {
                     content= @Content)
     })
     @PutMapping("/discount/{id}")
-    public Optional<Discount> updateDiscount(@PathVariable Long id, @RequestBody Discount discount) {
+    public Optional<Discount> updateDiscount(@PathVariable final Long id, @RequestBody final Discount discount) {
         discountService.findByIdDiscount(id).orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database"));
         return discountService.updateDiscountById(id, discount);
     }
@@ -105,7 +105,7 @@ public class DiscountController {
                     content= @Content)
     })
     @DeleteMapping("/discount/{id}")
-    public void deleteDiscount(@PathVariable Long id) {
+    public void deleteDiscount(@PathVariable final Long id) {
         discountService.findByIdDiscount(id).orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database"));
         discountService.deleteDiscountById(id);
     }

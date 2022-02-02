@@ -23,12 +23,12 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
-    public Optional<Discount> findByIdDiscount(Long id) {
+    public final Optional<Discount> findByIdDiscount(final Long id) {
         return discountRepository.findById(id);
     }
 
     @Override
-    public List<Optional<Discount>> findAllDiscounts() {
+    public final List<Optional<Discount>> findAllDiscounts() {
         return discountRepository.findAll().stream()
                 .map(discount ->
                 Optional.of(Objects.requireNonNullElseGet(discount, Discount::new)))
@@ -36,12 +36,12 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
-    public Optional<Discount> createDiscount(Discount discount) {
+    public final Optional<Discount> createDiscount(final Discount discount) {
         return Optional.of(discountRepository.save(discount));
     }
 
     @Override
-    public Optional<Discount> updateDiscountById(Long id, Discount newDiscount) {
+    public final Optional<Discount> updateDiscountById(final Long id, final Discount newDiscount) {
         discountRepository.findById(id).map(discount -> {
             discount.setTitle(newDiscount.getTitle());
             discount.setDescription(newDiscount.getDescription());
@@ -59,7 +59,7 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
-    public void deleteDiscountById(Long id) {
+    public void deleteDiscountById(final Long id) {
         discountRepository.deleteById(id);
     }
 
