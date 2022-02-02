@@ -2,6 +2,8 @@ server:
   port: 8080
   servlet:
     context-path: /benefits
+  error:
+    include-message: always
 
 spring:
   datasource:
@@ -14,3 +16,5 @@ spring:
   liquibase:
     enabled: true
     default-schema: public
+  main:
+    banner-mode: off
