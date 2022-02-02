@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-@Tag(name="Discount controller", description="Controller for performing operations on the discount")
+@Tag(name = "Discount controller", description = "Controller for performing operations on the discount")
 @RestController
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class DiscountController {
@@ -30,14 +30,14 @@ public class DiscountController {
     }
 
 
-    @Operation(summary="This is to fetch all discounts from database.")
-    @ApiResponses(value={
-            @ApiResponse(responseCode="200",
-                    description="Details of all the discounts",
-                    content= @Content(mediaType= "application/json")),
-            @ApiResponse(responseCode="500",
-                    description="Internal Server Error",
-                    content= @Content)
+    @Operation(summary = "This is to fetch all discounts from database.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Details of all the discounts",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
+                    content = @Content)
     })
     @GetMapping("/discounts")
     public final List<Discount> allDiscount() {
@@ -47,14 +47,14 @@ public class DiscountController {
                 .toList();
     }
 
-    @Operation(summary="This is create the new discount.")
-    @ApiResponses(value={
-            @ApiResponse(responseCode="201",
-                    description="Discount has been created",
-                    content= @Content),
-            @ApiResponse(responseCode="500",
-                    description="Internal Server Error",
-                    content= @Content)
+    @Operation(summary = "This is create the new discount.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201",
+                    description = "Discount has been created",
+                    content = @Content),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
+                    content = @Content)
     })
     @PostMapping("/discount")
     public final ResponseEntity<Discount> newDiscount(@RequestBody final Discount newDiscount) {
@@ -63,14 +63,14 @@ public class DiscountController {
                 savedDiscount.orElseThrow(() -> new IllegalStateException("The discount with id: " + newDiscount.getId() + " was not saved in the database")), HttpStatus.CREATED);
     }
 
-    @Operation(summary="This is to get the discount.")
-    @ApiResponses(value={
-            @ApiResponse(responseCode="200",
-                    description="Discount has been received",
-                    content= @Content),
-            @ApiResponse(responseCode="500",
-                    description="Internal Server Error",
-                    content= @Content)
+    @Operation(summary = "This is to get the discount.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Discount has been received",
+                    content = @Content),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
+                    content = @Content)
     })
     @GetMapping("/discount/{id}")
     public final Optional<Discount> oneDiscount(@PathVariable final Long id) {
@@ -80,14 +80,14 @@ public class DiscountController {
 
     }
 
-    @Operation(summary="This is update the discount.")
-    @ApiResponses(value={
-            @ApiResponse(responseCode="200",
-                    description="Discount has been updated",
-                    content= @Content),
-            @ApiResponse(responseCode="500",
-                    description="Internal Server Error",
-                    content= @Content)
+    @Operation(summary = "This is update the discount.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Discount has been updated",
+                    content = @Content),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
+                    content = @Content)
     })
     @PutMapping("/discount/{id}")
     public Optional<Discount> updateDiscount(@PathVariable final Long id, @RequestBody final Discount discount) {
@@ -95,14 +95,14 @@ public class DiscountController {
         return discountService.updateDiscountById(id, discount);
     }
 
-    @Operation(summary="This is to remove the discount.")
-    @ApiResponses(value={
-            @ApiResponse(responseCode="200",
-                    description="Discount has been deleted",
-                    content= @Content),
-            @ApiResponse(responseCode="500",
-                    description="Internal Server Error",
-                    content= @Content)
+    @Operation(summary = "This is to remove the discount.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Discount has been deleted",
+                    content = @Content),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
+                    content = @Content)
     })
     @DeleteMapping("/discount/{id}")
     public void deleteDiscount(@PathVariable final Long id) {

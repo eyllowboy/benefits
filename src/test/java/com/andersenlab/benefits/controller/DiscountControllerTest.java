@@ -20,8 +20,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.Date;
-
 import static java.sql.Timestamp.valueOf;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -115,6 +113,7 @@ class DiscountControllerTest {
     @Test
     @Order(5)
     public void whenUpdatePositiveScenario() throws Exception {
+
         final Discount discount = new Discount(2L, 3L, 3L, "title4", "description4", 20, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 3L, "image3");
 
         final String discountEntity = new ObjectMapper().writeValueAsString(discount);
@@ -131,10 +130,12 @@ class DiscountControllerTest {
     @Test
     @Order(6)
     public void whenUpdateNegativeScenario() throws JsonProcessingException {
-        Discount discount = new Discount(Long.MAX_VALUE, 2L, 2L, "title1", "description1", 15, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 2L, "image2");
-        String discountEntity = new ObjectMapper().writeValueAsString(discount);
 
-        NestedServletException nestedServletException = assertThrows(NestedServletException.class,
+        final Discount discount = new Discount(Long.MAX_VALUE, 2L, 2L, "title1", "description1", 15, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 2L, "image2");
+
+        final String discountEntity = new ObjectMapper().writeValueAsString(discount);
+
+        final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
                 () -> mockMvc.perform(MockMvcRequestBuilders
                         .put("/discount/{id}", Long.MAX_VALUE)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -147,7 +148,7 @@ class DiscountControllerTest {
     @Order(7)
     public void whenDeletePositiveScenario() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/discount/1")
+                        .delete("/discount/4")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -157,7 +158,7 @@ class DiscountControllerTest {
     @Test
     @Order(8)
     public void whenDeleteNegativeScenario() {
-        NestedServletException nestedServletException = assertThrows(NestedServletException.class,
+        final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
                 () -> this.mockMvc.perform(MockMvcRequestBuilders
                         .delete("/discount/{id}", Long.MAX_VALUE)));
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());

@@ -30,8 +30,7 @@ public class DiscountServiceImpl implements DiscountService {
     @Override
     public final List<Optional<Discount>> findAllDiscounts() {
         return discountRepository.findAll().stream()
-                .map(discount ->
-                Optional.of(Objects.requireNonNullElseGet(discount, Discount::new)))
+                .map(discount -> Optional.of(Objects.requireNonNullElseGet(discount, Discount::new)))
                 .toList();
     }
 

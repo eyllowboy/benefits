@@ -5,7 +5,6 @@ import com.andersenlab.benefits.repository.DiscountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -14,10 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.sql.Timestamp.valueOf;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -96,11 +93,11 @@ class DiscountServiceTest {
         when(discountRepository.findById(any())).thenReturn(Optional.of(oldDiscount));
         when(discountRepository.save(any())).thenReturn(oldDiscount);
         discountService.createDiscount(oldDiscount);
-        Discount newDiscount = new Discount();
+        final Discount newDiscount = new Discount();
         newDiscount.setTitle("title2");
         oldDiscount.setTitle(newDiscount.getTitle());
         discountService.updateDiscountById(oldDiscount.getId(), oldDiscount);
-        Optional<Discount> discountUpdated = discountService.findByIdDiscount(1L);
+        final Optional<Discount> discountUpdated = discountService.findByIdDiscount(1L);
         //then
         assertEquals("title2", discountUpdated.get().getTitle());
 
