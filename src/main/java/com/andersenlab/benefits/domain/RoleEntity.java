@@ -2,6 +2,7 @@ package com.andersenlab.benefits.domain;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.util.Objects;
@@ -37,6 +38,7 @@ public class RoleEntity {
 	}
 	
 	@Override
+
 	public boolean equals(final Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
