@@ -89,13 +89,13 @@ class DiscountServiceTest {
     public void whenUpdateDiscountByIdIsOk() {
         //given
         final Discount oldDiscount = new Discount(1L, 2L, 3L, "title", "description", 20, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image");
+        final Discount newDiscount = new Discount();
+        newDiscount.setTitle("title2");
+        oldDiscount.setTitle(newDiscount.getTitle());
         //when
         when(discountRepository.findById(any())).thenReturn(Optional.of(oldDiscount));
         when(discountRepository.save(any())).thenReturn(oldDiscount);
         discountService.createDiscount(oldDiscount);
-        final Discount newDiscount = new Discount();
-        newDiscount.setTitle("title2");
-        oldDiscount.setTitle(newDiscount.getTitle());
         discountService.updateDiscountById(oldDiscount.getId(), oldDiscount);
         final Optional<Discount> discountUpdated = discountService.findByIdDiscount(1L);
         //then

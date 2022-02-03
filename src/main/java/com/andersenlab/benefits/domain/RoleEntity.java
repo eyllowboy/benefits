@@ -16,6 +16,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoleEntity {
+
     @Schema(description = "Identifier", type = "int64", minimum = "1")
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "role_id_seq")
@@ -38,7 +39,6 @@ public class RoleEntity {
     }
 
     @Override
-
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
