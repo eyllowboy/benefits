@@ -17,6 +17,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The controller for handling requests for {@link Discount}.
+ *
+ * @author Aleksei Sidorin
+ * @version 1.0
+ * @see Discount
+ * @see DiscountServiceImpl
+ */
+
 @Tag(name = "Discount controller", description = "Controller for performing operations on the discount")
 @RestController
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -29,7 +38,11 @@ public class DiscountController {
         this.discountService = discountService;
     }
 
-
+    /**
+     * Find all {@link Discount} from the database.
+     *
+     * @return a list of {@link Discount} from database.
+     */
     @Operation(summary = "This is to fetch all discounts from database.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -47,6 +60,11 @@ public class DiscountController {
                 .toList();
     }
 
+    /**
+     * Create {@link Discount} in the database.
+     *
+     * @throws IllegalStateException if {@link Discount} with this id was not saved in the database.
+     */
     @Operation(summary = "This is create the new discount.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201",
@@ -56,13 +74,19 @@ public class DiscountController {
                     description = "Internal Server Error",
                     content = @Content)
     })
-    @PostMapping("/discount")
+    @PostMapping("/discounts")
     public final ResponseEntity<Discount> newDiscount(@RequestBody final Discount newDiscount) {
         final Optional<Discount> savedDiscount = discountService.createDiscount(newDiscount);
         return new ResponseEntity<Discount>(
                 savedDiscount.orElseThrow(() -> new IllegalStateException("The discount with id: " + newDiscount.getId() + " was not saved in the database")), HttpStatus.CREATED);
     }
 
+    /**
+     * Gets {@link Discount} from the database.
+     *
+     * @param id the id of {@link Discount} that needs to get.
+     * @throws IllegalStateException if the given id was not found in the database.
+     */
     @Operation(summary = "This is to get the discount.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -72,7 +96,7 @@ public class DiscountController {
                     description = "Internal Server Error",
                     content = @Content)
     })
-    @GetMapping("/discount/{id}")
+    @GetMapping("/discounts/{id}")
     public final Optional<Discount> oneDiscount(@PathVariable final Long id) {
         final Optional<Discount> discount = discountService.findByIdDiscount(id);
         return Optional.ofNullable(discount.orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database")));
@@ -80,6 +104,13 @@ public class DiscountController {
 
     }
 
+    /**
+     * Updates {@link Discount} in the database.
+     *
+     * @param id the id of {@link Discount} that needs to update
+     * @param discount the {@link Discount} that needs to update
+     * @throws IllegalStateException if the {@link Discount} with given id was not found in the database.
+     */
     @Operation(summary = "This is update the discount.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -89,12 +120,18 @@ public class DiscountController {
                     description = "Internal Server Error",
                     content = @Content)
     })
-    @PutMapping("/discount/{id}")
+    @PutMapping("/discounts/{id}")
     public Optional<Discount> updateDiscount(@PathVariable final Long id, @RequestBody final Discount discount) {
         discountService.findByIdDiscount(id).orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database"));
         return discountService.updateDiscountById(id, discount);
     }
 
+    /**
+     * Deletes {@link Discount} from the database.
+     *
+     * @param id the id of {@link Discount} that needs to delete
+     * @throws IllegalStateException if the given id was not found in the database
+     */
     @Operation(summary = "This is to remove the discount.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -104,7 +141,7 @@ public class DiscountController {
                     description = "Internal Server Error",
                     content = @Content)
     })
-    @DeleteMapping("/discount/{id}")
+    @DeleteMapping("/discounts/{id}")
     public void deleteDiscount(@PathVariable final Long id) {
         discountService.findByIdDiscount(id).orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database"));
         discountService.deleteDiscountById(id);

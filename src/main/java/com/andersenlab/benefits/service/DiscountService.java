@@ -6,6 +6,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Main interface for performing basic operations on database {@link Discount}.
+ *
+ * @author Aleksei Sidorin
+ * @version 1.0
+ */
+
 @Service
 public interface DiscountService {
 
