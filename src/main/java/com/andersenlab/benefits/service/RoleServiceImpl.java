@@ -1,17 +1,19 @@
 package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.RoleEntity;
-import com.andersenlab.benefits.domain.UserEntity;
 import com.andersenlab.benefits.repository.RoleRepository;
-import liquibase.pro.packaged.O;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * An implementation for performing operations on a {@link RoleEntity}.
+ * @author Andrei Rabchun
+ * @version 1.0
+ * @see RoleService
+ */
 @Service
 public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;

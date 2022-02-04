@@ -1,6 +1,7 @@
 package com.andersenlab.benefits.controller;
 
 import com.andersenlab.benefits.domain.RoleEntity;
+import com.andersenlab.benefits.domain.UserEntity;
 import com.andersenlab.benefits.service.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,6 +17,11 @@ import javax.validation.constraints.DecimalMin;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * A controller for handling requests for {@link RoleEntity}.
+ * @author Andrei Rabchun
+ * @version 1.0
+ */
 @Tag(name = "Role controller", description = "Controller for performing operations on user roles.")
 @RestController
 public class RoleController {
@@ -25,7 +31,10 @@ public class RoleController {
     public RoleController(final RoleService roleService) {
         this.roleService = roleService;
     }
-
+    
+    /**
+     * @return a list of {@link RoleEntity} from database.
+     */
     @Operation(summary = "This is to fetch all the roles stored in DB")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -39,7 +48,16 @@ public class RoleController {
     public List<RoleEntity> getRoles() {
         return roleService.findAll();
     }
-
+    
+    /**
+     * Updates {@link RoleEntity} in the database.
+     * @param roleEntity the {@link RoleEntity} that needs to update
+     * @throws IllegalStateException if:
+     * <ul>
+     * <li>{@link RoleEntity} with given id was not found in the database
+     * <li>{@link RoleEntity} with {@link RoleEntity#getCode()} field is already exists
+     * </ul>
+     */
     @Operation(summary = "This is to update the role")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -65,7 +83,13 @@ public class RoleController {
             throw new IllegalStateException("Role with such 'code' is already exists");
         }
     }
-
+    
+    /**
+     * Create {@link RoleEntity} in the database.
+     * @param name the {@link RoleEntity#getName()}
+     * @param code the {@link RoleEntity#getCode()}
+     * @throws IllegalStateException if {@link RoleEntity} with {@link RoleEntity#getCode()} field is already exists
+     */
     @Operation(summary = "This is to create new role")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201",
@@ -90,7 +114,12 @@ public class RoleController {
 
         return new ResponseEntity<>(savedRoleEntity, HttpStatus.CREATED);
     }
-
+    
+    /**
+     * Gets {@link RoleEntity} from the database.
+     * @param id the id of {@link RoleEntity} that needs to get
+     * @throws IllegalStateException if the given id was not found in the database
+     */
     @Operation(summary = "This is to get the role")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -108,7 +137,12 @@ public class RoleController {
         return roleEntity.orElseThrow(
                 () -> new IllegalStateException("Role with this id was not found in the database"));
     }
-
+    
+    /**
+     * Deletes {@link RoleEntity} from the database.
+     * @param id the id of {@link RoleEntity} that needs to delete
+     * @throws IllegalStateException if the given id was not found in the database
+     */
     @Operation(summary = "This is to remove the role")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
