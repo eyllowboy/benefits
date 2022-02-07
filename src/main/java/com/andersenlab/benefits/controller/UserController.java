@@ -18,6 +18,11 @@ import javax.validation.constraints.DecimalMin;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * A controller for handling requests for {@link UserEntity}.
+ * @author Andrei Rabchun
+ * @version 1.0
+ */
 @Tag(name = "User controller", description = "Controller for performing operations on users.")
 @RestController
 public class UserController {
@@ -29,7 +34,10 @@ public class UserController {
         this.userService = userService;
         this.roleService = roleService;
     }
-
+    
+    /**
+     * @return a list of {@link UserEntity} from database.
+     */
     @Operation(summary = "This is to fetch all the users stored in DB")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -43,7 +51,17 @@ public class UserController {
     public List<UserEntity> getUsers() {
         return userService.findAll();
     }
-
+    
+    /**
+     * Updates {@link UserEntity} in the database.
+     * @param userEntity the {@link UserEntity} that needs to update
+     * @throws IllegalStateException if:
+     * <ul>
+     * <li>{@link UserEntity} with given id was not found in the database
+     * <li>{@link RoleEntity} with given id was not found in the database
+     * <li>{@link UserEntity} with {@link UserEntity#getLogin()} field is already exists
+     * </ul>
+     */
     @Operation(summary = "This is to update the user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -74,7 +92,17 @@ public class UserController {
                     roleEntityInDataBase.get());
         }
     }
-
+    
+    /**
+     * Create {@link UserEntity} in the database.
+     * @param login the {@link UserEntity#getLogin()}
+     * @param roleId the id of {@link RoleEntity}
+     * @throws IllegalStateException if:
+     * <ul>
+     * <li>{@link UserEntity} with {@link UserEntity#getLogin()} field is already exists
+     * <li>{@link RoleEntity} with given id was not found in the database
+     * </ul>
+     */
     @Operation(summary = "This is to create new user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201",
@@ -102,7 +130,12 @@ public class UserController {
 
         return new ResponseEntity<>(savedUserEntity, HttpStatus.CREATED);
     }
-
+    
+    /**
+     * Gets {@link UserEntity} from the database.
+     * @param id the id of {@link UserEntity} that needs to get
+     * @throws IllegalStateException if the given id was not found in the database
+     */
     @Operation(summary = "This is to get the user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -119,7 +152,12 @@ public class UserController {
         return userEntity.orElseThrow(
                 () -> new IllegalStateException("User with this id was not found in the database"));
     }
-
+    
+    /**
+     * Deletes {@link UserEntity} from the database.
+     * @param id the id of {@link UserEntity} that needs to delete
+     * @throws IllegalStateException if the given id was not found in the database
+     */
     @Operation(summary = "This is to remove the user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",

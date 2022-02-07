@@ -1,13 +1,30 @@
 package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.RoleEntity;
+import org.springframework.boot.jdbc.SchemaManagement;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * An interface for performing unique operations on a {@link RoleEntity}.
+ * @see CrudService
+ * @author Andrei Rabchun
+ * @version 1.0
+ */
 @Service
 public interface RoleService extends CrudService<RoleEntity> {
+    
+    /**
+     * @param code the unique string representation to identify the role, not null
+     * @return {@link RoleEntity} corresponding given code from database, error if the code not found
+     */
     Optional<RoleEntity> findByCode(final String code);
     
+    /**
+     * @param id the id of {@link RoleEntity} in the database, not null
+     * @param name the name of {@link RoleEntity} stored in the database, not null
+     * @param code the unique string representation for a {@link RoleEntity}, not null
+     */
     void updateRoleEntity(final Long id, final String name, final String code);
 }

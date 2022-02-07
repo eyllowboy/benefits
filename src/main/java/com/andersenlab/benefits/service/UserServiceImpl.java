@@ -9,6 +9,12 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * An implementation for performing operations on a {@link UserEntity}.
+ * @author Andrei Rabchun
+ * @version 1.0
+ * @see UserService
+ */
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
