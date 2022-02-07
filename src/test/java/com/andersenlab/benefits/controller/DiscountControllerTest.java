@@ -71,7 +71,7 @@ class DiscountControllerTest {
     @Order(2)
     public void whenGetDiscountPositiveScenario() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/discount/{id}", 1L)
+                        .get("/discounts/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -85,7 +85,7 @@ class DiscountControllerTest {
     public void whenGetDiscountWithIncorrectId() throws Exception {
         final long id = 8L;
         NestedServletException NestedServletException = assertThrows(NestedServletException.class,
-                () -> mockMvc.perform(get("/discount/{id}", id)));
+                () -> mockMvc.perform(get("/discounts/{id}", id)));
         assertEquals(IllegalStateException.class,
                 NestedServletException.getCause().getClass());
 
@@ -100,7 +100,7 @@ class DiscountControllerTest {
         final Discount discount = new Discount(6L, 2L, 3L, "title6", "description", 20, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image");
 
         this.mockMvc.perform(
-                        post("/discount")
+                        post("/discounts")
                                 .content(objectMapper.writeValueAsString(discount))
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -119,7 +119,7 @@ class DiscountControllerTest {
         final String discountEntity = new ObjectMapper().writeValueAsString(discount);
 
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .put("/discount/2")
+                        .put("/discounts/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(discountEntity))
                 .andDo(print())
@@ -137,7 +137,7 @@ class DiscountControllerTest {
 
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
                 () -> mockMvc.perform(MockMvcRequestBuilders
-                        .put("/discount/{id}", Long.MAX_VALUE)
+                        .put("/discounts/{id}", Long.MAX_VALUE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(discountEntity)));
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
@@ -148,7 +148,7 @@ class DiscountControllerTest {
     @Order(7)
     public void whenDeletePositiveScenario() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/discount/4")
+                        .delete("/discounts/4")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -160,7 +160,7 @@ class DiscountControllerTest {
     public void whenDeleteNegativeScenario() {
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
                 () -> this.mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/discount/{id}", Long.MAX_VALUE)));
+                        .delete("/discounts/{id}", Long.MAX_VALUE)));
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
         assertEquals("The discount with id: " + Long.MAX_VALUE + " was not found in the database",
                 nestedServletException.getCause().getMessage());
