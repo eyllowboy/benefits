@@ -63,6 +63,7 @@ public class DiscountController {
     /**
      * Create {@link Discount} in the database.
      *
+     * @param newDiscount of the entity {@link Discount}
      * @throws IllegalStateException if {@link Discount} with this id was not saved in the database.
      */
     @Operation(summary = "This is create the new discount.")
