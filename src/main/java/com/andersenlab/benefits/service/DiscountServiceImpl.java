@@ -9,6 +9,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * The implementation for performing operations on a {@link Discount}.
+ *
+ * @author Aleksei Sidorin
+ * @version 1.0
+ * @see Discount
+ * @see DiscountService
+ */
+
 
 @Service
 public class DiscountServiceImpl implements DiscountService {
