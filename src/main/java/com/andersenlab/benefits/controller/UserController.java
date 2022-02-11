@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,8 +28,20 @@ import java.util.Optional;
  * @author Andrei Rabchun
  * @version 1.0
  */
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "401",
+                description = "Unauthorized",
+                content = @Content),
+        @ApiResponse(responseCode = "403",
+                description = "Forbidden",
+                content = @Content),
+        @ApiResponse(responseCode = "500",
+                description = "Internal Server Error",
+                content = @Content)
+})
 @Tag(name = "User controller", description = "Controller for performing operations on users.")
 @RestController
+@SecurityRequirement(name = "benefits")
 public class UserController {
     private final UserService userService;
     private final RoleService roleService;

@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,8 +23,20 @@ import java.util.Optional;
  * @author Andrei Rabchun
  * @version 1.0
  */
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "401",
+                description = "Unauthorized",
+                content = @Content),
+        @ApiResponse(responseCode = "403",
+                description = "Forbidden",
+                content = @Content),
+        @ApiResponse(responseCode = "500",
+                description = "Internal Server Error",
+                content = @Content)
+})
 @Tag(name = "Role controller", description = "Controller for performing operations on user roles.")
 @RestController
+@SecurityRequirement(name = "benefits")
 public class RoleController {
     private final RoleService roleService;
 
@@ -39,10 +52,7 @@ public class RoleController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Details of all the roles",
-                    content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Server Error",
-                    content = @Content)
+                    content = @Content(mediaType = "application/json"))
     })
     @GetMapping("/roles")
     public List<RoleEntity> getRoles() {
@@ -63,9 +73,6 @@ public class RoleController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Role has been updated",
-                    content = @Content),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Server Error",
                     content = @Content)
     })
     @PutMapping("/roles")
@@ -96,9 +103,6 @@ public class RoleController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201",
                     description = "Role has been created",
-                    content = @Content),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Server Error",
                     content = @Content)
     })
     @PostMapping("/roles")
@@ -127,11 +131,7 @@ public class RoleController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Role has been received",
-                    content = @Content),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Server Error",
-                    content = @Content
-            )
+                    content = @Content)
     })
     @GetMapping("/roles/{id}")
     public RoleEntity getRole(@PathVariable @DecimalMin("1") Long id) {
@@ -151,9 +151,6 @@ public class RoleController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Role has been removed",
-                    content = @Content),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Server Error",
                     content = @Content)
     })
     @DeleteMapping("/roles/{id}")
