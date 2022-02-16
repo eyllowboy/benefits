@@ -65,8 +65,8 @@ public class WebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/discounts").hasAnyRole("ADMIN", "MODERATOR", "USER")
                 .antMatchers(HttpMethod.GET, "/discount/**").hasAnyRole("ADMIN", "MODERATOR", "USER")
                 .antMatchers(HttpMethod.POST, "/discount").hasAnyRole("MODERATOR")
-                .antMatchers(HttpMethod.PUT, "/discount/**").hasAnyRole("ADMIN", "MODERATOR")
-                .antMatchers(HttpMethod.DELETE, "/discount/**").hasAnyRole("ADMIN", "MODERATOR")
+                .antMatchers(HttpMethod.PUT, "/discount/**").hasAnyRole("MODERATOR")
+                .antMatchers(HttpMethod.DELETE, "/discount/**").hasAnyRole("MODERATOR")
                 // swagger
                 .antMatchers(AUTH_WHITELIST).permitAll()
                 .anyRequest().authenticated()
