@@ -14,17 +14,16 @@ import java.util.Optional;
 @Repository
 public interface LocationRepository extends JpaRepository<LocationEntity, Long> {
 
-    List<Optional<LocationEntity>> findByCountry(final String country);
+    @Query("FROM LocationEntity loc WHERE (loc.country = :country)")
+    List<Optional<LocationEntity>> findByCountry(@Param(value = "country") final String country);
 
     @Query("FROM LocationEntity loc WHERE (loc.country = :country) AND (loc.city = :city)")
     Optional<LocationEntity> findByCity(@Param(value = "country") final String country,
                                         @Param(value = "city") final String city);
 
-    // Denis Popov:
-    // May be better use INITCAP(CONCAT(:filterMask, '%')) to increase speed
-    @Query("FROM LocationEntity loc WHERE (loc.country = :country) AND (LOWER(loc.city) LIKE LOWER(CONCAT(:filterMask, '%')))")
+    @Query("FROM LocationEntity loc WHERE (loc.country = :country) AND (LOWER(loc.city) LIKE LOWER(CONCAT(:filterMask, '%'))) ORDER BY loc.city")
     List<Optional<LocationEntity>> findByFirstLetters(@Param(value = "country") final String country,
-                                                      @Param(value = "filterMask") final String startsWith);
+                                                      @Param(value = "filterMask") final String filterMask);
 
     @Modifying
     @Transactional
