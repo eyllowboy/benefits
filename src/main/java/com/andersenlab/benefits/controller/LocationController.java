@@ -8,8 +8,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.support.HttpRequestWrapper;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,67 +34,13 @@ public class LocationController {
     }
 
     /**
-     * Get list of all {@link LocationEntity} from database.
-     * @return a list of {@link LocationEntity} from database.
-     */
-    @Operation(summary = "This is to fetch all the locations stored in DB")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Details of all the locations",
-                    content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Server Error",
-                    content = @Content)
-    })
-    @GetMapping("/locations")
-    public List<LocationEntity> getLocations() {
-        return locationService.findAll();
-    }
-
-    /**
-     * Get list of all {@link LocationEntity} in specified county from database.
-     * @return a list of {@link LocationEntity} in specified county from database.
-     */
-    @Operation(summary = "This is to fetch all the locations in specified country stored in DB")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Details of all the locations in specified country",
-                    content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Server Error",
-                    content = @Content)
-    })
-    @GetMapping("/locations/{country}")
-    List<Optional<LocationEntity>> findByCountry(@PathVariable final String country) {
-        return locationService.findByCountry(country);
-    }
-
-    /**
-     * Get list of all {@link LocationEntity} from database which name starts from specified text.
-     * @return a list of {@link LocationEntity} in specified county from database.
-     */
-    @Operation(summary = "This is to fetch all the locations which name starts with filter mask")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Details the locations in specified country starts with filter mask",
-                    content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Server Error",
-                    content = @Content)
-    })
-    List<Optional<LocationEntity>> findByFirstLetters(@RequestParam(value = "country") final String country,
-                                                      @RequestParam(value = "filterMask") final String filterMask) {
-        return locationService.findByFirstLetters(country, filterMask);
-    }
-
-    /**
      * Create {@link LocationEntity} in the database.
      *
      * @param country of the new location {@link LocationEntity#getCountry()}
      * @param city of the new location {@link LocationEntity#getCity()}
      * @throws IllegalStateException if {@link LocationEntity} with these parameters already exists.
      */
-    @Operation(summary = "This is create the new location")
+    @Operation(summary = "This is to create new location")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201",
                     description = "Location has been created",
@@ -117,7 +65,7 @@ public class LocationController {
      * @param id is the id of {@link LocationEntity} that needs to get
      * @throws IllegalStateException if the given id was not found in the database
      */
-    @Operation(summary = "This is to get the location")
+    @Operation(summary = "This is to get the location by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Location has been received",
@@ -139,7 +87,7 @@ public class LocationController {
      * @param city is the name of {@link LocationEntity} that needs to get
      * @throws IllegalStateException if the given name was not found in the database
      */
-    @Operation(summary = "This is to get the location")
+    @Operation(summary = "This is to get the location by country and city name")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Location has been received",
@@ -151,8 +99,8 @@ public class LocationController {
     })
     @GetMapping("/locations/{country}/{city}")
     public LocationEntity getLocationByName(@PathVariable final String country, @PathVariable final String city) {
-        return (locationService.findByCity(country, city)).orElseThrow(
-                () -> new IllegalStateException("Location with this id was not found in the database"));
+        return (locationService.findByCity(country, city)).orElseThrow(() ->
+                new IllegalStateException("Location with city name '" + city + "' and country '" + country + "' was not found in the database"));
     }
 
     /**
@@ -161,7 +109,7 @@ public class LocationController {
      * @param location the {@link LocationEntity} that needs to update
      * @throws IllegalStateException if the {@link LocationEntity} with given id was not found in the database.
      */
-    @Operation(summary = "This is update the location.")
+    @Operation(summary = "This is to update the location")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Location has been updated",
@@ -183,7 +131,7 @@ public class LocationController {
      * @param id is the id of {@link LocationEntity} that needs to delete
      * @throws IllegalStateException if the given id was not found in the database
      */
-    @Operation(summary = "This is to remove the location.")
+    @Operation(summary = "This is to remove the location")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Location has been removed.",
@@ -197,4 +145,60 @@ public class LocationController {
         locationService.findById(id).orElseThrow(() -> new IllegalStateException("Location with id: '"+ id +"' was not found in the database"));
         locationService.delete(id);
     }
+
+    /**
+     * Get list of all {@link LocationEntity} from database.
+     * @return a list of {@link LocationEntity} from database.
+     */
+    @Operation(summary = "This is to fetch all the stored locations")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Details of all locations",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
+                    content = @Content)
+    })
+    @RequestMapping(value = "/locations")
+    public List<LocationEntity> getLocations() {
+        return locationService.findAll();
+    }
+
+    /**
+     * Get list of all {@link LocationEntity} in specified county from database.
+     * @return a list of {@link LocationEntity} in specified county from database.
+     */
+    @Operation(summary = "This is to fetch all stored locations in specified country")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Details of all locations in specified country",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
+                    content = @Content)
+    })
+    @RequestMapping(method = RequestMethod.GET, value = "/locations", params = {"country"})
+    List<Optional<LocationEntity>> findByCountry(@RequestParam(value = "country") final String country) {
+        return locationService.findByCountry(country);
+    }
+
+    /**
+     * Get list of all {@link LocationEntity} from database which name starts from specified text.
+     * @return a list of {@link LocationEntity} in specified county from database.
+     */
+    @Operation(summary = "This is to fetch all stored locations which name starts with filter mask")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Details the locations in specified country starts with filter mask",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
+                    content = @Content)
+    })
+    @RequestMapping(method = RequestMethod.GET, value = "/locations", params = {"country", "filterMask"})
+    List<Optional<LocationEntity>> findByFirstLetters(@RequestParam(value = "country") final String country,
+                                                      @RequestParam(value = "filterMask") final String filterMask) {
+        return locationService.findByFirstLetters(country, filterMask);
+    }
+
 }
