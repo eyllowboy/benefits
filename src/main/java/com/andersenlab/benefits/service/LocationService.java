@@ -35,7 +35,7 @@ public interface LocationService extends CrudService<LocationEntity> {
      * Method to find all {@link LocationEntity} beginning with given letters in specified country
      * @param country name of country to get all locations, not null
      * @param filterMask case-insensitive beginning of {@link LocationEntity}'s name to search
-     * @return list of {@link LocationEntity} corresponding given name of country, error if nothing found
+     * @return list of {@link LocationEntity} corresponding given name of country
      */
     List<Optional<LocationEntity>> findByFirstLetters(final String country, final String filterMask);
 

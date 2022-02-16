@@ -41,8 +41,8 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public List<Optional<LocationEntity>> findByFirstLetters(final String country, final String firstLetters) {
-        return null;
+    public List<Optional<LocationEntity>> findByFirstLetters(final String country, final String filterMask) {
+        return locationRepository.findByFirstLetters(country, filterMask);
     }
 
     @Override
