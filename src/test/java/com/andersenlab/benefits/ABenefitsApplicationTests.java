@@ -1,5 +1,6 @@
 package com.andersenlab.benefits;
 
+import com.andersenlab.benefits.controller.LocationController;
 import com.andersenlab.benefits.controller.RoleController;
 import com.andersenlab.benefits.controller.UserController;
 import com.andersenlab.benefits.repository.RoleRepository;
@@ -24,6 +25,8 @@ public class ABenefitsApplicationTests {
     private RoleController roleController;
     @Autowired
     private UserController userController;
+    @Autowired
+    private LocationController locationController;
     @Autowired
     private UserService userService;
     @Autowired
@@ -50,6 +53,7 @@ public class ABenefitsApplicationTests {
         // then
         assertThat(roleController).isNotNull();
         assertThat(userController).isNotNull();
+        assertThat(locationController).isNotNull();
         assertThat(userService).isNotNull();
         assertThat(roleService).isNotNull();
         assertThat(roleRepository).isNotNull();

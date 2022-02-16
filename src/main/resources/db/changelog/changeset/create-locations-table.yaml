@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-locations
+      author: Denis Popov
+      dbms: 'postgresql'
+      changes:
+        - createTable:
+            tableName: locations
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  defaultValueSequenceNext: location_id
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: country
+                  type: varchar(15)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: city
+                  type: varchar(25)
+                  constraints:
+                    nullable: false
+                    unique: true
