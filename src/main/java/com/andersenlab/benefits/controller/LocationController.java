@@ -177,8 +177,8 @@ public class LocationController {
                     description = "Internal Server Error",
                     content = @Content)
     })
-    @RequestMapping(method = RequestMethod.GET, value = "/locations", params = {"country"})
-    List<Optional<LocationEntity>> findByCountry(@RequestParam(value = "country") final String country) {
+    @RequestMapping(method = RequestMethod.GET, value = "/locations/{country}", params = {"country"})
+    List<Optional<LocationEntity>> findByCountry(@RequestParam final String country) {
         return locationService.findByCountry(country);
     }
 
@@ -195,9 +195,9 @@ public class LocationController {
                     description = "Internal Server Error",
                     content = @Content)
     })
-    @RequestMapping(method = RequestMethod.GET, value = "/locations", params = {"country", "filterMask"})
-    List<Optional<LocationEntity>> findByFirstLetters(@RequestParam(value = "country") final String country,
-                                                      @RequestParam(value = "filterMask") final String filterMask) {
+    @RequestMapping(method = RequestMethod.GET, value = "/locations/{country}/{filterMask}", params = {"country", "filterMask"})
+    List<Optional<LocationEntity>> findByFirstLetters(@RequestParam final String country,
+                                                      @RequestParam final String filterMask) {
         return locationService.findByFirstLetters(country, filterMask);
     }
 
