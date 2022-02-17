@@ -1,0 +1,37 @@
+version: "3.9"
+
+x-logging: &default-logging
+   options:
+      max-size: "10m"
+      max-file: "4"
+      tag: "{{.ImageName}}|{{.Name}}"
+   driver: json-file
+
+services:
+  postgres:
+    container_name: postgres_container
+    image: postgres:14-alpine
+    labels:
+      - keep
+    env_file: $ENV_DEV
+    environment:
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - 5432:5432
+    restart: always
+    logging: *default-logging
+
+  benefits-backend:
+    image: $AND_DOCKER_REGISTRY/benefits-backend:$CI_COMMIT_BRANCH
+    container_name: benefits-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/benefits
+    ports:
+      - 8080:8080
+    restart: always
+    logging: *default-logging
+
+volumes:
+  postgres:
