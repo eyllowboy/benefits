@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,6 +21,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -28,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
+@WithMockUser
 public class UserControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
@@ -49,6 +52,7 @@ public class UserControllerTest {
 		// when
 		mockMvc.perform(MockMvcRequestBuilders
 						.get("/users")
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 		// then
@@ -61,6 +65,7 @@ public class UserControllerTest {
 		// when
 		mockMvc.perform(MockMvcRequestBuilders
 						.get("/users/{id}", 1L)
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 		// then
@@ -77,7 +82,8 @@ public class UserControllerTest {
 	public void whenGetUserByIdAndIdNotExists() {
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
-				() -> mockMvc.perform(get("/users/{id}", Long.MAX_VALUE)));
+				() -> mockMvc.perform(get("/users/{id}", Long.MAX_VALUE)
+						.with(csrf())));
 		
 		// then
 		assertEquals(IllegalStateException.class,
@@ -91,6 +97,7 @@ public class UserControllerTest {
 		// when
 		mockMvc.perform(MockMvcRequestBuilders
 						.post("/users")
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.param("login", "login_1")
 						.param("roleId", "1"))
@@ -110,6 +117,7 @@ public class UserControllerTest {
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.post("/users")
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.param("login", "admin")
 						.param("roleId", "1")));
@@ -127,6 +135,7 @@ public class UserControllerTest {
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.post("/users")
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.param("login", "admin_2")
 						.param("roleId", "9223372036854775807")));
@@ -148,6 +157,7 @@ public class UserControllerTest {
 		// when
 		mockMvc.perform(MockMvcRequestBuilders
 						.put("/users")
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(roleEntityAsJsonString))
 				.andDo(print())
@@ -166,6 +176,7 @@ public class UserControllerTest {
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.put("/users")
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(roleEntityAsJsonString)));
 		
@@ -187,6 +198,7 @@ public class UserControllerTest {
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.put("/users")
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(roleEntityAsJsonString)));
 		
@@ -208,6 +220,7 @@ public class UserControllerTest {
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.put("/users")
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(roleEntityAsJsonString)));
 		
@@ -223,6 +236,7 @@ public class UserControllerTest {
 		// when
 		mockMvc.perform(MockMvcRequestBuilders
 						.delete("/users/{id}", 7L)
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 		// then
@@ -234,7 +248,8 @@ public class UserControllerTest {
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
-						.delete("/users/{id}", Long.MAX_VALUE)));
+						.delete("/users/{id}", Long.MAX_VALUE)
+						.with(csrf())));
 		
 		// then
 		assertEquals(IllegalStateException.class,
