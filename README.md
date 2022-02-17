@@ -38,7 +38,8 @@ with matching body. See an example: ./keycloak/benefits.postman_collection.json
 > mvn spring-boot:stop
 5. App run on http://localhost:8080/benefits/
 6. Swagger run on http://localhost:8080/benefits/swagger-ui/index.html \
-"Secret" is required for authorization. Go to keycloak 
+"client_id" is benefits-auth.
+"Secret" also is required for authorization. Go to keycloak 
 "Clients" -> "benefits-auth" under "Credentials" tab copy it. 
 Next, enter the username and password of the user you created in step 3. \
 In order to log in as a different user, you need to wait until the end of the session or 

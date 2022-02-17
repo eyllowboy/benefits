@@ -34,7 +34,7 @@ springdoc:
   swagger-ui:
     oauth:
       clientId: benefits-auth
-      clientSecret: kgwJzuYFjm75C6c7Wz9nVYxeHOLDqrqj
+      clientSecret: qyYUkad3HmruCk2ZRw3FP9H52lWc9Poq
   oAuthFlow:
     authorizationUrl: http://localhost:8484/auth/realms/benefits/protocol/openid-connect/auth
     tokenUrl: http://localhost:8484/auth/realms/benefits/protocol/openid-connect/token
