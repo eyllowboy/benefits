@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,6 +31,7 @@ import static java.sql.Timestamp.valueOf;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -41,6 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@WithMockUser
 class DiscountControllerTest {
 
     @Autowired
@@ -76,6 +79,7 @@ class DiscountControllerTest {
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/discounts")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 // then
@@ -89,6 +93,7 @@ class DiscountControllerTest {
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/discounts/{id}", 1L)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 // then
@@ -105,8 +110,9 @@ class DiscountControllerTest {
         final long id = 8L;
         // when
         NestedServletException NestedServletException = assertThrows(NestedServletException.class,
-                () -> mockMvc.perform(get("/discounts/{id}", id)));
         // then
+                () -> mockMvc.perform(get("/discounts/{id}", id)
+                        .with(csrf())));
         assertEquals(IllegalStateException.class,
                 NestedServletException.getCause().getClass());
         assertEquals("The discount with id: " + id + " was not found in the database",
@@ -126,6 +132,7 @@ class DiscountControllerTest {
         // when
         this.mockMvc.perform(
                         post("/discounts")
+                                .with(csrf())
                                 .content(objectMapper.writeValueAsString(discount))
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -150,6 +157,7 @@ class DiscountControllerTest {
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .put("/discounts/2")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(discountEntity))
                 .andDo(print())
@@ -172,6 +180,7 @@ class DiscountControllerTest {
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 mockMvc.perform(MockMvcRequestBuilders
                         .put("/discounts/{id}", Long.MAX_VALUE)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(discountEntity)));
         // then
@@ -185,6 +194,7 @@ class DiscountControllerTest {
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .delete("/discounts/4")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 // then
@@ -198,8 +208,9 @@ class DiscountControllerTest {
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
                 () -> this.mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/discounts/{id}", Long.MAX_VALUE)));
         // then
+                        .delete("/discounts/{id}", Long.MAX_VALUE)
+                        .with(csrf())));
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
         assertEquals("The discount with id: " + Long.MAX_VALUE + " was not found in the database",
                 nestedServletException.getCause().getMessage());
