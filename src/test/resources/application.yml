@@ -19,4 +19,5 @@ spring:
     changeLog: classpath:changelog/db.changelog-master.yaml
   main:
     banner-mode: off
-
+  profiles:
+    active: test
