@@ -44,3 +44,5 @@ spring:
     allow-circular-references: true
   application:
     name: A-Benefits
+  profiles:
+    active: test
