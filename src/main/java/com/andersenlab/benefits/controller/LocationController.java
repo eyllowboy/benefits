@@ -159,7 +159,7 @@ public class LocationController {
                     description = "Internal Server Error",
                     content = @Content)
     })
-    @RequestMapping(value = "/locations")
+    @GetMapping(value = "/locations")
     public List<LocationEntity> getLocations() {
         return locationService.findAll();
     }
