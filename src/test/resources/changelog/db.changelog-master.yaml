@@ -8,11 +8,14 @@ databaseChangeLog:
   - include:
       file: changelog/changeset/create-users-table.yaml
   - include:
+      file: changelog/changeset/create-locations-table.yaml
+  - include:
       file: changelog/changeset/fill-roles-table.yaml
   - include:
       file: changelog/changeset/fill_user_role.sql
   - include:
       file: changelog/changeset/fill_discount.sql
-
+  - include:
+      file: changelog/changeset/fill_locations_table.sql
 
 

@@ -19,3 +19,8 @@ databaseChangeLog:
              incrementBy: 1
              sequenceName:  discount_id
              startValue: 1
+         - createSequence:
+             dataType: BIGINT
+             incrementBy: 1
+             sequenceName:  location_id
+             startValue: 1

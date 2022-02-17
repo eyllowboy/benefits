@@ -9,7 +9,7 @@ import java.util.Objects;
 
 @Schema(name = "Location", description = "Location entity")
 @Entity
-@Table(name = "location")
+@Table(name = "locations")
 @Getter
 @Setter
 @ToString
@@ -22,7 +22,7 @@ public class LocationEntity {
     @SequenceGenerator(name = "location_id_seq", sequenceName = "location_id", allocationSize = 1)
     private Long id;
 
-    @Schema(description = "Country", type = "string", minLength = 1, maxLength = 15)
+    @Schema(description = "Location country", type = "string", minLength = 1, maxLength = 15)
     @NotBlank
     @Column
     private String country;
