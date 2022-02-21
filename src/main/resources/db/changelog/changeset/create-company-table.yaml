@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-company
+      author: Aleksei Sidorin
+      dbms: 'postgresql'
+      changes:
+        - createTable:
+            tableName: company
+            columns:
+              - column:
+                name: id
+                type: BIGINT
+                defaultValueSequenceNext: company_id
+                constraints:
+                  primaryKey: true
+                  nullable: false
+              - column:
+                  name: title
+                  type: varchar(50)
+              - column:
+                  name: description
+                  type: varchar(1000)
+              - column:
+                  name: address
+                  type: varchar(150)
+              - column:
+                  name: phone
+                  type: varchar(20)
+              - column:
+                  name: link
+                  type: varchar
