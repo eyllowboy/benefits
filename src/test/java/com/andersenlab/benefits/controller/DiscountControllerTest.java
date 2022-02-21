@@ -97,7 +97,7 @@ class DiscountControllerTest {
     @Order(4)
     public void whenAddDiscountPositiveScenario() throws Exception {
 
-        final Discount discount = new Discount(6L, 2L, 3L, "title6", "description", 20, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image");
+        final Discount discount = new Discount(6L, 2L, 3L, "title6", "description", "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image");
 
         this.mockMvc.perform(
                         post("/discounts")
@@ -114,7 +114,7 @@ class DiscountControllerTest {
     @Order(5)
     public void whenUpdatePositiveScenario() throws Exception {
 
-        final Discount discount = new Discount(2L, 3L, 3L, "title4", "description4", 20, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 3L, "image3");
+        final Discount discount = new Discount(2L, 3L, 3L, "title4", "description4", "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 3L, "image3");
 
         final String discountEntity = new ObjectMapper().writeValueAsString(discount);
 
@@ -131,7 +131,7 @@ class DiscountControllerTest {
     @Order(6)
     public void whenUpdateNegativeScenario() throws JsonProcessingException {
 
-        final Discount discount = new Discount(Long.MAX_VALUE, 2L, 2L, "title1", "description1", 15, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 2L, "image2");
+        final Discount discount = new Discount(Long.MAX_VALUE, 2L, 2L, "title1", "description1", "15", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 2L, "image2");
 
         final String discountEntity = new ObjectMapper().writeValueAsString(discount);
 

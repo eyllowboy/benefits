@@ -13,6 +13,8 @@ spring:
     password: ben0147
   jpa:
     open-in-view: false
+    hibernate:
+      ddl-auto: validate
   liquibase:
     enabled: true
     default-schema: public

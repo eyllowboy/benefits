@@ -34,7 +34,7 @@ class DiscountServiceTest {
     @Test
     public void whenFindByIdReturnDiscount() {
         //given
-        final Discount discount = new Discount(1L, 2L, 3L, "title", "description", 20, new Date(12022020), new Date(12032020), 1L, "image");
+        final Discount discount = new Discount(1L, 2L, 3L, "title", "description", "20", new Date(12022020), new Date(12032020), 1L, "image");
         //when
         when(discountService.findByIdDiscount(1L)).thenReturn(Optional.of(discount));
         Optional<Discount> actual = discountService.findByIdDiscount(1L);
@@ -58,11 +58,11 @@ class DiscountServiceTest {
     public void whenFindAllDiscounts() {
         //given
         final List<Discount> listDiscounts = List.of(
-                new Discount(1L, 2L, 6L, "title1", "description", 20, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image"),
-                new Discount(2L, 3L, 2L, "title2", "description", 20, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image"),
-                new Discount(3L, 1L, 3L, "title3", "description", 20, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image"),
-                new Discount(4L, 5L, 1L, "title3", "description", 20, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image"),
-                new Discount(5L, 5L, 3L, "title4", "description", 20, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image")
+                new Discount(1L, 2L, 6L, "title1", "description", "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image"),
+                new Discount(2L, 3L, 2L, "title2", "description", "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image"),
+                new Discount(3L, 1L, 3L, "title3", "description", "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image"),
+                new Discount(4L, 5L, 1L, "title3", "description", "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image"),
+                new Discount(5L, 5L, 3L, "title4", "description", "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image")
         );
         //when
         when(discountRepository.findAll()).thenReturn(listDiscounts);
@@ -76,7 +76,7 @@ class DiscountServiceTest {
     @Test
     public void whenCreateDiscountIsOk() {
         //given
-        final Discount discount = new Discount(1L, 2L, 3L, "title", "description", 20, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image");
+        final Discount discount = new Discount(1L, 2L, 3L, "title", "description", "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image");
         //when
         when(discountRepository.save(any())).thenReturn(discount);
         final Optional<Discount> discountSaved = discountService.createDiscount(discount);
@@ -88,7 +88,7 @@ class DiscountServiceTest {
     @Test
     public void whenUpdateDiscountByIdIsOk() {
         //given
-        final Discount oldDiscount = new Discount(1L, 2L, 3L, "title", "description", 20, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image");
+        final Discount oldDiscount = new Discount(1L, 2L, 3L, "title", "description", "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image");
         final Discount newDiscount = new Discount();
         newDiscount.setTitle("title2");
         oldDiscount.setTitle(newDiscount.getTitle());

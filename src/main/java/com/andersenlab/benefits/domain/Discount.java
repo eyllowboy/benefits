@@ -37,7 +37,7 @@ public class Discount {
     private String description;
 
     @Column(name = "size", nullable = false)
-    private Integer sizeDiscount;
+    private String sizeDiscount;
 
     @Column(name = "start_date", nullable = false)
     @Temporal(TemporalType.DATE)
