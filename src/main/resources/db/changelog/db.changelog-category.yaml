@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-sequence
+      author: Denis Popov
+      dbms: 'postgresql'
+      changes:
+        - createSequence:
+            dataType: BIGINT
+            incrementBy: 1
+            sequenceName: category_id
+            startValue: 1
+  - include:
+      file: db/changelog/changeset/create-categories-table.yaml
+  - include:
+      file: db/changelog/changeset/fill-categories-table.sql

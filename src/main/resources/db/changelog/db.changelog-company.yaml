@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-sequence
+      author: Aleksei Sidorin
+      dbms: 'postgresql'
+      changes:
+        - createSequence:
+            dataType: BIGINT
+            incrementBy: 1
+            sequenceName: company_id
+            startValue: 1
+  - include:
+      file: db/changelog/changeset/create-company-table.yaml

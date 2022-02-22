@@ -3,6 +3,7 @@ package com.andersenlab.benefits.service;
 import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import java.util.Optional;
  * @see CategoryService
  * @see CategoryEntity
  */
+@Service
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 

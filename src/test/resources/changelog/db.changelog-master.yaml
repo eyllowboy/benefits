@@ -10,8 +10,6 @@ databaseChangeLog:
   - include:
       file: changelog/changeset/create-locations-table.yaml
   - include:
-      file: changelog/changeset/create-company-table.yaml
-  - include:
       file: changelog/changeset/fill-roles-table.yaml
   - include:
       file: changelog/changeset/fill_user_role.sql
@@ -20,5 +18,6 @@ databaseChangeLog:
   - include:
       file: changelog/changeset/fill_locations_table.sql
   - include:
-      file: changelog/changeset/fill_company.sql
-
+      file: changelog/db.changelog-category.yaml
+  - include:
+      file: changelog/db.changelog-company.yaml
