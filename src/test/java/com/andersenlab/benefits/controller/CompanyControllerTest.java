@@ -67,8 +67,8 @@ class CompanyControllerTest {
     @Test
     void whenGetCompanyByIdIsOk() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders
-                .get("/companies/{id}", 1L)
-                .contentType(MediaType.APPLICATION_JSON))
+                        .get("/companies/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
@@ -101,7 +101,7 @@ class CompanyControllerTest {
     @Test
     void whenUpdatedCompanyPositiveScenario() throws Exception {
 
-        final CompanyEntity company = new CompanyEntity(2L,"company22", "description22", "address22", "8911-11-11", "link22");
+        final CompanyEntity company = new CompanyEntity(2L, "company22", "description22", "address22", "8911-11-11", "link22");
 
         final String companyEntity = new ObjectMapper().writeValueAsString(company);
 
@@ -117,7 +117,7 @@ class CompanyControllerTest {
     void whenUpdatedCompanyNegativeScenario() throws Exception {
 
         final long id = 9L;
-        final CompanyEntity company = new CompanyEntity(id,"company9", "description9", "address9", "8911-11-11", "link9");
+        final CompanyEntity company = new CompanyEntity(id, "company9", "description9", "address9", "8911-11-11", "link9");
 
         final String companyEntity = new ObjectMapper().writeValueAsString(company);
 

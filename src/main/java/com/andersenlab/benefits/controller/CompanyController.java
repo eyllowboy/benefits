@@ -15,6 +15,7 @@ import java.util.Optional;
 
 /**
  * A controller for handling requests for {@link CompanyEntity}.
+ *
  * @author Aleksei Sidorin
  * @version 1.0
  */
@@ -42,11 +43,11 @@ public class CompanyController {
                     description = "Location has been created",
                     content = @Content),
             @ApiResponse(responseCode = "500",
-            description = "Internal Server Error",
-            content = @Content)
+                    description = "Internal Server Error",
+                    content = @Content)
     })
     @PostMapping("/companies")
-    public final Optional<CompanyEntity> addCompany(@RequestBody CompanyEntity companyEntity){
+    public final Optional<CompanyEntity> addCompany(@RequestBody CompanyEntity companyEntity) {
         return Optional.ofNullable(companyService.createCompany(companyEntity)
                 .orElseThrow(() -> new IllegalStateException("The company with id: " + companyEntity.getId() + " already exists.")));
     }
@@ -67,9 +68,9 @@ public class CompanyController {
                     content = @Content)
     })
     @GetMapping("/companies/{id}")
-    public final CompanyEntity getCompanyById(@PathVariable final Long id){
+    public final CompanyEntity getCompanyById(@PathVariable final Long id) {
         return (companyService.findByIdCompany(id))
-                .orElseThrow(()-> new IllegalStateException("Company with this id was not found in the database."));
+                .orElseThrow(() -> new IllegalStateException("Company with this id was not found in the database."));
     }
 
     /**
@@ -95,7 +96,7 @@ public class CompanyController {
     /**
      * Updates {@link CompanyEntity} in the database.
      *
-     * @param id the id of {@link CompanyEntity} that needs to update.
+     * @param id      the id of {@link CompanyEntity} that needs to update.
      * @param company the {@link CompanyEntity} that needs to update.
      * @throws IllegalStateException if the {@link CompanyEntity} with given id was not found in the database.
      */
@@ -109,7 +110,7 @@ public class CompanyController {
                     content = @Content)
     })
     @PutMapping("/companies/{id}")
-    public final Optional<CompanyEntity> updatedCompany(@PathVariable final Long id, @RequestBody final CompanyEntity company){
+    public final Optional<CompanyEntity> updatedCompany(@PathVariable final Long id, @RequestBody final CompanyEntity company) {
         companyService.findByIdCompany(id).orElseThrow(() -> new IllegalStateException("The company with id: " + id + " was not found in the database."));
         return companyService.updateCompanyById(id, company);
     }
@@ -130,11 +131,10 @@ public class CompanyController {
                     content = @Content)
     })
     @DeleteMapping("/companies/{id}")
-    public void deleteCompanyById(@PathVariable final Long id){
+    public void deleteCompanyById(@PathVariable final Long id) {
         companyService.findByIdCompany(id).orElseThrow(() -> new IllegalStateException("The company with id: " + id + " was not found in the database."));
         companyService.deleteCompanyById(id);
     }
-
 
 
 }
