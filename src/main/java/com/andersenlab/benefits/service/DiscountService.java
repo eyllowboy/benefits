@@ -1,13 +1,13 @@
 package com.andersenlab.benefits.service;
 
-import com.andersenlab.benefits.domain.Discount;
+import com.andersenlab.benefits.domain.DiscountEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Main interface for performing basic operations on database {@link Discount}.
+ * Main interface for performing basic operations on database {@link DiscountEntity}.
  *
  * @author Aleksei Sidorin
  * @version 1.0
@@ -22,14 +22,14 @@ public interface DiscountService {
      * @param id the id of record in the database, not null
      * @return the discount corresponding given id from database, error if id not found
      */
-    Optional<Discount> findByIdDiscount(final Long id);
+    Optional<DiscountEntity> findByIdDiscount(final Long id);
 
     /**
      * Method allows us finds all discount.
      *
      * @return the list of discounts from database, error if not processed
      */
-    List<Optional<Discount>> findAllDiscounts();
+    List<Optional<DiscountEntity>> findAllDiscounts();
 
     /**
      * Method allows creates new the discount.
@@ -37,7 +37,7 @@ public interface DiscountService {
      * @param discount contains information to create a new record in the database, not null
      * @return the entity corresponding new record in the database, error if consistency conditions are not met
      */
-    Optional<Discount> createDiscount(final Discount discount);
+    Optional<DiscountEntity> createDiscount(final DiscountEntity discount);
 
     /**
      * Method allows updates the discount by id.
@@ -46,7 +46,7 @@ public interface DiscountService {
      * @param discount contains information to the updated record in the database, not null
      * @return the entity corresponding updated record in the database, error if consistency conditions are not met
      */
-    Optional<Discount> updateDiscountById(final Long id, final Discount discount);
+    Optional<DiscountEntity> updateDiscountById(final Long id, final DiscountEntity discount);
 
     /**
      * Method allows deleted the discount by id.

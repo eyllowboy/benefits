@@ -1,6 +1,6 @@
 package com.andersenlab.benefits.service;
 
-import com.andersenlab.benefits.domain.Discount;
+import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.repository.DiscountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,11 +10,11 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * The implementation for performing operations on a {@link Discount}.
+ * The implementation for performing operations on a {@link DiscountEntity}.
  *
  * @author Aleksei Sidorin
  * @version 1.0
- * @see Discount
+ * @see DiscountEntity
  * @see DiscountService
  */
 
@@ -32,26 +32,26 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
-    public final Optional<Discount> findByIdDiscount(final Long id) {
+    public final Optional<DiscountEntity> findByIdDiscount(final Long id) {
         return discountRepository.findById(id);
     }
 
     @Override
-    public final List<Optional<Discount>> findAllDiscounts() {
+    public final List<Optional<DiscountEntity>> findAllDiscounts() {
         return discountRepository.findAll().stream()
-                .map(discount -> Optional.of(Objects.requireNonNullElseGet(discount, Discount::new)))
+                .map(discount -> Optional.of(Objects.requireNonNullElseGet(discount, DiscountEntity::new)))
                 .toList();
     }
 
     @Override
-    public final Optional<Discount> createDiscount(final Discount discount) {
+    public final Optional<DiscountEntity> createDiscount(final DiscountEntity discount) {
         return Optional.of(discountRepository.save(discount));
     }
 
     @Override
-    public final Optional<Discount> updateDiscountById(final Long id, final Discount newDiscount) {
+    public final Optional<DiscountEntity> updateDiscountById(final Long id, final DiscountEntity newDiscount) {
         discountRepository.findById(id).map(discount -> {
-            discount.setTitle(newDiscount.getTitle());
+            discount.setType(newDiscount.getType());
             discount.setDescription(newDiscount.getDescription());
             discount.setDateBegin(newDiscount.getDateBegin());
             discount.setDateFinish(newDiscount.getDateFinish());

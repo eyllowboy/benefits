@@ -1,16 +1,18 @@
 package com.andersenlab.benefits.service;
 
-import com.andersenlab.benefits.domain.Discount;
+import com.andersenlab.benefits.domain.CategoryEntity;
+import com.andersenlab.benefits.domain.DiscountEntity;
+import com.andersenlab.benefits.domain.LocationEntity;
+import com.andersenlab.benefits.repository.CategoryRepository;
 import com.andersenlab.benefits.repository.DiscountRepository;
+import com.andersenlab.benefits.repository.LocationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static java.sql.Timestamp.valueOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,6 +27,12 @@ class DiscountServiceTest {
 
     private DiscountServiceImpl discountService;
 
+    @Mock
+    private LocationRepository locationRepository;
+
+    @Mock
+    private CategoryRepository categoryRepository;
+
     @BeforeEach
     private void setUp() {
         discountService = new DiscountServiceImpl(discountRepository);
@@ -33,11 +41,16 @@ class DiscountServiceTest {
 
     @Test
     public void whenFindByIdReturnDiscount() {
-        //given
-        final Discount discount = new Discount(1L, 2L, 3L, "title", "description", "20", new Date(12022020), new Date(12032020), 1L, "image");
+        // given
+        final Set<CategoryEntity> categories = new HashSet<>();
+        categories.add(categoryRepository.getById(1L));
+        final Set<LocationEntity> locations = new HashSet<>();
+        locations.add(locationRepository.getById(1L));
+        final DiscountEntity discount = new DiscountEntity(6L, categories, 3L, "title6", "description", "no condition",
+                "20", new Date(12022020), new Date(12022020), locations, "image");
         //when
         when(discountService.findByIdDiscount(1L)).thenReturn(Optional.of(discount));
-        Optional<Discount> actual = discountService.findByIdDiscount(1L);
+        Optional<DiscountEntity> actual = discountService.findByIdDiscount(1L);
         //then
         assertEquals(Optional.of(discount), actual);
         verify(discountRepository).findById(1L);
@@ -46,7 +59,7 @@ class DiscountServiceTest {
     @Test
     public void whenFindByIdDiscountIsNotPresent() {
         //when
-        final Optional<Discount> discount = discountService.findByIdDiscount(1L);
+        final Optional<DiscountEntity> discount = discountService.findByIdDiscount(1L);
         //then
         assertEquals(discount, Optional.empty());
         verify(discountRepository).findById(1L);
@@ -56,17 +69,27 @@ class DiscountServiceTest {
 
     @Test
     public void whenFindAllDiscounts() {
-        //given
-        final List<Discount> listDiscounts = List.of(
-                new Discount(1L, 2L, 6L, "title1", "description", "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image"),
-                new Discount(2L, 3L, 2L, "title2", "description", "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image"),
-                new Discount(3L, 1L, 3L, "title3", "description", "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image"),
-                new Discount(4L, 5L, 1L, "title3", "description", "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image"),
-                new Discount(5L, 5L, 3L, "title4", "description", "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image")
-        );
+        // given
+        final Set<CategoryEntity> categories = new HashSet<>();
+        categories.add(categoryRepository.getById(1L));
+        final Set<LocationEntity> locations = new HashSet<>();
+        locations.add(locationRepository.getById(1L));
+        final List<DiscountEntity> listDiscounts = List.of(
+            new DiscountEntity(1L, categories, 1L, "title1", "description", "no condition",
+                "20", new Date(12022020), new Date(12022020), locations, "image"),
+            new DiscountEntity(2L, categories, 2L, "title2", "description", "no condition",
+                    "20", new Date(12022020), new Date(12022020), locations, "image"),
+            new DiscountEntity(3L, categories, 3L, "title3", "description", "no condition",
+                    "20", new Date(12022020), new Date(12022020), locations, "image"),
+            new DiscountEntity(4L, categories, 4L, "title4", "description", "no condition",
+                    "20", new Date(12022020), new Date(12022020), locations, "image"),
+            new DiscountEntity(5L, categories, 5L, "title5", "description", "no condition",
+                    "20", new Date(12022020), new Date(12022020), locations, "image"),
+            new DiscountEntity(6L, categories, 6L, "title6", "description", "no condition",
+                    "20", new Date(12022020), new Date(12022020), locations, "image"));
         //when
         when(discountRepository.findAll()).thenReturn(listDiscounts);
-        final List<Discount> discountList = discountService.findAllDiscounts().stream().map(Optional::orElseThrow).toList();
+        final List<DiscountEntity> discountList = discountService.findAllDiscounts().stream().map(Optional::orElseThrow).toList();
         //then
         assertEquals(listDiscounts, discountList);
         verify(discountRepository).findAll();
@@ -75,11 +98,16 @@ class DiscountServiceTest {
 
     @Test
     public void whenCreateDiscountIsOk() {
-        //given
-        final Discount discount = new Discount(1L, 2L, 3L, "title", "description", "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image");
+        // given
+        final Set<CategoryEntity> categories = new HashSet<>();
+        categories.add(categoryRepository.getById(1L));
+        final Set<LocationEntity> locations = new HashSet<>();
+        locations.add(locationRepository.getById(1L));
+        final DiscountEntity discount = new DiscountEntity(6L, categories, 3L, "title6", "description", "no condition",
+                "20", new Date(12022020), new Date(12022020), locations, "image");
         //when
         when(discountRepository.save(any())).thenReturn(discount);
-        final Optional<Discount> discountSaved = discountService.createDiscount(discount);
+        final Optional<DiscountEntity> discountSaved = discountService.createDiscount(discount);
         //then
         assertEquals(Optional.of(discount), discountSaved);
         verify(discountRepository, times(1)).save(discount);
@@ -87,19 +115,24 @@ class DiscountServiceTest {
 
     @Test
     public void whenUpdateDiscountByIdIsOk() {
-        //given
-        final Discount oldDiscount = new Discount(1L, 2L, 3L, "title", "description", "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), 1L, "image");
-        final Discount newDiscount = new Discount();
-        newDiscount.setTitle("title2");
-        oldDiscount.setTitle(newDiscount.getTitle());
+        // given
+        final Set<CategoryEntity> categories = new HashSet<>();
+        categories.add(categoryRepository.getById(1L));
+        final Set<LocationEntity> locations = new HashSet<>();
+        locations.add(locationRepository.getById(1L));
+        final DiscountEntity oldDiscount = new DiscountEntity(6L, categories, 3L, "title6", "description", "no condition",
+                "20", new Date(12022020), new Date(12022020), locations, "image");
+        final DiscountEntity newDiscount = new DiscountEntity();
+        newDiscount.setType("title2");
+        oldDiscount.setType(newDiscount.getType());
         //when
         when(discountRepository.findById(any())).thenReturn(Optional.of(oldDiscount));
         when(discountRepository.save(any())).thenReturn(oldDiscount);
         discountService.createDiscount(oldDiscount);
         discountService.updateDiscountById(oldDiscount.getId(), oldDiscount);
-        final Optional<Discount> discountUpdated = discountService.findByIdDiscount(1L);
+        final Optional<DiscountEntity> discountUpdated = discountService.findByIdDiscount(1L);
         //then
-        assertEquals("title2", discountUpdated.get().getTitle());
+        assertEquals("title2", discountUpdated.get().getType());
 
     }
 
