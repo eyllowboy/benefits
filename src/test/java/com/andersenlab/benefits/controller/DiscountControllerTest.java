@@ -82,7 +82,7 @@ class DiscountControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                // then
+        // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()));
     }
@@ -96,7 +96,7 @@ class DiscountControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                // then
+        // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.id", is(1)))
@@ -113,6 +113,7 @@ class DiscountControllerTest {
         // then
                 () -> mockMvc.perform(get("/discounts/{id}", id)
                         .with(csrf())));
+        // then
         assertEquals(IllegalStateException.class,
                 NestedServletException.getCause().getClass());
         assertEquals("The discount with id: " + id + " was not found in the database",
@@ -128,7 +129,8 @@ class DiscountControllerTest {
         final Set<LocationEntity> locations = new HashSet<>();
         locations.add(locationRepository.findById(1L).get());
         final CompanyEntity company = companyRepository.findById(3L).get();
-        final DiscountEntity discount = new DiscountEntity(6L, "type02", "desc02", "cond", "20", DiscountType.DISCOUNT, valueOf("2022-01-20 15:34:23"), valueOf("2022-02-20 15:34:23"), "image", locations, categories, company);
+        final DiscountEntity discount = new DiscountEntity(6L, "type02", "desc02", "cond", "20", DiscountType.DISCOUNT,
+                valueOf("2022-01-20 15:34:23"), valueOf("2022-02-20 15:34:23"), "image", locations, categories, company);
         // when
         this.mockMvc.perform(
                         post("/discounts")
@@ -136,7 +138,7 @@ class DiscountControllerTest {
                                 .content(objectMapper.writeValueAsString(discount))
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                // then
+        // then
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.id", isA(Number.class)))
@@ -161,7 +163,7 @@ class DiscountControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(discountEntity))
                 .andDo(print())
-                // then
+        // then
                 .andExpect(status().isOk());
     }
 
@@ -197,7 +199,7 @@ class DiscountControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                // then
+        // then
                 .andExpect(status().isOk());
     }
 
@@ -211,6 +213,7 @@ class DiscountControllerTest {
         // then
                         .delete("/discounts/{id}", Long.MAX_VALUE)
                         .with(csrf())));
+        // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
         assertEquals("The discount with id: " + Long.MAX_VALUE + " was not found in the database",
                 nestedServletException.getCause().getMessage());

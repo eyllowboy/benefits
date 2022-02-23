@@ -23,5 +23,8 @@ databaseChangeLog:
       file: changelog/db.changelog-company.yaml
   - include:
       file: changelog/db.changelog-location_discount.yaml
+<<<<<<< HEAD
   - include:
       file: changelog/db.changelog-category_discount.yaml
+=======
+>>>>>>> 9599459 (Discount modified, tables created, tests not working)

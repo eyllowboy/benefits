@@ -39,7 +39,6 @@ class DiscountServiceImplTest {
     @BeforeEach
     private void setUp() {
         discountService = new DiscountServiceImpl(discountRepository);
-
     }
 
     @Test
@@ -61,9 +60,7 @@ class DiscountServiceImplTest {
         //then
         assertEquals(discount, Optional.empty());
         verify(discountRepository).findById(1L);
-
     }
-
 
     @Test
     public void whenFindAllDiscounts() {
@@ -84,7 +81,6 @@ class DiscountServiceImplTest {
         assertEquals(listDiscounts, discountList);
         verify(discountRepository).findAll();
     }
-
 
     @Test
     public void whenCreateDiscountIsOk() {

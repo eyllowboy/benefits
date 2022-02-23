@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -32,20 +31,8 @@ import static com.andersenlab.benefits.repository.DiscountSpec.getLastAdded;
  * @see DiscountServiceImpl
  */
 
-@ApiResponses(value = {
-        @ApiResponse(responseCode = "401",
-                description = "Unauthorized",
-                content = @Content),
-        @ApiResponse(responseCode = "403",
-                description = "Forbidden",
-                content = @Content),
-        @ApiResponse(responseCode = "500",
-                description = "Internal Server Error",
-                content = @Content)
-})
 @Tag(name = "Discount controller", description = "Controller for performing operations on the discount")
 @RestController
-@SecurityRequirement(name = "benefits")
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class DiscountController {
 
@@ -65,7 +52,10 @@ public class DiscountController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Details of all the discounts",
-                    content = @Content(mediaType = "application/json"))
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
+                    content = @Content)
     })
     @GetMapping("/discounts")
     public final List<DiscountEntity> allDiscount() {
@@ -85,6 +75,9 @@ public class DiscountController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201",
                     description = "Discount has been created",
+                    content = @Content),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
                     content = @Content)
     })
     @PostMapping("/discounts")
@@ -104,6 +97,9 @@ public class DiscountController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Discount has been received",
+                    content = @Content),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
                     content = @Content)
     })
     @GetMapping("/discounts/{id}")
@@ -125,6 +121,9 @@ public class DiscountController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Discount has been updated",
+                    content = @Content),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
                     content = @Content)
     })
     @PutMapping("/discounts/{id}")
@@ -143,6 +142,9 @@ public class DiscountController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Discount has been deleted",
+                    content = @Content),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
                     content = @Content)
     })
     @DeleteMapping("/discounts/{id}")
@@ -218,5 +220,5 @@ public class DiscountController {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getBySize(size).and(getLastAdded()));
         return discountService.getDiscountsByCriteria(spec);
     }
-}
 
+}

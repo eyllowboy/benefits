@@ -8,7 +8,11 @@ import org.springframework.stereotype.Repository;
 
 
 @Repository
+<<<<<<< HEAD
 public interface DiscountRepository extends JpaRepository<DiscountEntity, Long>, JpaSpecificationExecutor<DiscountEntity> {
+=======
+public interface DiscountRepository extends JpaRepository<DiscountEntity, Long> {
+>>>>>>> 9599459 (Discount modified, tables created, tests not working)
 
 
 }
