@@ -38,7 +38,7 @@ public class CompanyController {
      */
     @Operation(summary = "This method created the new company")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201",
+            @ApiResponse(responseCode = "200",
                     description = "Location has been created",
                     content = @Content),
             @ApiResponse(responseCode = "500",
