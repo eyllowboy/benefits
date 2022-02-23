@@ -23,3 +23,5 @@ databaseChangeLog:
       file: changelog/db.changelog-company.yaml
   - include:
       file: changelog/db.changelog-location_discount.yaml
+  - include:
+      file: changelog/db.changelog-category_discount.yaml

@@ -24,16 +24,16 @@ public class DiscountEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade =
+    @ManyToMany(fetch = FetchType.EAGER, cascade =
             {
                     CascadeType.DETACH,
                     CascadeType.MERGE,
                     CascadeType.REFRESH,
                     CascadeType.PERSIST
             })
-    @JoinTable(name = "CategoriesAndDiscounts",
-            joinColumns = @JoinColumn(name = "cad_discount_id"),
-            inverseJoinColumns = @JoinColumn(name = "cad_category_id"))
+    @JoinTable(name = "category_discount",
+            joinColumns = @JoinColumn(name = "cd_discount_id"),
+            inverseJoinColumns = @JoinColumn(name = "cd_category_id"))
     private Set<CategoryEntity> categories;
 
     @Column(name = "company_id")
@@ -59,7 +59,7 @@ public class DiscountEntity {
     @Temporal(TemporalType.DATE)
     private Date dateFinish;
 
-    @ManyToMany (fetch = FetchType.LAZY, cascade =
+    @ManyToMany (fetch = FetchType.EAGER, cascade =
             {
                 CascadeType.DETACH,
                 CascadeType.MERGE,
