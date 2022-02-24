@@ -15,19 +15,21 @@ databaseChangeLog:
                        primaryKey:  true
                        nullable:  false
                 -  column:
-                     name:  category_id
-                     type:  BIGINT
-                -  column:
                      name:  company_id
-                     type:  BIGINT
+                     type:  int
                 -  column:
-                     name: title
+                     name: type
                      type: varchar(50)
                      constraints:
                        nullable: false
                 -  column:
                      name: description
                      type: varchar(2000)
+                     constraints:
+                       nullable: false
+                -  column:
+                     name: discount_condition
+                     type: varchar(500)
                      constraints:
                        nullable: false
                 - column:
@@ -45,11 +47,6 @@ databaseChangeLog:
                     type: date
                     constraints:
                       nullable: true
-                - column:
-                    name: area
-                    type: BIGINT
-                    constraints:
-                      nullable: false
                 - column:
                     name: image
                     type: varchar(300)

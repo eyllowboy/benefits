@@ -1,9 +1,11 @@
 package com.andersenlab.benefits.controller;
 
 import com.andersenlab.benefits.domain.CategoryEntity;
+import com.andersenlab.benefits.domain.CompanyEntity;
 import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.repository.CategoryRepository;
+import com.andersenlab.benefits.repository.CompanyRepository;
 import com.andersenlab.benefits.repository.LocationRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,6 +58,9 @@ class DiscountControllerTest {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private CompanyRepository companyRepository;
+
     @Container
     public static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres")
             .withDatabaseName("benefits")
@@ -93,7 +98,7 @@ class DiscountControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.title", is("title1")));
+                .andExpect(jsonPath("$.type", is("type1")));
     }
 
     @Test
@@ -116,10 +121,11 @@ class DiscountControllerTest {
     public void whenAddDiscountPositiveScenario() throws Exception {
         // given
         final Set<CategoryEntity> categories = new HashSet<>();
-        categories.add(categoryRepository.getById(1L));
+        categories.add(categoryRepository.findById(1L).get());
         final Set<LocationEntity> locations = new HashSet<>();
-        locations.add(locationRepository.getById(1L));
-        final DiscountEntity discount = new DiscountEntity(6L, categories, 3L, "title6", "description", "no condition",
+        locations.add(locationRepository.findById(1L).get());
+        final CompanyEntity company = companyRepository.findById(3L).get();
+        final DiscountEntity discount = new DiscountEntity(7L, categories, company, "type7", "description", "no condition",
                 "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), locations, "image");
         // when
         this.mockMvc.perform(
@@ -131,7 +137,7 @@ class DiscountControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.id", isA(Number.class)))
-                .andExpect(jsonPath("$.title", is("title6")));
+                .andExpect(jsonPath("$.type", is("type7")));
     }
 
     @Test
@@ -139,10 +145,11 @@ class DiscountControllerTest {
     public void whenUpdatePositiveScenario() throws Exception {
         // given
         final Set<CategoryEntity> categories = new HashSet<>();
-        categories.add(categoryRepository.getById(1L));
+        categories.add(categoryRepository.findById(1L).get());
         final Set<LocationEntity> locations = new HashSet<>();
-        locations.add(locationRepository.getById(1L));
-        final DiscountEntity discount = new DiscountEntity(2L, categories, 3L, "title4", "description4", "no condition",
+        locations.add(locationRepository.findById(1L).get());
+        final CompanyEntity company = companyRepository.findById(3L).get();
+        final DiscountEntity discount = new DiscountEntity(2L, categories, company, "title4", "description4", "no condition",
     "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), locations, "image3");
         final String discountEntity = new ObjectMapper().writeValueAsString(discount);
         // when
@@ -160,10 +167,11 @@ class DiscountControllerTest {
     public void whenUpdateNegativeScenario() throws JsonProcessingException {
         // given
         final Set<CategoryEntity> categories = new HashSet<>();
-        categories.add(categoryRepository.getById(1L));
+        categories.add(categoryRepository.findById(1L).get());
         final Set<LocationEntity> locations = new HashSet<>();
-        locations.add(locationRepository.getById(1L));
-        final DiscountEntity discount = new DiscountEntity(2L, categories, 3L, "title4", "description4", "no condition",
+        locations.add(locationRepository.findById(1L).get());
+        final CompanyEntity company = companyRepository.findById(3L).get();
+        final DiscountEntity discount = new DiscountEntity(2L, categories, company, "title4", "description4", "no condition",
                 "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), locations, "image3");
         final String discountEntity = new ObjectMapper().writeValueAsString(discount);
         // when

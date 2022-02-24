@@ -36,8 +36,11 @@ public class DiscountEntity {
             inverseJoinColumns = @JoinColumn(name = "cd_category_id"))
     private Set<CategoryEntity> categories;
 
-    @Column(name = "company_id")
-    private Long companyId;
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private CompanyEntity company_id;
+//    @Column(name = "company_id")
+//    private Long companyId;
 
     @Column(name = "type", nullable = false, length = 50)
     private String type;

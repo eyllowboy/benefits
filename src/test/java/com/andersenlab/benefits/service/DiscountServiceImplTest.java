@@ -1,9 +1,11 @@
 package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.CategoryEntity;
+import com.andersenlab.benefits.domain.CompanyEntity;
 import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.repository.CategoryRepository;
+import com.andersenlab.benefits.repository.CompanyRepository;
 import com.andersenlab.benefits.repository.DiscountRepository;
 import com.andersenlab.benefits.repository.LocationRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class DiscountServiceTest {
+class DiscountServiceImplTest {
 
     @Mock
     private DiscountRepository discountRepository;
@@ -32,6 +34,9 @@ class DiscountServiceTest {
 
     @Mock
     private CategoryRepository categoryRepository;
+
+    @Mock
+    private CompanyRepository companyRepository;
 
     @BeforeEach
     private void setUp() {
@@ -46,7 +51,8 @@ class DiscountServiceTest {
         categories.add(categoryRepository.getById(1L));
         final Set<LocationEntity> locations = new HashSet<>();
         locations.add(locationRepository.getById(1L));
-        final DiscountEntity discount = new DiscountEntity(6L, categories, 3L, "title6", "description", "no condition",
+        final CompanyEntity company = companyRepository.getById(3L);
+        final DiscountEntity discount = new DiscountEntity(6L, categories, company, "title6", "description", "no condition",
                 "20", new Date(12022020), new Date(12022020), locations, "image");
         //when
         when(discountService.findByIdDiscount(1L)).thenReturn(Optional.of(discount));
@@ -74,19 +80,22 @@ class DiscountServiceTest {
         categories.add(categoryRepository.getById(1L));
         final Set<LocationEntity> locations = new HashSet<>();
         locations.add(locationRepository.getById(1L));
-        final List<DiscountEntity> listDiscounts = List.of(
-            new DiscountEntity(1L, categories, 1L, "title1", "description", "no condition",
-                "20", new Date(12022020), new Date(12022020), locations, "image"),
-            new DiscountEntity(2L, categories, 2L, "title2", "description", "no condition",
-                    "20", new Date(12022020), new Date(12022020), locations, "image"),
-            new DiscountEntity(3L, categories, 3L, "title3", "description", "no condition",
-                    "20", new Date(12022020), new Date(12022020), locations, "image"),
-            new DiscountEntity(4L, categories, 4L, "title4", "description", "no condition",
-                    "20", new Date(12022020), new Date(12022020), locations, "image"),
-            new DiscountEntity(5L, categories, 5L, "title5", "description", "no condition",
-                    "20", new Date(12022020), new Date(12022020), locations, "image"),
-            new DiscountEntity(6L, categories, 6L, "title6", "description", "no condition",
-                    "20", new Date(12022020), new Date(12022020), locations, "image"));
+        final List<DiscountEntity> listDiscounts = new ArrayList<>();
+        for (int i = 1; i < 6; i++) {
+            listDiscounts.add(new DiscountEntity(
+                    (long) i,
+                    categories,
+                    companyRepository.getById((long) i),
+                    "title" + i,
+                    "description" + i,
+                    "condition" + i,
+                    "20",
+                    new Date(12022020),
+                    new Date(12022020),
+                    locations,
+                    "image" + i
+            ));
+        }
         //when
         when(discountRepository.findAll()).thenReturn(listDiscounts);
         final List<DiscountEntity> discountList = discountService.findAllDiscounts().stream().map(Optional::orElseThrow).toList();
@@ -103,7 +112,8 @@ class DiscountServiceTest {
         categories.add(categoryRepository.getById(1L));
         final Set<LocationEntity> locations = new HashSet<>();
         locations.add(locationRepository.getById(1L));
-        final DiscountEntity discount = new DiscountEntity(6L, categories, 3L, "title6", "description", "no condition",
+        final CompanyEntity company = companyRepository.getById(3L);
+        final DiscountEntity discount = new DiscountEntity(6L, categories, company, "title6", "description", "no condition",
                 "20", new Date(12022020), new Date(12022020), locations, "image");
         //when
         when(discountRepository.save(any())).thenReturn(discount);
@@ -120,7 +130,8 @@ class DiscountServiceTest {
         categories.add(categoryRepository.getById(1L));
         final Set<LocationEntity> locations = new HashSet<>();
         locations.add(locationRepository.getById(1L));
-        final DiscountEntity oldDiscount = new DiscountEntity(6L, categories, 3L, "title6", "description", "no condition",
+        final CompanyEntity company = companyRepository.getById(3L);
+        final DiscountEntity oldDiscount = new DiscountEntity(6L, categories, company, "title6", "description", "no condition",
                 "20", new Date(12022020), new Date(12022020), locations, "image");
         final DiscountEntity newDiscount = new DiscountEntity();
         newDiscount.setType("title2");
@@ -144,6 +155,4 @@ class DiscountServiceTest {
         verify(discountRepository).deleteById(anyLong());
 
     }
-
-
 }

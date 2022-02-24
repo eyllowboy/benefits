@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-sequence
+      author: Denis Popov
+      dbms: 'postgresql'
+      changes:
+        - createSequence:
+            dataType: BIGINT
+            incrementBy: 1
+            sequenceName: location_discount_id
+            startValue: 1
+  - include:
+      file: changelog/changeset/create-location_discount-table.sql
+#  - include:
+#      file: changelog/changeset/fill-location_discount-table.sql
