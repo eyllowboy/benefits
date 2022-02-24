@@ -1,28 +1,28 @@
 databaseChangeLog:
   - changeSet:
-      id: create-categories
+      id: create-location_discount
       author: Denis Popov
       dbms: 'postgresql'
       changes:
         - createTable:
-            tableName: category_discount
+            tableName: location_discount
             columns:
               - column:
                   name: id
                   type: BIGINT
-                  defaultValueSequenceNext: category_discount_id
+                  defaultValueSequenceNext: location_discount_id
                   constraints:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: category_id
+                  name: location_id
                   type: BIGINT
                   constraints:
-                    foreignKey: true
-                    references: category(id)
+                    foreignKeyName: fk_location_id
+                    references: locations(id)
               - column:
                   name: discount_id
                   type: BIGINT
                   constraints:
-                    foreignKey: true
+                    foreignKeyName: fk_discount_id
                     references: discounts(id)

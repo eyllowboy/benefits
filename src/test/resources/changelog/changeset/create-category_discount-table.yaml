@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: create-categories
+      id: create-category_discount
       author: Denis Popov
       dbms: 'postgresql'
       changes:
@@ -18,11 +18,11 @@ databaseChangeLog:
                   name: category_id
                   type: BIGINT
                   constraints:
-                    foreignKey: true
-                    references: category(id)
+                    foreignKeyName: fk_category_id
+                    references: categories(id)
               - column:
                   name: discount_id
                   type: BIGINT
                   constraints:
-                    foreignKey: true
+                    foreignKeyName: fk_discount_id
                     references: discounts(id)

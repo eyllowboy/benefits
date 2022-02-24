@@ -1,12 +1,10 @@
 package com.andersenlab.benefits.domain;
 
-
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.util.Set;
-
 
 @Entity
 @Table(name = "discounts")

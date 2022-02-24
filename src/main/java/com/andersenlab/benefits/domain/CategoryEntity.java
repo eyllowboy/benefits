@@ -6,7 +6,6 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -31,7 +30,7 @@ public class CategoryEntity {
     private String title;
 
     @ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER)
-    @JsonIgnoreProperties("categories")
+    @JsonIgnoreProperties({"categories", "area"})
     private Set<DiscountEntity> discounts;
 
     public CategoryEntity(Long id, String title) {
