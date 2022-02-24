@@ -31,16 +31,15 @@ public class DiscountEntity {
                     CascadeType.REFRESH,
                     CascadeType.PERSIST
             })
-    @JoinTable(name = "category_discount",
-            joinColumns = @JoinColumn(name = "cd_discount_id"),
-            inverseJoinColumns = @JoinColumn(name = "cd_category_id"))
+    @JoinTable(
+        name = "category_discount",
+        joinColumns = @JoinColumn(name = "discount_id"),
+        inverseJoinColumns = @JoinColumn(name = "category_id"))
     private Set<CategoryEntity> categories;
 
     @ManyToOne
     @JoinColumn(name = "company_id")
     private CompanyEntity company_id;
-//    @Column(name = "company_id")
-//    private Long companyId;
 
     @Column(name = "type", nullable = false, length = 50)
     private String type;
@@ -70,8 +69,8 @@ public class DiscountEntity {
                 CascadeType.PERSIST
             })
     @JoinTable (name = "location_discount",
-            joinColumns = @JoinColumn(name = "ld_discount_id"),
-            inverseJoinColumns = @JoinColumn(name = "ld_location_id"))
+            joinColumns = @JoinColumn(name = "discount_id"),
+            inverseJoinColumns = @JoinColumn(name = "location_id"))
     private Set<LocationEntity> area;
 
     @Column(name = "image", nullable = false, length = 300)
