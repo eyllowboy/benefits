@@ -1,7 +1,9 @@
 package com.andersenlab.benefits.controller;
 
 import com.andersenlab.benefits.domain.CategoryEntity;
+import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.service.CategoryService;
+import com.andersenlab.benefits.service.DiscountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,9 +12,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The controller for handling requests for {@link CategoryEntity}.
@@ -24,9 +28,12 @@ import java.util.List;
 public class CategoryController {
     private final CategoryService categoryService;
 
+    private final DiscountService discountService;
+
     @Autowired
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(CategoryService categoryService, DiscountService discountService) {
         this.categoryService = categoryService;
+        this.discountService = discountService;
     }
 
     /**
@@ -113,8 +120,16 @@ public class CategoryController {
                     content = @Content)
     })
     @DeleteMapping("/categories/{id}")
+    @Transactional
     public void deleteCategory(@PathVariable final Long id) {
-        categoryService.findById(id).orElseThrow(() -> new IllegalStateException("Category with id: '"+ id +"' was not found in the database"));
+        Optional<CategoryEntity> category = categoryService.findById(id);
+        if (category.isPresent()) {
+            for (Optional<DiscountEntity> discount : discountService.findAllDiscounts())
+                discount.ifPresent(discountEntity -> discountEntity.getCategories().remove(category.get()));
+        } else {
+            throw new IllegalStateException("Category with id: '"+ id +"' was not found in the database");
+        };
+//        categoryService.findById(id).orElseThrow(() -> new IllegalStateException("Category with id: '"+ id +"' was not found in the database"));
         categoryService.delete(id);
     }
 

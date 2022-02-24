@@ -6,7 +6,9 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Schema(name = "Location", description = "Location entity")
 @Entity
@@ -15,7 +17,7 @@ import java.util.Objects;
 @Setter
 @ToString
 @NoArgsConstructor
-@AllArgsConstructor()
+//@AllArgsConstructor()
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class LocationEntity {
     @Schema(description = "Identifier", type = "int64", minimum = "1")
@@ -33,6 +35,15 @@ public class LocationEntity {
     @NotBlank
     @Column
     private String city;
+
+//    @ManyToMany(mappedBy = "area")
+//    private Set<DiscountEntity> discounts;
+
+    public LocationEntity(Long id, String country, String city) {
+        this.country = country;
+        this.city = city;
+        this.id = id;
+    }
 
     public LocationEntity(String country, String city) {
         this.country = country;

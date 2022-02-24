@@ -197,8 +197,8 @@ public class LocationControllerTest {
     public void whenDeleteLocationSuccess() throws Exception {
         // when
         mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/locations/{id}", 1L)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .delete("/locations/{id}", 1L)
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
         // then
                 .andExpect(status().isOk());
