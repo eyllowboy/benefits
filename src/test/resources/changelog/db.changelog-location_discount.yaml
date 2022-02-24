@@ -7,18 +7,9 @@ databaseChangeLog:
         - createSequence:
             dataType: BIGINT
             incrementBy: 1
-<<<<<<< HEAD
             sequenceName: location_discount_id
             startValue: 1
   - include:
       file: changelog/changeset/create-location_discount-table.yaml
   - include:
       file: changelog/changeset/fill-location_discount-table.sql
-=======
-            sequenceName: category_id
-            startValue: 1
-  - include:
-      file: changelog/changeset/create-location_discount-table.sql
-#  - include:
-#      file: changelog/changeset/fill-categories-table.sql
->>>>>>> 9599459 (Discount modified, tables created, tests not working)

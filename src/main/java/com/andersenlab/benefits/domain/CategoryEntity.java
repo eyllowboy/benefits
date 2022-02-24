@@ -33,6 +33,7 @@ public class CategoryEntity {
 
     @JsonIgnore
     @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"categories", "area"})
     private Set<DiscountEntity> discounts;
 
     public CategoryEntity(Long id, String title) {
