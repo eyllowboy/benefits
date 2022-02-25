@@ -15,8 +15,9 @@ import java.util.Set;
 @Setter
 @ToString
 @NoArgsConstructor
-//@AllArgsConstructor()
+@AllArgsConstructor()
 public class CategoryEntity {
+
     @Schema(description = "Identifier", type = "int64", minimum = "1")
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "category_id_seq")
@@ -28,8 +29,8 @@ public class CategoryEntity {
     @Column
     private String title;
 
-//    @ManyToMany(mappedBy = "categories")
-//    private Set<DiscountEntity> discounts;
+    @ManyToMany
+    private Set<DiscountEntity> discounts;
 
     public CategoryEntity(Long id, String title) {
         this.id = id;

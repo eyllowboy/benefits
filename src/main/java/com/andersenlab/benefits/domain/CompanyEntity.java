@@ -5,6 +5,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 import java.util.Objects;
 
 @Schema(name = "Company", description = "Company entity")
@@ -48,7 +49,20 @@ public class CompanyEntity {
     @Column(name = "link")
     private String link;
 
+    @Transient
+    @OneToMany(mappedBy="company_id")
+    private List<DiscountEntity> discountEntityList;
+
     public CompanyEntity(String title, String description, String address, String phone, String link) {
+        this.title = title;
+        this.description = description;
+        this.address = address;
+        this.phone = phone;
+        this.link = link;
+    }
+
+    public CompanyEntity(Long id, String title, String description, String address, String phone, String link) {
+        this.id = id;
         this.title = title;
         this.description = description;
         this.address = address;

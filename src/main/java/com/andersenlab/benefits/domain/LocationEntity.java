@@ -17,7 +17,7 @@ import java.util.Set;
 @Setter
 @ToString
 @NoArgsConstructor
-//@AllArgsConstructor()
+@AllArgsConstructor()
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class LocationEntity {
     @Schema(description = "Identifier", type = "int64", minimum = "1")
@@ -36,8 +36,8 @@ public class LocationEntity {
     @Column
     private String city;
 
-//    @ManyToMany(mappedBy = "area")
-//    private Set<DiscountEntity> discounts;
+    @ManyToMany(mappedBy = "area")
+    private Set<DiscountEntity> discounts;
 
     public LocationEntity(Long id, String country, String city) {
         this.country = country;

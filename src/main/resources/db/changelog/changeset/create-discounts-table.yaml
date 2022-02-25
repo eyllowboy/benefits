@@ -38,6 +38,12 @@ databaseChangeLog:
                     constraints:
                       nullable: false
                 - column:
+                    name: discount_type
+                    type: varchar(10)
+                - column:
+                    name: discount_id
+                    type: varchar(100)
+                - column:
                     name: start_date
                     type: date
                     constraints:

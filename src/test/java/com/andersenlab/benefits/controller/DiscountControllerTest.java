@@ -1,9 +1,6 @@
 package com.andersenlab.benefits.controller;
 
-import com.andersenlab.benefits.domain.CategoryEntity;
-import com.andersenlab.benefits.domain.CompanyEntity;
-import com.andersenlab.benefits.domain.DiscountEntity;
-import com.andersenlab.benefits.domain.LocationEntity;
+import com.andersenlab.benefits.domain.*;
 import com.andersenlab.benefits.repository.CategoryRepository;
 import com.andersenlab.benefits.repository.CompanyRepository;
 import com.andersenlab.benefits.repository.LocationRepository;
@@ -125,8 +122,7 @@ class DiscountControllerTest {
         final Set<LocationEntity> locations = new HashSet<>();
         locations.add(locationRepository.findById(1L).get());
         final CompanyEntity company = companyRepository.findById(3L).get();
-        final DiscountEntity discount = new DiscountEntity(7L, categories, company, "type7", "description", "no condition",
-                "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), locations, "image");
+        final DiscountEntity discount = new DiscountEntity(7L, "cool7", "desc7", "condition", "20", DiscountType.DISCOUNT, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), "image", categories, locations, company);
         // when
         this.mockMvc.perform(
                         post("/discounts")
@@ -149,8 +145,7 @@ class DiscountControllerTest {
         final Set<LocationEntity> locations = new HashSet<>();
         locations.add(locationRepository.findById(1L).get());
         final CompanyEntity company = companyRepository.findById(3L).get();
-        final DiscountEntity discount = new DiscountEntity(2L, categories, company, "title4", "description4", "no condition",
-    "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), locations, "image3");
+        final DiscountEntity discount = new DiscountEntity(2L, "cool", "desc", "condition", "20", DiscountType.DISCOUNT, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), "image", categories, locations, company);
         final String discountEntity = new ObjectMapper().writeValueAsString(discount);
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
@@ -171,8 +166,7 @@ class DiscountControllerTest {
         final Set<LocationEntity> locations = new HashSet<>();
         locations.add(locationRepository.findById(1L).get());
         final CompanyEntity company = companyRepository.findById(3L).get();
-        final DiscountEntity discount = new DiscountEntity(2L, categories, company, "title4", "description4", "no condition",
-                "20", valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), locations, "image3");
+        final DiscountEntity discount = new DiscountEntity(8L, "cool", "desc", "condition", "20", DiscountType.DISCOUNT, valueOf("2022-01-20 15:34:23"), valueOf("2022-01-20 15:34:23"), "image", categories, locations, company);
         final String discountEntity = new ObjectMapper().writeValueAsString(discount);
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class,  () ->

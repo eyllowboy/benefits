@@ -24,24 +24,6 @@ public class DiscountEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade =
-            {
-                    CascadeType.DETACH,
-                    CascadeType.MERGE,
-                    CascadeType.REFRESH,
-                    CascadeType.PERSIST
-            })
-    @JoinTable(name = "category_discount",
-            joinColumns = @JoinColumn(name = "cd_discount_id"),
-            inverseJoinColumns = @JoinColumn(name = "cd_category_id"))
-    private Set<CategoryEntity> categories;
-
-    @ManyToOne
-    @JoinColumn(name = "company_id")
-    private CompanyEntity company_id;
-//    @Column(name = "company_id")
-//    private Long companyId;
-
     @Column(name = "type", nullable = false, length = 50)
     private String type;
 
@@ -54,6 +36,9 @@ public class DiscountEntity {
     @Column(name = "size", nullable = false, length = 100)
     private String sizeDiscount;
 
+    @Enumerated(EnumType.STRING)
+    private DiscountType discount_type;
+
     @Column(name = "start_date", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date dateBegin;
@@ -62,19 +47,34 @@ public class DiscountEntity {
     @Temporal(TemporalType.DATE)
     private Date dateFinish;
 
-    @ManyToMany (fetch = FetchType.EAGER, cascade =
-            {
-                CascadeType.DETACH,
-                CascadeType.MERGE,
-                CascadeType.REFRESH,
-                CascadeType.PERSIST
-            })
+    @Column(name = "image", nullable = false, length = 300)
+    private String imageDiscount;
+
+    @ManyToMany(cascade = CascadeType.PERSIST)
+    @JoinTable(name = "category_discount",
+            joinColumns = @JoinColumn(name = "cd_discount_id"),
+            inverseJoinColumns = @JoinColumn(name = "cd_category_id"))
+    private Set<CategoryEntity> categories;
+
+    @ManyToMany
     @JoinTable (name = "location_discount",
             joinColumns = @JoinColumn(name = "ld_discount_id"),
             inverseJoinColumns = @JoinColumn(name = "ld_location_id"))
     private Set<LocationEntity> area;
 
-    @Column(name = "image", nullable = false, length = 300)
-    private String imageDiscount;
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private CompanyEntity company_id;
 
+    public DiscountEntity(Long id, String type, String description, String discount_condition, String sizeDiscount, DiscountType discount_type, Date dateBegin, Date dateFinish, String imageDiscount) {
+        this.id = id;
+        this.type = type;
+        this.description = description;
+        this.discount_condition = discount_condition;
+        this.sizeDiscount = sizeDiscount;
+        this.discount_type = discount_type;
+        this.dateBegin = dateBegin;
+        this.dateFinish = dateFinish;
+        this.imageDiscount = imageDiscount;
+    }
 }
