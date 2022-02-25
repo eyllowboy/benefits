@@ -1,12 +1,10 @@
 package com.andersenlab.benefits.domain;
 
-
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.util.Set;
-
 
 @Entity
 @Table(name = "discounts")
@@ -23,6 +21,23 @@ public class DiscountEntity {
     @SequenceGenerator(name = "discount_id_seq", sequenceName = "discount_id", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Long id;
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade =
+            {
+                    CascadeType.DETACH,
+                    CascadeType.MERGE,
+                    CascadeType.REFRESH,
+                    CascadeType.PERSIST
+            })
+    @JoinTable(
+        name = "category_discount",
+        joinColumns = @JoinColumn(name = "discount_id"),
+        inverseJoinColumns = @JoinColumn(name = "category_id"))
+    private Set<CategoryEntity> categories;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private CompanyEntity company_id;
 
     @Column(name = "type", nullable = false, length = 50)
     private String type;
@@ -50,21 +65,11 @@ public class DiscountEntity {
     @Column(name = "image", nullable = false, length = 300)
     private String imageDiscount;
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
-    @JoinTable(name = "category_discount",
-            joinColumns = @JoinColumn(name = "cd_discount_id"),
-            inverseJoinColumns = @JoinColumn(name = "cd_category_id"))
-    private Set<CategoryEntity> categories;
-
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable (name = "location_discount",
-            joinColumns = @JoinColumn(name = "ld_discount_id"),
-            inverseJoinColumns = @JoinColumn(name = "ld_location_id"))
+            joinColumns = @JoinColumn(name = "discount_id"),
+            inverseJoinColumns = @JoinColumn(name = "location_id"))
     private Set<LocationEntity> area;
-
-    @ManyToOne
-    @JoinColumn(name = "company_id")
-    private CompanyEntity company_id;
 
     public DiscountEntity(Long id, String type, String description, String discount_condition, String sizeDiscount, DiscountType discount_type, Date dateBegin, Date dateFinish, String imageDiscount) {
         this.id = id;

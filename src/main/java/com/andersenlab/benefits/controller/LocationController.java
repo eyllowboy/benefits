@@ -1,9 +1,7 @@
 package com.andersenlab.benefits.controller;
 
-import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.service.LocationService;
-import com.andersenlab.benefits.service.DiscountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,7 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,12 +26,9 @@ public class LocationController {
 
     private final LocationService locationService;
 
-    private final DiscountService discountService;
-
     @Autowired
-    public LocationController(LocationService locationService, DiscountService discountService) {
+    public LocationController(LocationService locationService) {
         this.locationService = locationService;
-        this.discountService = discountService;
     }
 
     /**
@@ -145,16 +139,9 @@ public class LocationController {
                     content = @Content)
     })
     @DeleteMapping("/locations/{id}")
-    @Transactional
     public void deleteLocation(@PathVariable final Long id) {
-        Optional<LocationEntity> location = locationService.findById(id);
-        if (location.isPresent()) {
-            for (Optional<DiscountEntity> discount : discountService.findAllDiscounts())
-                discount.ifPresent(discountEntity -> discountEntity.getArea().remove(location.get()));
-        } else {
-            throw new IllegalStateException("Location with id: '"+ id +"' was not found in the database");
-        };
-//        locationService.findById(id).orElseThrow(() -> new IllegalStateException("Location with id: '"+ id + "' was not found in the database"));
+        locationService.findById(id).orElseThrow(() ->
+            new IllegalStateException("Location with id: '"+ id + "' was not found in the database"));
         locationService.delete(id);
     }
 
@@ -212,5 +199,4 @@ public class LocationController {
                                                       @RequestParam final String filterMask) {
         return locationService.findByFirstLetters(country, filterMask);
     }
-
 }

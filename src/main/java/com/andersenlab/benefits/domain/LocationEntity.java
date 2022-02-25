@@ -1,12 +1,12 @@
 package com.andersenlab.benefits.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -36,7 +36,9 @@ public class LocationEntity {
     @Column
     private String city;
 
-    @ManyToMany(mappedBy = "area")
+
+    @ManyToMany(mappedBy = "area", fetch = FetchType.EAGER)
+    @JsonIgnoreProperties({"area", "categories"})
     private Set<DiscountEntity> discounts;
 
     public LocationEntity(Long id, String country, String city) {

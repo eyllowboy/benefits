@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -29,7 +30,9 @@ public class CategoryEntity {
     @Column
     private String title;
 
-    @ManyToMany
+
+    @ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER)
+    @JsonIgnoreProperties({"categories", "area"})
     private Set<DiscountEntity> discounts;
 
     public CategoryEntity(Long id, String title) {

@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-location_discount
+      author: Denis Popov
+      dbms: 'postgresql'
+      changes:
+        - createTable:
+            tableName: location_discount
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  defaultValueSequenceNext: location_discount_id
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: location_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_location_id
+                    references: locations(id)
+              - column:
+                  name: discount_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_discount_id
+                    references: discounts(id)
