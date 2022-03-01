@@ -82,7 +82,7 @@ class DiscountControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()));
     }
@@ -96,7 +96,7 @@ class DiscountControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.id", is(1)))
@@ -138,7 +138,7 @@ class DiscountControllerTest {
                                 .content(objectMapper.writeValueAsString(discount))
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.id", isA(Number.class)))
@@ -163,7 +163,7 @@ class DiscountControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(discountEntity))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isOk());
     }
 
@@ -199,7 +199,7 @@ class DiscountControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isOk());
     }
 
