@@ -74,7 +74,7 @@ class DiscountServiceImplTest {
         final List<DiscountEntity> listDiscounts = new ArrayList<>();
         final CompanyEntity company = companyRepository.getById(3L);
         for (int i = 1; i < 6; i++) {
-            listDiscounts.add(new DiscountEntity(2L, categories, company, "type02", "desc02", "cond", "20", DiscountType.DISCOUNT, valueOf("2022-01-20 15:34:23"), valueOf("2022-02-20 15:34:23"), "image", locations));
+            listDiscounts.add(new DiscountEntity(2L, "type02", "desc02", "cond", "20", DiscountType.DISCOUNT, valueOf("2022-01-20 15:34:23"), valueOf("2022-02-20 15:34:23"), "image", locations, categories, company));
         }
         //when
         when(discountRepository.findAll()).thenReturn(listDiscounts);
@@ -93,7 +93,7 @@ class DiscountServiceImplTest {
         final Set<LocationEntity> locations = new HashSet<>();
         locations.add(locationRepository.getById(1L));
         final CompanyEntity company = companyRepository.getById(3L);
-        final DiscountEntity discount = new DiscountEntity(6L, categories, company, "type02", "desc02", "cond", "20", DiscountType.DISCOUNT, valueOf("2022-01-20 15:34:23"), valueOf("2022-02-20 15:34:23"), "image", locations);
+        final DiscountEntity discount = new DiscountEntity(6L, "type02", "desc02", "cond", "20", DiscountType.DISCOUNT, valueOf("2022-01-20 15:34:23"), valueOf("2022-02-20 15:34:23"), "image", locations, categories, company);
         //when
         when(discountRepository.save(any())).thenReturn(discount);
         final Optional<DiscountEntity> discountSaved = discountService.createDiscount(discount);
@@ -110,7 +110,7 @@ class DiscountServiceImplTest {
         final Set<LocationEntity> locations = new HashSet<>();
         locations.add(locationRepository.getById(1L));
         final CompanyEntity company = companyRepository.getById(3L);
-        final DiscountEntity oldDiscount = new DiscountEntity(6L, categories, company, "type02", "desc02", "cond", "20", DiscountType.DISCOUNT, valueOf("2022-01-20 15:34:23"), valueOf("2022-02-20 15:34:23"), "image", locations);
+        final DiscountEntity oldDiscount = new DiscountEntity(6L, "type02", "desc02", "cond", "20", DiscountType.DISCOUNT, valueOf("2022-01-20 15:34:23"), valueOf("2022-02-20 15:34:23"), "image", locations, categories, company);
         final DiscountEntity newDiscount = new DiscountEntity();
         newDiscount.setType("title2");
         oldDiscount.setType(newDiscount.getType());
