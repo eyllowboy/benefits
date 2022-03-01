@@ -10,6 +10,4 @@ databaseChangeLog:
             sequenceName: location_discount_id
             startValue: 1
   - include:
-      file: changelog/changeset/create-location_discount-table.yaml
-
-
+      file: db/changelog/changeset/create-location_discount-table.yaml

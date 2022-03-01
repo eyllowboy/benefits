@@ -44,11 +44,6 @@ class DiscountServiceImplTest {
     @Test
     public void whenFindByIdReturnDiscount() {
         // given
-        final Set<CategoryEntity> categories = new HashSet<>();
-        categories.add(categoryRepository.getById(1L));
-        final Set<LocationEntity> locations = new HashSet<>();
-        locations.add(locationRepository.getById(1L));
-        final CompanyEntity company = companyRepository.getById(3L);
         final DiscountEntity discount = new DiscountEntity();
         //when
         when(discountService.findByIdDiscount(1L)).thenReturn(Optional.of(discount));

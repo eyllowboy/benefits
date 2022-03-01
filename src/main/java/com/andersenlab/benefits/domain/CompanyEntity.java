@@ -1,5 +1,7 @@
 package com.andersenlab.benefits.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -51,6 +53,7 @@ public class CompanyEntity {
 
     @Transient
     @OneToMany(mappedBy="company_id")
+    @JsonIgnore
     private List<DiscountEntity> discountEntityList;
 
     public CompanyEntity(String title, String description, String address, String phone, String link) {

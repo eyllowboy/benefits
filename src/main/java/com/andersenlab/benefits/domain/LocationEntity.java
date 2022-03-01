@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -37,6 +38,8 @@ public class LocationEntity {
     private String city;
 
 
+    @JsonIgnore
+    @Transient
     @ManyToMany(mappedBy = "area", fetch = FetchType.EAGER)
     @JsonIgnoreProperties({"area", "categories"})
     private Set<DiscountEntity> discounts;
