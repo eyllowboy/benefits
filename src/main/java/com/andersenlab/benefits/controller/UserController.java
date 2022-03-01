@@ -20,6 +20,7 @@ import java.util.Optional;
 
 /**
  * A controller for handling requests for {@link UserEntity}.
+ *
  * @author Andrei Rabchun
  * @version 1.0
  */
@@ -34,7 +35,7 @@ public class UserController {
         this.userService = userService;
         this.roleService = roleService;
     }
-    
+
     /**
      * @return a list of {@link UserEntity} from database.
      */
@@ -51,16 +52,17 @@ public class UserController {
     public List<UserEntity> getUsers() {
         return userService.findAll();
     }
-    
+
     /**
      * Updates {@link UserEntity} in the database.
+     *
      * @param userEntity the {@link UserEntity} that needs to update
      * @throws IllegalStateException if:
-     * <ul>
-     * <li>{@link UserEntity} with given id was not found in the database
-     * <li>{@link RoleEntity} with given id was not found in the database
-     * <li>{@link UserEntity} with {@link UserEntity#getLogin()} field is already exists
-     * </ul>
+     *                               <ul>
+     *                               <li>{@link UserEntity} with given id was not found in the database
+     *                               <li>{@link RoleEntity} with given id was not found in the database
+     *                               <li>{@link UserEntity} with {@link UserEntity#getLogin()} field is already exists
+     *                               </ul>
      */
     @Operation(summary = "This is to update the user")
     @ApiResponses(value = {
@@ -92,16 +94,17 @@ public class UserController {
                     roleEntityInDataBase.get());
         }
     }
-    
+
     /**
      * Create {@link UserEntity} in the database.
-     * @param login the {@link UserEntity#getLogin()}
+     *
+     * @param login  the {@link UserEntity#getLogin()}
      * @param roleId the id of {@link RoleEntity}
      * @throws IllegalStateException if:
-     * <ul>
-     * <li>{@link UserEntity} with {@link UserEntity#getLogin()} field is already exists
-     * <li>{@link RoleEntity} with given id was not found in the database
-     * </ul>
+     *                               <ul>
+     *                               <li>{@link UserEntity} with {@link UserEntity#getLogin()} field is already exists
+     *                               <li>{@link RoleEntity} with given id was not found in the database
+     *                               </ul>
      */
     @Operation(summary = "This is to create new user")
     @ApiResponses(value = {
@@ -130,9 +133,10 @@ public class UserController {
 
         return new ResponseEntity<>(savedUserEntity, HttpStatus.CREATED);
     }
-    
+
     /**
      * Gets {@link UserEntity} from the database.
+     *
      * @param id the id of {@link UserEntity} that needs to get
      * @throws IllegalStateException if the given id was not found in the database
      */
@@ -152,9 +156,10 @@ public class UserController {
         return userEntity.orElseThrow(
                 () -> new IllegalStateException("User with this id was not found in the database"));
     }
-    
+
     /**
      * Deletes {@link UserEntity} from the database.
+     *
      * @param id the id of {@link UserEntity} that needs to delete
      * @throws IllegalStateException if the given id was not found in the database
      */

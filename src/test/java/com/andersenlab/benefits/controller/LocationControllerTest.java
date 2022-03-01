@@ -2,7 +2,6 @@ package com.andersenlab.benefits.controller;
 
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 @AutoConfigureMockMvc
 public class LocationControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -52,7 +52,7 @@ public class LocationControllerTest {
                         .get("/locations")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()));
     }
@@ -65,7 +65,7 @@ public class LocationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("country", "Россия"))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()));
     }
@@ -77,7 +77,7 @@ public class LocationControllerTest {
                         .get("/locations/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.id", is(1)))
@@ -118,10 +118,10 @@ public class LocationControllerTest {
         // when
         final NestedServletException NestedServletException = assertThrows(NestedServletException.class, () ->
                 mockMvc.perform(MockMvcRequestBuilders
-                        .get("/locations/{country}/{city}", country, city)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print()));
-                // then
+                                .get("/locations/{country}/{city}", country, city)
+                                .contentType(MediaType.APPLICATION_JSON))
+                        .andDo(print()));
+        // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
         assertEquals("Location with city name '" + city + "' and country '" + country + "' was not found in the database",
                 NestedServletException.getCause().getMessage());
@@ -136,7 +136,7 @@ public class LocationControllerTest {
                         .param("country", "Россия")
                         .param("city", "Пермь"))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.country", is("Россия")))
@@ -164,22 +164,22 @@ public class LocationControllerTest {
     @Test
     public void whenUpdateLocationSuccess() throws Exception {
         // given
-        final LocationEntity location = new LocationEntity(2L,"Россия", "СПБ");
+        final LocationEntity location = new LocationEntity(2L, "Россия", "СПБ");
         final String locationEntity = new ObjectMapper().writeValueAsString(location);
         // when
         mockMvc.perform(MockMvcRequestBuilders
-                .put("/locations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(locationEntity))
+                        .put("/locations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(locationEntity))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isOk());
     }
 
     @Test
     public void whenUpdateLocationFailIdNotExists() throws Exception {
         // given
-        LocationEntity location = new LocationEntity(100L,"Россия", "Moscow");
+        LocationEntity location = new LocationEntity(100L, "Россия", "Moscow");
         final String locationEntity = new ObjectMapper().writeValueAsString(location);
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
@@ -197,10 +197,10 @@ public class LocationControllerTest {
     public void whenDeleteLocationSuccess() throws Exception {
         // when
         mockMvc.perform(MockMvcRequestBuilders
-                .delete("/locations/{id}", 1L)
-                .contentType(MediaType.APPLICATION_JSON))
+                        .delete("/locations/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isOk());
     }
 
@@ -210,12 +210,12 @@ public class LocationControllerTest {
         final Long id = 100L;
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
-            mockMvc.perform(MockMvcRequestBuilders
+                mockMvc.perform(MockMvcRequestBuilders
                         .delete("/locations/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)));
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-        assertEquals("Location with id: '"+ id +"' was not found in the database",
+        assertEquals("Location with id: '" + id + "' was not found in the database",
                 nestedServletException.getCause().getMessage());
     }
 
@@ -228,7 +228,7 @@ public class LocationControllerTest {
                         .param("country", "Россия")
                         .param("filterMask", "са"))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()));
     }

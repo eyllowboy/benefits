@@ -17,6 +17,7 @@ import java.util.Optional;
 
 /**
  * A controller for handling requests for {@link LocationEntity}.
+ *
  * @author Denis Popov
  * @version 1.0
  */
@@ -35,7 +36,7 @@ public class LocationController {
      * Create {@link LocationEntity} in the database.
      *
      * @param country of the new location {@link LocationEntity#getCountry()}
-     * @param city of the new location {@link LocationEntity#getCity()}
+     * @param city    of the new location {@link LocationEntity#getCity()}
      * @throws IllegalStateException if {@link LocationEntity} with these parameters already exists.
      */
     @Operation(summary = "This is to create new location")
@@ -60,6 +61,7 @@ public class LocationController {
 
     /**
      * Gets {@link LocationEntity} from the database with specified id.
+     *
      * @param id is the id of {@link LocationEntity} that needs to get
      * @throws IllegalStateException if the given id was not found in the database
      */
@@ -81,8 +83,9 @@ public class LocationController {
 
     /**
      * Gets {@link LocationEntity} from the database with specified country and city name.
+     *
      * @param country is the country {@link LocationEntity} where to get city
-     * @param city is the name of {@link LocationEntity} that needs to get
+     * @param city    is the name of {@link LocationEntity} that needs to get
      * @throws IllegalStateException if the given name was not found in the database
      */
     @Operation(summary = "This is to get the location by country and city name")
@@ -141,12 +144,13 @@ public class LocationController {
     @DeleteMapping("/locations/{id}")
     public void deleteLocation(@PathVariable final Long id) {
         locationService.findById(id).orElseThrow(() ->
-            new IllegalStateException("Location with id: '"+ id + "' was not found in the database"));
+                new IllegalStateException("Location with id: '" + id + "' was not found in the database"));
         locationService.delete(id);
     }
 
     /**
      * Get list of all {@link LocationEntity} from database.
+     *
      * @return a list of {@link LocationEntity} from database.
      */
     @Operation(summary = "This is to fetch all the stored locations")
@@ -165,6 +169,7 @@ public class LocationController {
 
     /**
      * Get list of all {@link LocationEntity} in specified county from database.
+     *
      * @return a list of {@link LocationEntity} in specified county from database.
      */
     @Operation(summary = "This is to fetch all stored locations in specified country")
@@ -183,6 +188,7 @@ public class LocationController {
 
     /**
      * Get list of all {@link LocationEntity} from database which name starts from specified text.
+     *
      * @return a list of {@link LocationEntity} in specified county from database.
      */
     @Operation(summary = "This is to fetch all stored locations which name starts with filter mask")

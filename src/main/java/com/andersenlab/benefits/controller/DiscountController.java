@@ -108,7 +108,7 @@ public class DiscountController {
     /**
      * Updates {@link DiscountEntity} in the database.
      *
-     * @param id the id of {@link DiscountEntity} that needs to update
+     * @param id       the id of {@link DiscountEntity} that needs to update
      * @param discount the {@link DiscountEntity} that needs to update
      * @throws IllegalStateException if the {@link DiscountEntity} with given id was not found in the database.
      */

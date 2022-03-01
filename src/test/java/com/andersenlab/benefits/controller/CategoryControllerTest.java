@@ -47,26 +47,26 @@ public class CategoryControllerTest {
     public void whenGetAllCategoriesSuccess() throws Exception {
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-                .get("/categories")
-                .contentType(MediaType.APPLICATION_JSON))
-            .andDo(print())
-        //then
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$", notNullValue()));
+                        .get("/categories")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                //then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", notNullValue()));
     }
 
     @Test
     public void whenGetCategoryByIdSuccess() throws Exception {
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-                .get("/categories/{id}", 1L)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andDo(print())
-        // then
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$", notNullValue()))
-            .andExpect(jsonPath("$.id", is(1)))
-            .andExpect(jsonPath("$.title", is("Еда")));
+                        .get("/categories/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                // then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", notNullValue()))
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.title", is("Еда")));
     }
 
     @Test
@@ -86,14 +86,14 @@ public class CategoryControllerTest {
     public void whenAddCategorySuccess() throws Exception {
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-                .post("/categories")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("title", "Разное"))
-            .andDo(print())
-        // then
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$", notNullValue()))
-            .andExpect(jsonPath("$.title", is("Разное")));
+                        .post("/categories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("title", "Разное"))
+                .andDo(print())
+                // then
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$", notNullValue()))
+                .andExpect(jsonPath("$.title", is("Разное")));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class CategoryControllerTest {
         NestedServletException NestedServletException = assertThrows(NestedServletException.class, () -> {
             this.mockMvc.perform(MockMvcRequestBuilders.post("/categories")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .param("title","Обучение"));
+                    .param("title", "Обучение"));
         });
         // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
@@ -118,11 +118,11 @@ public class CategoryControllerTest {
         final String categoryEntity = (new ObjectMapper()).writeValueAsString(category);
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-                .put("/categories")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(categoryEntity))
+                        .put("/categories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(categoryEntity))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isOk());
     }
 
@@ -146,10 +146,10 @@ public class CategoryControllerTest {
     public void whenDeleteCategorySuccess() throws Exception {
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-                .delete("/categories/{id}", 1L)
-                .contentType(MediaType.APPLICATION_JSON))
+                        .delete("/categories/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isOk());
     }
 

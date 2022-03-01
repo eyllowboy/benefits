@@ -26,25 +26,6 @@ public class DiscountEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Schema(description = "Categories", type = "collections of entities")
-    @ManyToMany(fetch = FetchType.EAGER, cascade =
-            {
-                    CascadeType.DETACH,
-                    CascadeType.MERGE,
-                    CascadeType.REFRESH,
-                    CascadeType.PERSIST
-            })
-    @JoinTable(
-        name = "category_discount",
-        joinColumns = @JoinColumn(name = "discount_id"),
-        inverseJoinColumns = @JoinColumn(name = "category_id"))
-    private Set<CategoryEntity> categories;
-
-    @Schema(description = "Companies", type = "entities")
-    @ManyToOne
-    @JoinColumn(name = "company_id")
-    private CompanyEntity company_id;
-
     @Schema(description = " Type of discount", type = "string", minLength = 1, maxLength = 50)
     @Column(name = "type", nullable = false, length = 50)
     private String type;
@@ -87,10 +68,29 @@ public class DiscountEntity {
                     CascadeType.REFRESH,
                     CascadeType.PERSIST
             })
-    @JoinTable (name = "location_discount",
+    @JoinTable(name = "location_discount",
             joinColumns = @JoinColumn(name = "discount_id"),
             inverseJoinColumns = @JoinColumn(name = "location_id"))
     private Set<LocationEntity> area;
+
+    @Schema(description = "Categories", type = "collections of entities")
+    @ManyToMany(fetch = FetchType.EAGER, cascade =
+            {
+                    CascadeType.DETACH,
+                    CascadeType.MERGE,
+                    CascadeType.REFRESH,
+                    CascadeType.PERSIST
+            })
+    @JoinTable(
+            name = "category_discount",
+            joinColumns = @JoinColumn(name = "discount_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id"))
+    private Set<CategoryEntity> categories;
+
+    @Schema(description = "Companies", type = "entities")
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private CompanyEntity company_id;
 
     public DiscountEntity(Long id, String type, String description, String discount_condition, String sizeDiscount, DiscountType discount_type, Date dateBegin, Date dateFinish, String imageDiscount) {
         this.id = id;

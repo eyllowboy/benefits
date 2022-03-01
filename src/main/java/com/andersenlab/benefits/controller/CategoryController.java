@@ -16,6 +16,7 @@ import java.util.List;
 
 /**
  * The controller for handling requests for {@link CategoryEntity}.
+ *
  * @author Denis Popov
  * @version 1.0
  */
@@ -55,6 +56,7 @@ public class CategoryController {
 
     /**
      * Gets {@link CategoryEntity} from the database with specified id.
+     *
      * @param id is the id of {@link CategoryEntity} that needs to get
      * @throws IllegalStateException if the given id was not found in the database
      */
@@ -114,12 +116,13 @@ public class CategoryController {
     @DeleteMapping("/categories/{id}")
     public void deleteCategory(@PathVariable final Long id) {
         categoryService.findById(id).orElseThrow(() ->
-                new IllegalStateException("Category with id: '"+ id +"' was not found in the database"));
+                new IllegalStateException("Category with id: '" + id + "' was not found in the database"));
         categoryService.delete(id);
     }
 
     /**
      * Get list of all {@link CategoryEntity} from database.
+     *
      * @return a list of {@link CategoryEntity} from database.
      */
     @Operation(summary = "This is to fetch all the stored categories")

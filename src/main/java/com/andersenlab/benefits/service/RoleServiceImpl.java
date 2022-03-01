@@ -10,6 +10,7 @@ import java.util.Optional;
 
 /**
  * An implementation for performing operations on a {@link RoleEntity}.
+ *
  * @author Andrei Rabchun
  * @version 1.0
  * @see RoleService
@@ -17,37 +18,37 @@ import java.util.Optional;
 @Service
 public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;
-    
+
     @Autowired
     public RoleServiceImpl(final RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
     }
-    
+
     @Override
     public List<RoleEntity> findAll() {
         return roleRepository.findAll();
     }
-    
+
     @Override
     public Optional<RoleEntity> findById(final Long id) {
         return roleRepository.findById(id);
     }
-    
+
     @Override
     public Optional<RoleEntity> findByCode(final String code) {
         return roleRepository.findByCode(code);
     }
-    
+
     @Override
     public RoleEntity save(final RoleEntity role) {
         return roleRepository.save(role);
     }
-    
+
     @Override
     public void updateRoleEntity(final Long id, final String name, final String code) {
         roleRepository.updateRoleEntity(id, name, code);
     }
-    
+
     @Override
     public void delete(final Long id) {
         roleRepository.deleteById(id);

@@ -31,8 +31,6 @@ public class CategoryEntity {
     @Column
     private String title;
 
-
-
     @JsonIgnore
     @ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER)
     @JsonIgnoreProperties({"categories", "area"})

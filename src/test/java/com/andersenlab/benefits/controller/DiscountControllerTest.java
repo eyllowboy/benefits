@@ -78,7 +78,7 @@ class DiscountControllerTest {
                         .get("/discounts")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()));
     }
@@ -91,7 +91,7 @@ class DiscountControllerTest {
                         .get("/discounts/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.id", is(1)))
@@ -129,7 +129,7 @@ class DiscountControllerTest {
                                 .content(objectMapper.writeValueAsString(discount))
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.id", isA(Number.class)))
@@ -153,7 +153,7 @@ class DiscountControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(discountEntity))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isOk());
     }
 
@@ -169,7 +169,7 @@ class DiscountControllerTest {
         final DiscountEntity discount = new DiscountEntity(8L, categories, company, "type", "desc", "cond", "20", DiscountType.DISCOUNT, valueOf("2022-01-20 15:34:23"), valueOf("2022-02-20 15:34:23"), "image", locations);
         final String discountEntity = new ObjectMapper().writeValueAsString(discount);
         // when
-        final NestedServletException nestedServletException = assertThrows(NestedServletException.class,  () ->
+        final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 mockMvc.perform(MockMvcRequestBuilders
                         .put("/discounts/{id}", Long.MAX_VALUE)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -187,7 +187,7 @@ class DiscountControllerTest {
                         .delete("/discounts/4")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isOk());
     }
 
