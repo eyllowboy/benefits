@@ -5,11 +5,17 @@ import com.andersenlab.benefits.repository.DiscountRepository;
 import com.andersenlab.benefits.service.DiscountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * The implementation for performing operations on a {@link DiscountEntity}.
@@ -23,7 +29,6 @@ import java.util.Optional;
 
 @Service
 public class DiscountServiceImpl implements DiscountService {
-
 
     private final DiscountRepository discountRepository;
 
@@ -76,8 +81,5 @@ public class DiscountServiceImpl implements DiscountService {
     @Override
     public final List<DiscountEntity> getDiscountsByCriteria(final Specification<DiscountEntity> specificDiscountEntity) {
         return discountRepository.findAll(specificDiscountEntity);
-
     }
-
-
 }

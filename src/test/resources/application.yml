@@ -14,6 +14,7 @@ spring:
   jpa:
     open-in-view: false
     show-sql: true
+<<<<<<< HEAD
     properties:
       javax:
         persistence:
@@ -35,6 +36,8 @@ spring:
       org:
         hibernate:
           type: trace
+=======
+>>>>>>> db44c56 (add filters discount)
   liquibase:
     enabled: true
     default-schema: public

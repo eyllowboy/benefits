@@ -1,10 +1,8 @@
 package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.DiscountEntity;
-<<<<<<< HEAD
 import org.springframework.data.jpa.domain.Specification;
-=======
->>>>>>> 9599459 (Discount modified, tables created, tests not working)
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -65,6 +63,4 @@ public interface DiscountService {
      * @param specificDiscountEntity entity provide filtering data
      */
     List<DiscountEntity> getDiscountsByCriteria(final Specification<DiscountEntity> specificDiscountEntity);
-
-
 }
