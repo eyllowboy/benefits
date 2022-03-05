@@ -18,6 +18,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.util.NestedServletException;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -166,7 +167,7 @@ class DiscountControllerTest {
         final Set<LocationEntity> locations = new HashSet<>();
         locations.add(locationRepository.findById(1L).get());
         final CompanyEntity company = companyRepository.findById(3L).get();
-        final DiscountEntity discount = new DiscountEntity(8L,"type", "desc", "cond", "20", DiscountType.DISCOUNT, valueOf("2022-01-20 15:34:23"), valueOf("2022-02-20 15:34:23"), "image", locations, categories, company);
+        final DiscountEntity discount = new DiscountEntity(8L, "type", "desc", "cond", "20", DiscountType.DISCOUNT, valueOf("2022-01-20 15:34:23"), valueOf("2022-02-20 15:34:23"), "image", locations, categories, company);
         final String discountEntity = new ObjectMapper().writeValueAsString(discount);
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
@@ -207,41 +208,47 @@ class DiscountControllerTest {
 
     @Test
     void whenFindByCityAndCategoryAndDateIsPositiveScenario() throws Exception {
-
-       /* this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/discounts/city/category/date")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .param("city", "Москва")
-                        .param("title", "Еда"))
-                .andDo(print())
-                // then
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.city", is("Москва")))
-                .andExpect(jsonPath("$.title", is("Еда")));*/
-
-
+        //given
+        final LinkedMultiValueMap<String, String> requestParams = new LinkedMultiValueMap<>();
+        requestParams.add("city", "Москва");
+        requestParams.add("category", "Еда");
+        //when
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/filterdiscount")
+                        .get("/discounts/filter")
                         .contentType(MediaType.APPLICATION_JSON)
-                .param("city", "Москва")
-                .param("title", "Еда"))
-
-
+                        .params(requestParams))
+                //then
                 .andDo(print())
-                // then
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.type", is("type1")))
-                //.andExpect(jsonPath("$.title", is("Еда")))
+                .andExpect(jsonPath("$[0].type", is("type1")))
                 .andReturn();
 
     }
 
     @Test
-    void findByType() {
+    void whenFindByTypeIsPositiveScenario() throws Exception {
+        //when
+        this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/discounts/type")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("type", "type1"))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].type", is("type1")));
     }
 
     @Test
-    void findBySizeDiscount() {
+    void whenFindBySizeDiscountIsPositiveScenario() throws Exception {
+        //when
+        this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/discounts/size")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("size", "10"))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].sizeDiscount", is("10")));
     }
 }
 

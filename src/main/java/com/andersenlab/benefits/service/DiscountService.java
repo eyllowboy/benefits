@@ -56,9 +56,12 @@ public interface DiscountService {
      */
     void deleteDiscountById(final Long id);
 
-
+    /**
+     * Method allows filtering the discount entity.
+     *
+     * @param specificDiscountEntity entity provide filtering data
+     */
     List<DiscountEntity> getDiscountsByCriteria(final Specification<DiscountEntity> specificDiscountEntity);
-
 
 
 }

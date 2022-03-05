@@ -1,22 +1,21 @@
 package com.andersenlab.benefits.repository;
 
-import com.andersenlab.benefits.domain.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.andersenlab.benefits.domain.CategoryEntity_;
+import com.andersenlab.benefits.domain.DiscountEntity;
+import com.andersenlab.benefits.domain.DiscountEntity_;
+import com.andersenlab.benefits.domain.LocationEntity_;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.EntityManager;
 import javax.persistence.criteria.*;
-import java.sql.Time;
 import java.util.Date;
-import java.util.Objects;
 
 
 @Component
 public class DiscountSpec {
 
 
-    public static Specification<DiscountEntity> getByCategory(String category){
+    public static Specification<DiscountEntity> getByCategory(String category) {
         return new Specification<DiscountEntity>() {
             @Override
             public Predicate toPredicate(Root<DiscountEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
@@ -28,7 +27,7 @@ public class DiscountSpec {
 
     }
 
-    public static Specification<DiscountEntity> getByLocation(String location){
+    public static Specification<DiscountEntity> getByLocation(String location) {
         return new Specification<DiscountEntity>() {
             @Override
             public Predicate toPredicate(Root<DiscountEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
@@ -50,7 +49,7 @@ public class DiscountSpec {
         };
     }
 
-    public static Specification<DiscountEntity> getByType(String type){
+    public static Specification<DiscountEntity> getByType(String type) {
         return new Specification<DiscountEntity>() {
             @Override
             public Predicate toPredicate(Root<DiscountEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
@@ -60,7 +59,7 @@ public class DiscountSpec {
 
     }
 
-    public static Specification<DiscountEntity> getBySize(String sizeDiscount){
+    public static Specification<DiscountEntity> getBySize(String sizeDiscount) {
         return new Specification<DiscountEntity>() {
             @Override
             public Predicate toPredicate(Root<DiscountEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
@@ -68,7 +67,6 @@ public class DiscountSpec {
             }
         };
     }
-
 
 
 }

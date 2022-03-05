@@ -1,7 +1,9 @@
 package com.andersenlab.benefits.controller;
 
 
+import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.DiscountEntity;
+import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.repository.DiscountSpec;
 import com.andersenlab.benefits.service.DiscountServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 /**
  * The controller for handling requests for {@link DiscountEntity}.
@@ -152,21 +152,54 @@ public class DiscountController {
         discountService.deleteDiscountById(id);
     }
 
-    @GetMapping("/filterdiscount")
-    public final List<DiscountEntity> findByCityAndCategoryAndDate(@RequestParam(required = false) final String city, @RequestParam(required = false) final String category){
+    /**
+     * Filters {@link DiscountEntity} from the database by city and category.
+     *
+     * @param city     the city {@link LocationEntity} that needs to filtering
+     * @param category the category from {@link CategoryEntity} that needs to filtering
+     */
+    @Operation(summary = "This is method to filtering the discount by city and category.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Discount is filtered",
+                    content = @Content)
+    })
+    @GetMapping("/discounts/filter")
+    public final List<DiscountEntity> findByCityAndCategoryAndDate(@RequestParam(required = false) final String city, @RequestParam(required = false) final String category) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByLocation(city).and(DiscountSpec.getByCategory(category).and(DiscountSpec.getLastAdded())));
         return discountService.getDiscountsByCriteria(spec);
-
     }
 
-    @GetMapping("/discount/type")
-    public final List<DiscountEntity> findByType(@RequestParam(required = false) final String type){
+    @Operation(summary = "This is method to filtering the discount by type.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Discounts are filtered",
+                    content = @Content)
+    })
+    /**
+     * Filters {@link DiscountEntity} from the database by type.
+     *
+     * @param type the type {@link DiscountEntity} that needs to filtering
+     */
+    @GetMapping("/discounts/type")
+    public final List<DiscountEntity> findByType(@RequestParam(required = false) final String type) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByType(type));
         return discountService.getDiscountsByCriteria(spec);
     }
 
-    @GetMapping("/discount/size")
-    public final List<DiscountEntity> findBySizeDiscount(@RequestParam(required = false) final String size){
+    @Operation(summary = "This is method to filtering the discount by size.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Discounts are filtered",
+                    content = @Content)
+    })
+    /**
+     * Filters {@link DiscountEntity} from the database by discountSize.
+     *
+     * @param size the size {@link DiscountEntity} that needs to filtering
+     */
+    @GetMapping("/discounts/size")
+    public final List<DiscountEntity> findBySizeDiscount(@RequestParam(required = false) final String size) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getBySize(size));
         return discountService.getDiscountsByCriteria(spec);
     }
