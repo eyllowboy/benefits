@@ -224,7 +224,6 @@ class DiscountControllerTest {
                         .get("/filterdiscount")
                         .contentType(MediaType.APPLICATION_JSON)
                 .param("city", "Москва")
-
                 .param("title", "Еда"))
 
 
