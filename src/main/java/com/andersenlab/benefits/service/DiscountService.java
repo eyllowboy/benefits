@@ -1,6 +1,7 @@
 package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.DiscountEntity;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -54,5 +55,10 @@ public interface DiscountService {
      * @param id the id of record in the database, not null
      */
     void deleteDiscountById(final Long id);
+
+
+    List<DiscountEntity> getDiscountsByCriteria(final Specification<DiscountEntity> specificDiscountEntity);
+
+
 
 }

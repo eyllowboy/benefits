@@ -204,6 +204,46 @@ class DiscountControllerTest {
         assertEquals("The discount with id: " + Long.MAX_VALUE + " was not found in the database",
                 nestedServletException.getCause().getMessage());
     }
+
+    @Test
+    void whenFindByCityAndCategoryAndDateIsPositiveScenario() throws Exception {
+
+       /* this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/discounts/city/category/date")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("city", "Москва")
+                        .param("title", "Еда"))
+                .andDo(print())
+                // then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.city", is("Москва")))
+                .andExpect(jsonPath("$.title", is("Еда")));*/
+
+
+        this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/filterdiscount")
+                        .contentType(MediaType.APPLICATION_JSON)
+                .param("city", "Москва")
+
+                .param("title", "Еда"))
+
+
+                .andDo(print())
+                // then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.type", is("type1")))
+                //.andExpect(jsonPath("$.title", is("Еда")))
+                .andReturn();
+
+    }
+
+    @Test
+    void findByType() {
+    }
+
+    @Test
+    void findBySizeDiscount() {
+    }
 }
 
 

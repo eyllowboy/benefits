@@ -2,6 +2,7 @@ package com.andersenlab.benefits.controller;
 
 
 import com.andersenlab.benefits.domain.DiscountEntity;
+import com.andersenlab.benefits.repository.DiscountSpec;
 import com.andersenlab.benefits.service.DiscountServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -9,6 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * The controller for handling requests for {@link DiscountEntity}.
@@ -122,7 +126,7 @@ public class DiscountController {
                     content = @Content)
     })
     @PutMapping("/discounts/{id}")
-    public Optional<DiscountEntity> updateDiscount(@PathVariable final Long id, @RequestBody final DiscountEntity discount) {
+    public final Optional<DiscountEntity> updateDiscount(@PathVariable final Long id, @RequestBody final DiscountEntity discount) {
         discountService.findByIdDiscount(id).orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database"));
         return discountService.updateDiscountById(id, discount);
     }
@@ -146,6 +150,25 @@ public class DiscountController {
     public void deleteDiscount(@PathVariable final Long id) {
         discountService.findByIdDiscount(id).orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database"));
         discountService.deleteDiscountById(id);
+    }
+
+    @GetMapping("/filterdiscount")
+    public final List<DiscountEntity> findByCityAndCategoryAndDate(@RequestParam(required = false) final String city, @RequestParam(required = false) final String category){
+        Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByLocation(city).and(DiscountSpec.getByCategory(category).and(DiscountSpec.getLastAdded())));
+        return discountService.getDiscountsByCriteria(spec);
+
+    }
+
+    @GetMapping("/discount/type")
+    public final List<DiscountEntity> findByType(@RequestParam(required = false) final String type){
+        Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByType(type));
+        return discountService.getDiscountsByCriteria(spec);
+    }
+
+    @GetMapping("/discount/size")
+    public final List<DiscountEntity> findBySizeDiscount(@RequestParam(required = false) final String size){
+        Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getBySize(size));
+        return discountService.getDiscountsByCriteria(spec);
     }
 
 }

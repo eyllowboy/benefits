@@ -13,6 +13,7 @@ spring:
     password: ben0147
   jpa:
     open-in-view: false
+    show-sql: true
   liquibase:
     enabled: true
     default-schema: public
