@@ -28,27 +28,33 @@ variables:
 
 # !===== TEST JAVA =====
 
-test:
+.test-template:
   stage: test
-  tags: [shell]
   cache:
     key: "maven-$CI_COMMIT_REF_SLUG"
     paths:
       - .m2/repository
   script:
     - mvn $MAVEN_CLI_OPTS test
+
+test:dev:
+  extends: .test-template
+  tags: [shell]
   only:
     - merge_requests
-    - master
     - develop
     - ci
+
+test:stage:
+  extends: .test-template
+  tags: [shell-stage]
+  only: [stage]
 
 
 # !===== BUILD JAVA BINARIES =====
 
-build:
+.build-template:
   stage: build
-  tags: [shell]
   cache:
     key: "maven-$CI_COMMIT_REF_SLUG"
     paths:
@@ -60,11 +66,19 @@ build:
     paths:
       - target/
     expire_in: 25min
+
+build:dev:
+  extends: .build-template
+  tags: [shell]
   only:
     - merge_requests
-    - master
     - develop
     - ci
+
+build:stage:
+  extends: .build-template
+  tags: [shell-stage]
+  only: [stage]
 
 
 # !===== BUILD DOCKER IMAGE AND UPLOAD IT TO THE REGISTRY =====
@@ -86,6 +100,11 @@ docker:dev:
     - if: $CI_COMMIT_BRANCH == "ci"
       variables:
         CI_COMMIT_BRANCH: develop
+
+docker:stage:
+  extends: .docker-template
+  tags: [shell-stage]
+  only: [stage]
 
 # docker:prod:
 #   extends: .docker-template
@@ -117,6 +136,15 @@ deploy:dev:
     - if: $CI_COMMIT_BRANCH == "ci"
       variables:
         CI_COMMIT_BRANCH: develop
+
+deploy:stage:
+  extends: .deploy-template
+  tags: [shell-stage]
+  environment:
+    name: stage
+    url: http://10.10.15.189:8080
+    deployment_tier: staging
+  only: [stage]
 
 # deploy:prod:
 #   extends: .deploy-template
