@@ -27,3 +27,10 @@ databaseChangeLog:
                      constraints:
                        nullable:  false
                        unique:  true
+                -  column:
+                     name: location_id
+                     type: int
+                     constraints:
+                       nullable: false
+                       foreignKeyName: fk_id_locations
+                       references: locations(id)

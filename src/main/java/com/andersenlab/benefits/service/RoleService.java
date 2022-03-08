@@ -1,9 +1,10 @@
 package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.RoleEntity;
-import org.springframework.boot.jdbc.SchemaManagement;
+import com.andersenlab.benefits.domain.UserEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -27,4 +28,11 @@ public interface RoleService extends CrudService<RoleEntity> {
      * @param code the unique string representation for a {@link RoleEntity}, not null
      */
     void updateRoleEntity(final Long id, final String name, final String code);
+
+    /**
+     * Method to get {@link RoleEntity} with EAGER fetch associated {@link UserEntity}
+     * @param id the id of {@link RoleEntity} need to load, not null
+     * @return {@link RoleEntity} with given id, error if id role found
+     */
+    Optional<RoleEntity> findWithAssociatedUsers(final Long id);
 }

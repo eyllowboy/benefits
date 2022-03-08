@@ -217,12 +217,11 @@ class DiscountControllerTest {
                         .get("/discounts/filter")
                         .contentType(MediaType.APPLICATION_JSON)
                         .params(requestParams))
-                //then
+        //then
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].type", is("type1")))
                 .andReturn();
-
     }
 
     @Test
@@ -251,5 +250,3 @@ class DiscountControllerTest {
                 .andExpect(jsonPath("$[0].sizeDiscount", is("10")));
     }
 }
-
-

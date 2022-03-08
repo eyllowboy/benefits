@@ -53,4 +53,9 @@ public class CategoryServiceImpl implements CategoryService {
     public void delete(Long id) {
         categoryRepository.deleteById(id);
     }
+
+    @Override
+    public Optional<CategoryEntity> findWithAssociatedDiscounts(final Long id) {
+        return categoryRepository.findWithAssociatedDiscounts(id);
+    };
 }

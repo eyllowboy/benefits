@@ -15,6 +15,10 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
 
     Optional<CategoryEntity> findByTitle(final String title);
 
+    @Transactional
+    @Query("FROM CategoryEntity cat JOIN FETCH cat.discounts WHERE cat.id = :id")
+    Optional<CategoryEntity> findWithAssociatedDiscounts(@Param(value = "id") final Long id);
+
     @Modifying
     @Transactional
     @Query("UPDATE CategoryEntity cat SET cat.title = :title where cat.id = :id")

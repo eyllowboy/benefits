@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The controller for handling requests for {@link CategoryEntity}.
@@ -117,6 +118,9 @@ public class CategoryController {
     public void deleteCategory(@PathVariable final Long id) {
         categoryService.findById(id).orElseThrow(() ->
                 new IllegalStateException("Category with id: '" + id + "' was not found in the database"));
+        final Optional<CategoryEntity> categoryEntity = categoryService.findWithAssociatedDiscounts(id);
+        if (categoryEntity.isPresent() && categoryEntity.get().getDiscounts().size() > 0)
+            throw new IllegalStateException("There is active discounts in this Category in database");
         categoryService.delete(id);
     }
 

@@ -194,14 +194,31 @@ public class LocationControllerTest {
     }
 
     @Test
-    public void whenDeleteLocationSuccess() throws Exception {
+    public void whenDeleteLocationWithoutDiscountsSuccess() throws Exception {
+        // given
+        final Long id = 10L;
         // when
         mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/locations/{id}", 1L)
+                        .delete("/locations/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void whenDeleteLocationFailHasActiveDiscounts() throws Exception {
+        // given
+        final Long id = 1L;
+        // when
+        final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
+                mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/locations/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)));
+        // then
+        assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
+        assertEquals("There is active discounts in this Location in database",
+                nestedServletException.getCause().getMessage());
     }
 
     @Test

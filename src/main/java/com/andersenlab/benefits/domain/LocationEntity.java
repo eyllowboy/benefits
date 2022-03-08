@@ -37,11 +37,8 @@ public class LocationEntity {
     @Column
     private String city;
 
-
     @JsonIgnore
-    @Transient
-    @ManyToMany(mappedBy = "area", fetch = FetchType.EAGER)
-    @JsonIgnoreProperties({"area", "categories"})
+    @ManyToMany(mappedBy = "area", fetch = FetchType.LAZY)
     private Set<DiscountEntity> discounts;
 
     public LocationEntity(Long id, String country, String city) {

@@ -158,10 +158,11 @@ public class RoleController {
     })
     @DeleteMapping("/roles/{id}")
     public void deleteRole(@PathVariable @DecimalMin("1") Long id) {
-        roleService.findById(id)
-                .orElseThrow(
-                        () -> new IllegalStateException("Role with this id was not found in the database"));
-
+        roleService.findById(id).orElseThrow(() ->
+                new IllegalStateException("Role with this id was not found in the database"));
+        final Optional<RoleEntity> roleEntity = roleService.findWithAssociatedUsers(id);
+        if (roleEntity.isPresent() && roleEntity.get().getUsers().size() > 0)
+                throw new IllegalStateException("There is active users with this Role in database");
         roleService.delete(id);
     }
 }

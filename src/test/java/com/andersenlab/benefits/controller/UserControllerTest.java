@@ -1,7 +1,9 @@
 package com.andersenlab.benefits.controller;
 
+import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
+import com.andersenlab.benefits.service.LocationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,8 @@ import org.springframework.web.util.NestedServletException;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import javax.xml.stream.Location;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,6 +36,9 @@ public class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private LocationService locationService;
 
     @Container
     public static final PostgreSQLContainer<?> postgreSQLContainer =
@@ -71,7 +78,9 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.login", is("admin")))
                 .andExpect(jsonPath("$.roleEntity.id", is(1)))
                 .andExpect(jsonPath("$.roleEntity.name", is("System administrator")))
-                .andExpect(jsonPath("$.roleEntity.code", is("ROLE_ADMIN")));
+                .andExpect(jsonPath("$.roleEntity.code", is("ROLE_ADMIN")))
+                .andExpect(jsonPath("$.location.country", is("Россия")))
+                .andExpect(jsonPath("$.location.city", is("Москва")));
     }
 
     @Test
@@ -94,7 +103,8 @@ public class UserControllerTest {
                         .post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("login", "login_1")
-                        .param("roleId", "1"))
+                        .param("roleId", "1")
+                        .param("locationId", "1"))
                 .andDo(print())
                 // then
                 .andExpect(jsonPath("$", notNullValue()))
@@ -102,7 +112,9 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.login", is("login_1")))
                 .andExpect(jsonPath("$.roleEntity.id", is(1)))
                 .andExpect(jsonPath("$.roleEntity.name", is("System administrator")))
-                .andExpect(jsonPath("$.roleEntity.code", is("ROLE_ADMIN")));
+                .andExpect(jsonPath("$.roleEntity.code", is("ROLE_ADMIN")))
+                .andExpect(jsonPath("$.location.country", is("Россия")))
+                .andExpect(jsonPath("$.location.city", is("Москва")));
     }
 
     @Test
@@ -113,7 +125,8 @@ public class UserControllerTest {
                         .post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("login", "admin")
-                        .param("roleId", "1")));
+                        .param("roleId", "1")
+                        .param("locationId", "1")));
 
         // then
         assertEquals(IllegalStateException.class,
@@ -130,7 +143,8 @@ public class UserControllerTest {
                         .post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("login", "admin_2")
-                        .param("roleId", "9223372036854775807")));
+                        .param("roleId", "9223372036854775807")
+                        .param("locationId", "1")));
 
         // then
         assertEquals(IllegalStateException.class,
@@ -143,7 +157,8 @@ public class UserControllerTest {
     public void whenUpdateUserWithNewLoginAndRoleIdIsExists() throws Exception {
         // given
         final RoleEntity roleEntity = new RoleEntity(6L, "incorrect_name_1", "incorrect_role_code_1");
-        final UserEntity userEntity = new UserEntity(5L, "new_login_1", roleEntity);
+        final LocationEntity location = locationService.findById(1L).orElseThrow();
+        final UserEntity userEntity = new UserEntity(5L, "new_login_1", roleEntity, location);
         final String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(userEntity);
 
         // when
@@ -160,7 +175,8 @@ public class UserControllerTest {
     public void whenUpdateUserAndLoginIsExists() throws Exception {
         // given
         final RoleEntity roleEntity = new RoleEntity(6L, "incorrect_name_1", "incorrect_role_code_1");
-        final UserEntity userEntity = new UserEntity(5L, "admin", roleEntity);
+        final LocationEntity location = new LocationEntity("Россия", "Уфа");
+        final UserEntity userEntity = new UserEntity(5L, "admin", roleEntity, location);
         final String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(userEntity);
 
         // when
@@ -181,7 +197,8 @@ public class UserControllerTest {
     public void whenUpdateUserAndRoleIsNotExists() throws Exception {
         // given
         final RoleEntity roleEntity = new RoleEntity(Long.MAX_VALUE, "incorrect_name_1", "incorrect_role_code_1");
-        final UserEntity userEntity = new UserEntity(5L, "new_login_2", roleEntity);
+        final LocationEntity location = new LocationEntity("Россия", "Уфа");
+        final UserEntity userEntity = new UserEntity(5L, "new_login_2", roleEntity, location);
         final String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(userEntity);
 
         // when
@@ -202,7 +219,8 @@ public class UserControllerTest {
     public void whenUpdateUserAndIdNotExists() throws Exception {
         // given
         final RoleEntity roleEntity = new RoleEntity(1L, "incorrect_name_1", "incorrect_role_code_1");
-        final UserEntity userEntity = new UserEntity(Long.MAX_VALUE, "new_login_3", roleEntity);
+        final LocationEntity location = new LocationEntity("Россия", "Уфа");
+        final UserEntity userEntity = new UserEntity(Long.MAX_VALUE, "new_login_3", roleEntity, location);
         final String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(userEntity);
 
         // when

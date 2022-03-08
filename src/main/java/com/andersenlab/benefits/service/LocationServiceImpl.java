@@ -64,4 +64,9 @@ public class LocationServiceImpl implements LocationService {
     public void delete(final Long id) {
         locationRepository.deleteById(id);
     }
+
+    @Override
+    public Optional<LocationEntity> findWithAssociatedDiscounts(final Long id) {
+        return locationRepository.findWithAssociatedDiscounts(id);
+    }
 }

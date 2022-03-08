@@ -63,45 +63,24 @@ public class DiscountEntity {
 
     @Schema(description = "Location of discount", type = "collection of entities")
     @ManyToMany(fetch = FetchType.EAGER, cascade =
-            {
-                    CascadeType.DETACH,
-                    CascadeType.MERGE,
-                    CascadeType.REFRESH,
-                    CascadeType.PERSIST
-            })
+            {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
     @JoinTable(name = "location_discount",
             joinColumns = @JoinColumn(name = "discount_id"),
             inverseJoinColumns = @JoinColumn(name = "location_id"))
+    @JsonIgnore
     private Set<LocationEntity> area;
 
     @Schema(description = "Categories", type = "collections of entities")
     @ManyToMany(fetch = FetchType.EAGER, cascade =
-            {
-                    CascadeType.DETACH,
-                    CascadeType.MERGE,
-                    CascadeType.REFRESH,
-                    CascadeType.PERSIST
-            })
-    @JoinTable(
-            name = "category_discount",
+            {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
+    @JoinTable(name = "category_discount",
             joinColumns = @JoinColumn(name = "discount_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id"))
+    @JsonIgnore
     private Set<CategoryEntity> categories;
 
     @Schema(description = "Companies", type = "entities")
     @ManyToOne
     @JoinColumn(name = "company_id")
     private CompanyEntity company_id;
-
-    public DiscountEntity(Long id, String type, String description, String discount_condition, String sizeDiscount, DiscountType discount_type, Date dateBegin, Date dateFinish, String imageDiscount) {
-        this.id = id;
-        this.type = type;
-        this.description = description;
-        this.discount_condition = discount_condition;
-        this.sizeDiscount = sizeDiscount;
-        this.discount_type = discount_type;
-        this.dateBegin = dateBegin;
-        this.dateFinish = dateFinish;
-        this.imageDiscount = imageDiscount;
-    }
 }

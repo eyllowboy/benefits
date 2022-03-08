@@ -53,4 +53,9 @@ public class RoleServiceImpl implements RoleService {
     public void delete(final Long id) {
         roleRepository.deleteById(id);
     }
+
+    @Override
+    public Optional<RoleEntity> findWithAssociatedUsers(final Long id) {
+        return roleRepository.findWithAssociatedUsers(id);
+    }
 }

@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.service;
 
+import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public interface UserService extends CrudService<UserEntity> {
      * @param id the id of {@link UserEntity} in the database, not null
      * @param login the login of {@link UserEntity} stored in the database, not null
      * @param roleEntity the {@link RoleEntity} assigned to the {@link UserEntity}, not null
+     * @param location the {@link LocationEntity} assigned to the {@link UserEntity}, not null
      */
-    void updateUserEntity(final Long id, final String login, final RoleEntity roleEntity);
+    void updateUserEntity(final Long id, final String login, final RoleEntity roleEntity, final LocationEntity location);
 }

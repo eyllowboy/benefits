@@ -1,11 +1,13 @@
 package com.andersenlab.benefits.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.util.Objects;
+import java.util.Set;
 
 @Schema(name = "Role", description = "Role entity")
 @Entity
@@ -33,7 +35,17 @@ public class RoleEntity {
     @Column
     private String code;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "roleEntity", fetch = FetchType.LAZY)
+    private Set<UserEntity> users;
+
     public RoleEntity(final String name, final String code) {
+        this.name = name;
+        this.code = code;
+    }
+
+    public RoleEntity(final Long id, final String name, final String code) {
+        this.id = id;
         this.name = name;
         this.code = code;
     }

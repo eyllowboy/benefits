@@ -28,13 +28,19 @@ public class UserEntity {
     private String login;
 
     @Schema(description = "Role", type = "RoleEntity")
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
     @JoinColumn(name = "role_id")
     private RoleEntity roleEntity;
 
-    public UserEntity(final String login, final RoleEntity roleEntity) {
+    @Schema(description = "Location", type = "LocationEntity")
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
+    @JoinColumn(name = "location_id")
+    private LocationEntity location;
+
+    public UserEntity(final String login, final RoleEntity roleEntity, final LocationEntity location) {
         this.login = login;
         this.roleEntity = roleEntity;
+        this.location = location;
     }
 
     @Override

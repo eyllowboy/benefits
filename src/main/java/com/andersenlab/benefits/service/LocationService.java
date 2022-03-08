@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.service;
 
+import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.domain.LocationEntity;
 import org.springframework.stereotype.Service;
 
@@ -46,4 +47,11 @@ public interface LocationService extends CrudService<LocationEntity> {
      * @param city the name of city, not null
      */
     void updateLocationEntity(final Long id, final String country, final String city);
+
+    /**
+     * Method to get {@link LocationEntity} with EAGER fetch associated {@link DiscountEntity}
+     * @param id the id of {@link LocationEntity} need to load, not null
+     * @return {@link LocationEntity} with given id, error if id role found
+     */
+    Optional<LocationEntity> findWithAssociatedDiscounts(final Long id);
 }

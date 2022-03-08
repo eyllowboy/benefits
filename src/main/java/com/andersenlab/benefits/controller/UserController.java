@@ -1,7 +1,9 @@
 package com.andersenlab.benefits.controller;
 
+import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
+import com.andersenlab.benefits.service.LocationService;
 import com.andersenlab.benefits.service.RoleService;
 import com.andersenlab.benefits.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.DecimalMin;
@@ -29,11 +32,14 @@ import java.util.Optional;
 public class UserController {
     private final UserService userService;
     private final RoleService roleService;
+    private final LocationService locationService;
 
     @Autowired
-    public UserController(final UserService userService, final RoleService roleService) {
+    public UserController(final UserService userService, final RoleService roleService,
+                          final LocationService locationService) {
         this.userService = userService;
         this.roleService = roleService;
+        this.locationService = locationService;
     }
 
     /**
@@ -61,6 +67,7 @@ public class UserController {
      *                               <ul>
      *                               <li>{@link UserEntity} with given id was not found in the database
      *                               <li>{@link RoleEntity} with given id was not found in the database
+     *                               <li>{@link LocationEntity} with given id was not found in the database
      *                               <li>{@link UserEntity} with {@link UserEntity#getLogin()} field is already exists
      *                               </ul>
      */
@@ -89,9 +96,12 @@ public class UserController {
                 && !userEntityWithSameLogin.get().getId().equals(userEntity.getId())) {
             throw new IllegalStateException("User with such 'login' is already exists");
         } else {
+            final Optional<LocationEntity> location = locationService.findById(userEntity.getLocation().getId());
+            location.orElseThrow(() -> new IllegalStateException("Location with this id was not found in the database"));
             userService.updateUserEntity(userEntity.getId(),
                     userEntity.getLogin(),
-                    roleEntityInDataBase.get());
+                    roleEntityInDataBase.get(),
+                    location.get());
         }
     }
 
@@ -100,10 +110,12 @@ public class UserController {
      *
      * @param login  the {@link UserEntity#getLogin()}
      * @param roleId the id of {@link RoleEntity}
+     * @param locationId the id of {@link LocationEntity}
      * @throws IllegalStateException if:
      *                               <ul>
      *                               <li>{@link UserEntity} with {@link UserEntity#getLogin()} field is already exists
      *                               <li>{@link RoleEntity} with given id was not found in the database
+     *                               <li>{@link LocationEntity} with given id was not found in the database
      *                               </ul>
      */
     @Operation(summary = "This is to create new user")
@@ -116,9 +128,11 @@ public class UserController {
                     content = @Content)
     })
     @PostMapping("/users")
+    @Transactional
     public ResponseEntity<UserEntity> addUser(
             @RequestParam(value = "login") final String login,
-            @RequestParam(value = "roleId") final Long roleId) {
+            @RequestParam(value = "roleId") final Long roleId,
+            @RequestParam(value = "locationId") final Long locationId) {
 
         userService.findByLogin(login)
                 .ifPresent(userEntity -> {
@@ -129,7 +143,10 @@ public class UserController {
         roleEntityInDataBase
                 .orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
 
-        final UserEntity savedUserEntity = userService.save(new UserEntity(login, roleEntityInDataBase.get()));
+        final Optional<LocationEntity> location = locationService.findById(locationId);
+        location.orElseThrow(() -> new IllegalStateException("Location with this id was not found in the database"));
+
+        final UserEntity savedUserEntity = userService.save(new UserEntity(login, roleEntityInDataBase.get(), location.get()));
 
         return new ResponseEntity<>(savedUserEntity, HttpStatus.CREATED);
     }

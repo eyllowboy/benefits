@@ -1,6 +1,7 @@
 package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.CategoryEntity;
+import com.andersenlab.benefits.domain.DiscountEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -28,4 +29,11 @@ public interface CategoryService extends CrudService<CategoryEntity>{
      * @param title the title of {@link CategoryEntity} stored in the database, not null
      */
     void updateCategoryEntity(final Long id, final String title);
+
+    /**
+     * Method to get {@link CategoryEntity} with EAGER fetch associated {@link DiscountEntity}
+     * @param id the id of {@link CategoryEntity} need to load, not null
+     * @return {@link CategoryEntity} with given id, error if id role found
+     */
+    Optional<CategoryEntity> findWithAssociatedDiscounts(final Long id);
 }

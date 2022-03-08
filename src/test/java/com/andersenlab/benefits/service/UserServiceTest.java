@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.service;
 
+import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import com.andersenlab.benefits.repository.UserRepository;
@@ -33,10 +34,11 @@ public class UserServiceTest {
 	@Test
 	public void whenFindAll() {
 		// given
+		final LocationEntity location = new LocationEntity(1L, "Россия", "Уфа");
 		final List<UserEntity> userEntities = List.of(
-				new UserEntity("user", new RoleEntity("user", "user")),
-				new UserEntity("user1", new RoleEntity("user1", "user1")),
-				new UserEntity("user2", new RoleEntity("user2", "user2")));
+				new UserEntity("user", new RoleEntity("user", "user"), location),
+				new UserEntity("user1", new RoleEntity("user1", "user1"), location),
+				new UserEntity("user2", new RoleEntity("user2", "user2"), location));
 		
 		// when
 		when(userRepository.findAll()).thenReturn(userEntities);
@@ -50,7 +52,8 @@ public class UserServiceTest {
 	@Test
 	public void whenFindById() {
 		// given
-		final UserEntity userEntity = new UserEntity("user", new RoleEntity("user", "user"));
+		final LocationEntity location = new LocationEntity(1L, "Россия", "Уфа");
+		final UserEntity userEntity = new UserEntity("user", new RoleEntity("user", "user"), location);
 		
 		// when
 		when(userRepository.findById(anyLong())).thenReturn(Optional.of(userEntity));
@@ -64,7 +67,8 @@ public class UserServiceTest {
 	@Test
 	public void whenSave() {
 		// given
-		final UserEntity userEntity = new UserEntity("user", new RoleEntity("user", "user"));
+		final LocationEntity location = new LocationEntity(1L, "Россия", "Уфа");
+		final UserEntity userEntity = new UserEntity("user", new RoleEntity("user", "user"), location);
 		
 		// when
 		when(userRepository.save(any(UserEntity.class))).thenReturn(userEntity);
@@ -87,8 +91,9 @@ public class UserServiceTest {
 	@Test
 	public void whenFindByLogin() {
 		// given
+		final LocationEntity location = new LocationEntity(1L, "Россия", "Уфа");
 		final Optional<UserEntity> userEntity =
-				Optional.of(new UserEntity("user", new RoleEntity("user", "user")));
+				Optional.of(new UserEntity("user", new RoleEntity("user", "user"), location));
 		
 		// when
 		when(userRepository.findByLogin(anyString())).thenReturn(userEntity);
@@ -103,12 +108,13 @@ public class UserServiceTest {
 	public void whenUpdate() {
 		// given
 		final RoleEntity roleEntity = new RoleEntity(1L, "abc", "def");
+		final LocationEntity location = new LocationEntity(1L, "Россия", "Уфа");
 		
 		// when
-		userRepository.updateUserEntity(1L, "abc", roleEntity);
+		userRepository.updateUserEntity(1L, "abc", roleEntity, location);
 		
 		// then
 		verify(userRepository, times(1))
-				.updateUserEntity(1L, "abc", roleEntity);
+				.updateUserEntity(1L, "abc", roleEntity, location);
 	}
 }

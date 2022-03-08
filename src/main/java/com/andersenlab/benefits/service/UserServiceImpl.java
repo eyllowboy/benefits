@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.service;
 
+import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import com.andersenlab.benefits.repository.UserRepository;
@@ -46,8 +47,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUserEntity(final Long id, final String login, final RoleEntity roleEntity) {
-        userRepository.updateUserEntity(id, login, roleEntity);
+    public void updateUserEntity(final Long id, final String login, final RoleEntity roleEntity, final LocationEntity location) {
+        userRepository.updateUserEntity(id, login, roleEntity, location);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.repository;
 
+import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,8 +18,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     @Modifying
     @Transactional
-    @Query("update UserEntity u set u.login = :login, u.roleEntity = :roleEntity where u.id = :id")
+    @Query("update UserEntity u set u.login = :login, u.roleEntity = :roleEntity, u.location = :location where u.id = :id")
     void updateUserEntity(@Param(value = "id") final Long id,
                           @Param(value = "login") final String login,
-                          @Param(value = "roleEntity") final RoleEntity roleEntity);
+                          @Param(value = "roleEntity") final RoleEntity roleEntity,
+                          @Param(value = "location") final LocationEntity location);
 }

@@ -191,14 +191,30 @@ public class RoleControllerTest {
     }
 
     @Test
-    public void whenDeleteRoleIsSuccess() throws Exception {
+    public void whenDeleteRoleWithoutUsersSuccess() throws Exception {
+        // given
+        final Long id = 10L;
         // when
         mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/roles/{id}", 10L)
+                        .delete("/roles/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void whenDeleteRoleFailHasActiveUsers() throws Exception {
+        // given
+        final Long id = 1L;
+        // when
+        final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
+                () -> mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/roles/{id}", id)));
+        // then
+        assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
+        assertEquals("There is active users with this Role in database",
+                nestedServletException.getCause().getMessage());
     }
 
     @Test

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -20,4 +21,8 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
     void updateRoleEntity(@Param(value = "id") final Long id,
                           @Param(value = "name") final String name,
                           @Param(value = "code") final String code);
+
+    @Transactional
+    @Query("from RoleEntity r join fetch r.users where r.id = :id")
+    Optional<RoleEntity> findWithAssociatedUsers(@Param(value = "id") final Long id);
 }

@@ -129,7 +129,8 @@ public class CategoryControllerTest {
     @Test
     public void whenUpdateCategoryFailIdNotExists() throws Exception {
         // given
-        final CategoryEntity category = new CategoryEntity(100L, "Прочее");
+        final Long id = 100L;
+        final CategoryEntity category = new CategoryEntity(id, "Прочее");
         final String categoryEntity = (new ObjectMapper()).writeValueAsString(category);
         // when
         NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
@@ -143,14 +144,31 @@ public class CategoryControllerTest {
     }
 
     @Test
-    public void whenDeleteCategorySuccess() throws Exception {
+    public void whenDeleteCategoryWithoutDiscountsSuccess() throws Exception {
+        // given
+        final Long id = 4L;
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/categories/{id}", 1L)
+                        .delete("/categories/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void whenDeleteCategoryFailHasActiveDiscounts() throws Exception {
+        // given
+        final Long id = 1L;
+        // when
+        NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
+            this.mockMvc.perform(MockMvcRequestBuilders
+                    .delete("/categories/{id}", id)
+                    .contentType(MediaType.APPLICATION_JSON));
+        });
+        // then
+        assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
+        assertEquals("There is active discounts in this Category in database", nestedServletException.getCause().getMessage());
     }
 
     @Test
