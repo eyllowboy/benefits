@@ -28,12 +28,12 @@ public class UserEntity {
     private String login;
 
     @Schema(description = "Role", type = "RoleEntity")
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
+    @ManyToOne
     @JoinColumn(name = "role_id")
     private RoleEntity roleEntity;
 
     @Schema(description = "Location", type = "LocationEntity")
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
+    @ManyToOne
     @JoinColumn(name = "location_id")
     private LocationEntity location;
 

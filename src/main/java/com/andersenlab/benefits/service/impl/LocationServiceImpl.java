@@ -1,7 +1,8 @@
-package com.andersenlab.benefits.service;
+package com.andersenlab.benefits.service.impl;
 
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.repository.LocationRepository;
+import com.andersenlab.benefits.service.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

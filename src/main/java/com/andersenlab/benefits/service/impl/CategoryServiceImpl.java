@@ -1,7 +1,8 @@
-package com.andersenlab.benefits.service;
+package com.andersenlab.benefits.service.impl;
 
 import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.repository.CategoryRepository;
+import com.andersenlab.benefits.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

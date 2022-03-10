@@ -2,6 +2,7 @@ package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.repository.LocationRepository;
+import com.andersenlab.benefits.service.impl.LocationServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

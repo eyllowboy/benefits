@@ -2,6 +2,7 @@ package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.repository.CategoryRepository;
+import com.andersenlab.benefits.service.impl.CategoryServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,7 +1,8 @@
-package com.andersenlab.benefits.service;
+package com.andersenlab.benefits.service.impl;
 
 import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.repository.DiscountRepository;
+import com.andersenlab.benefits.service.DiscountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;

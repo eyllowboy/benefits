@@ -1,11 +1,10 @@
 package com.andersenlab.benefits.controller;
 
 
-import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.repository.DiscountSpec;
-import com.andersenlab.benefits.service.DiscountServiceImpl;
+import com.andersenlab.benefits.service.impl.DiscountServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

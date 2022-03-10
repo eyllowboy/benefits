@@ -5,6 +5,7 @@ import com.andersenlab.benefits.repository.CategoryRepository;
 import com.andersenlab.benefits.repository.CompanyRepository;
 import com.andersenlab.benefits.repository.DiscountRepository;
 import com.andersenlab.benefits.repository.LocationRepository;
+import com.andersenlab.benefits.service.impl.DiscountServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

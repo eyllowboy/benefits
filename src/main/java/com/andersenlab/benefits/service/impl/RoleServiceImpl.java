@@ -1,7 +1,8 @@
-package com.andersenlab.benefits.service;
+package com.andersenlab.benefits.service.impl;
 
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.repository.RoleRepository;
+import com.andersenlab.benefits.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
