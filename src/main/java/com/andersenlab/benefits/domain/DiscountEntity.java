@@ -62,21 +62,17 @@ public class DiscountEntity {
     private String imageDiscount;
 
     @Schema(description = "Location of discount", type = "collection of entities")
-    @ManyToMany(fetch = FetchType.EAGER, cascade =
-            {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "location_discount",
             joinColumns = @JoinColumn(name = "discount_id"),
             inverseJoinColumns = @JoinColumn(name = "location_id"))
-    @JsonIgnore
     private Set<LocationEntity> area;
 
     @Schema(description = "Categories", type = "collections of entities")
-    @ManyToMany(fetch = FetchType.EAGER, cascade =
-            {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "category_discount",
             joinColumns = @JoinColumn(name = "discount_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id"))
-    @JsonIgnore
     private Set<CategoryEntity> categories;
 
     @Schema(description = "Companies", type = "entities")
