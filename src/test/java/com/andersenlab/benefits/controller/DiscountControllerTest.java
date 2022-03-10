@@ -220,7 +220,6 @@ class DiscountControllerTest {
     }
 
     @Test
-    @Order(9)
     void whenFindByCityAndDateIsPositiveScenario() throws Exception {
         //when
         this.mockMvc.perform(MockMvcRequestBuilders
@@ -236,27 +235,6 @@ class DiscountControllerTest {
     }
 
     @Test
-    @Order(10)
-    void whenFindByCityAndCategoryAndDateIsPositiveScenario() throws Exception {
-        //given
-        final LinkedMultiValueMap<String, String> requestParams = new LinkedMultiValueMap<>();
-        requestParams.add("city", "Москва");
-        requestParams.add("category", "Еда");
-        //when
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/discounts/filter")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .params(requestParams)
-                        .with(csrf()))
-        //then
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].type", is("type1")))
-                .andReturn();
-    }
-
-    @Test
-    @Order(11)
     void whenFindByCategoryAndDateIsPositiveScenario() throws Exception {
         //when
         this.mockMvc.perform(MockMvcRequestBuilders
@@ -272,22 +250,21 @@ class DiscountControllerTest {
     }
 
     @Test
-    @Order(12)
     void whenFindByTypeAndDateIsPositiveScenario() throws Exception {
         //when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/discounts/filter-by-type")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("type", "type1")
+                        .param("category", "Еда")
                         .with(csrf()))
-                //then
+        //then
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].type", is("type1")));
+                .andExpect(jsonPath("$[0].type", is("type1")))
+                .andReturn();
     }
 
     @Test
-    @Order(13)
     void whenFindByTypeIsPositiveScenario() throws Exception {
         //when
         this.mockMvc.perform(MockMvcRequestBuilders
@@ -302,11 +279,10 @@ class DiscountControllerTest {
     }
 
     @Test
-    @Order(14)
     void whenFindBySizeDiscountIsPositiveScenario() throws Exception {
         //when
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/discounts/size")
+                        .get("/discounts/filter-by-size")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("size", "10")
                         .with(csrf()))
@@ -317,7 +293,6 @@ class DiscountControllerTest {
     }
 
     @Test
-    @Order(15)
     void whenFindBySizeDiscountAndDateIsPositiveScenario() throws Exception {
         //when
         this.mockMvc.perform(MockMvcRequestBuilders
