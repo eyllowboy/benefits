@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+import static com.andersenlab.benefits.repository.DiscountSpec.getLastAdded;
+
 /**
  * The controller for handling requests for {@link DiscountEntity}.
  *
@@ -153,54 +155,70 @@ public class DiscountController {
     }
 
     /**
-     * Filters {@link DiscountEntity} from the database by city and category.
+     * Filters {@link DiscountEntity} from the database by city and lastDate.
      *
-     * @param city     the city {@link LocationEntity} that needs to filtering
-     * @param category the category from {@link CategoryEntity} that needs to filtering
+     * @param city the city {@link LocationEntity} that needs to filtering
      */
-    @Operation(summary = "This is method to filtering the discount by city and category.")
+    @Operation(summary = "This is method to filtering the discount by city and lastDate.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Discount is filtered",
                     content = @Content)
     })
-    @GetMapping("/discounts/filter")
-    public final List<DiscountEntity> findByCityAndCategoryAndDate(@RequestParam(required = false) final String city, @RequestParam(required = false) final String category) {
-        Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByLocation(city).and(DiscountSpec.getByCategory(category).and(DiscountSpec.getLastAdded())));
+    @GetMapping("/discounts/filter-by-city")
+    public final List<DiscountEntity> findByCityAndCategoryAndDate(@RequestParam(required = false) final String city) {
+        Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByLocation(city).and(getLastAdded()));
         return discountService.getDiscountsByCriteria(spec);
     }
 
-    @Operation(summary = "This is method to filtering the discount by type.")
+    /**
+     * Filters {@link DiscountEntity} from the database by category and lastDate.
+     *
+     * @param category the city {@link LocationEntity} that needs to filtering
+     */
+    @Operation(summary = "This is method to filtering the discount by category and lastDate.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                    description = "Discounts are filtered",
+                    description = "Discount is filtered",
                     content = @Content)
     })
+    @GetMapping("/discounts/filter-by-category")
+    public final List<DiscountEntity> findByCategoryAndDate(@RequestParam(required = false) final String category) {
+        Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByCategory(category).and(getLastAdded()));
+        return discountService.getDiscountsByCriteria(spec);
+    }
+
     /**
-     * Filters {@link DiscountEntity} from the database by type.
+     * Filters {@link DiscountEntity} from the database by type and lastDate.
      *
      * @param type the type {@link DiscountEntity} that needs to filtering
      */
-    @GetMapping("/discounts/type")
-    public final List<DiscountEntity> findByType(@RequestParam(required = false) final String type) {
-        Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByType(type));
+    @Operation(summary = "This is method to filtering the discount by type and lastDate.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Discounts are filtered",
+                    content = @Content)
+    })
+    @GetMapping("/discounts/filter-by-type")
+    public final List<DiscountEntity> findByTypeAndLastDate(@RequestParam(required = false) final String type) {
+        Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByType(type).and(getLastAdded()));
         return discountService.getDiscountsByCriteria(spec);
     }
 
-    @Operation(summary = "This is method to filtering the discount by size.")
+    @Operation(summary = "This is method to filtering the discount by size and lastDate.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Discounts are filtered",
                     content = @Content)
     })
     /**
-     * Filters {@link DiscountEntity} from the database by discountSize.
+     * Filters {@link DiscountEntity} from the database by discountSize and lastDate.
      *
      * @param size the size {@link DiscountEntity} that needs to filtering
      */
-    @GetMapping("/discounts/size")
+    @GetMapping("/discounts/filter-by-size")
     public final List<DiscountEntity> findBySizeDiscount(@RequestParam(required = false) final String size) {
-        Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getBySize(size));
+        Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getBySize(size).and(getLastAdded()));
         return discountService.getDiscountsByCriteria(spec);
     }
 

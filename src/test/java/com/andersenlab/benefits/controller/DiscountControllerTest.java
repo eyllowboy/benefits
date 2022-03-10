@@ -18,7 +18,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.util.NestedServletException;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -207,16 +206,12 @@ class DiscountControllerTest {
     }
 
     @Test
-    void whenFindByCityAndCategoryAndDateIsPositiveScenario() throws Exception {
-        //given
-        final LinkedMultiValueMap<String, String> requestParams = new LinkedMultiValueMap<>();
-        requestParams.add("city", "Москва");
-        requestParams.add("category", "Еда");
+    void whenFindByCityAndDateIsPositiveScenario() throws Exception {
         //when
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/discounts/filter")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .params(requestParams))
+                        .get("/discounts/filter-by-city")
+                        .param("city", "Москва")
+                        .contentType(MediaType.APPLICATION_JSON))
         //then
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -225,10 +220,24 @@ class DiscountControllerTest {
     }
 
     @Test
-    void whenFindByTypeIsPositiveScenario() throws Exception {
+    void whenFindByCategoryAndDateIsPositiveScenario() throws Exception {
         //when
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/discounts/type")
+                        .get("/discounts/filter-by-category")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("category", "Еда"))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].type", is("type1")))
+                .andReturn();
+    }
+
+    @Test
+    void whenFindByTypeAndDateIsPositiveScenario() throws Exception {
+        //when
+        this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/discounts/filter-by-type")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("type", "type1"))
                 //then
@@ -238,10 +247,10 @@ class DiscountControllerTest {
     }
 
     @Test
-    void whenFindBySizeDiscountIsPositiveScenario() throws Exception {
+    void whenFindBySizeDiscountAndDateIsPositiveScenario() throws Exception {
         //when
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/discounts/size")
+                        .get("/discounts/filter-by-size")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("size", "10"))
                 //then
