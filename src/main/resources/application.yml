@@ -18,3 +18,24 @@ spring:
     default-schema: public
   main:
     banner-mode: off
+    allow-circular-references: true
+  application:
+    name: A-Benefits
+
+keycloak:
+  auth-server-url: http://localhost:8484/auth/
+  realm: benefits
+  resource: benefits-auth
+  ssl-required: external
+  principal-attribute: preferred_username
+  use-resource-role-mappings: false
+
+springdoc:
+  swagger-ui:
+    oauth:
+      clientId: benefits-auth
+      clientSecret: qyYUkad3HmruCk2ZRw3FP9H52lWc9Poq
+  oAuthFlow:
+    authorizationUrl: http://localhost:8484/auth/realms/benefits/protocol/openid-connect/auth
+    tokenUrl: http://localhost:8484/auth/realms/benefits/protocol/openid-connect/token
+    use-pkce-with-authorization-code-grant: true

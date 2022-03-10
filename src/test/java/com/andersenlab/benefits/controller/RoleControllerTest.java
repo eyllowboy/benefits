@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -19,6 +20,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -27,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
+@WithMockUser
 public class RoleControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
@@ -48,6 +51,7 @@ public class RoleControllerTest {
 		// when
 		mockMvc.perform(MockMvcRequestBuilders
 						.get("/roles")
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 		// then
@@ -60,6 +64,7 @@ public class RoleControllerTest {
 		// when
 		mockMvc.perform(MockMvcRequestBuilders
 						.get("/roles/{id}", 1L)
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 		// then
@@ -74,7 +79,8 @@ public class RoleControllerTest {
 	public void whenGetRoleByIdAndIdNotExists() {
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
-				() -> mockMvc.perform(get("/roles/{id}", Long.MAX_VALUE)));
+				() -> mockMvc.perform(get("/roles/{id}", Long.MAX_VALUE)
+						.with(csrf())));
 		
 		// then
 		assertEquals(IllegalStateException.class,
@@ -88,6 +94,7 @@ public class RoleControllerTest {
 		// when
 		mockMvc.perform(MockMvcRequestBuilders
 						.post("/roles")
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.param("name", "new_name_1")
 						.param("code", "new_role_code_1"))
@@ -106,6 +113,7 @@ public class RoleControllerTest {
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.post("/roles")
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.param("name", "new_name_2")
 						.param("code", "ROLE_ADMIN")));
@@ -126,6 +134,7 @@ public class RoleControllerTest {
 		// when
 		mockMvc.perform(MockMvcRequestBuilders
 						.put("/roles")
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(roleEntityAsJsonString))
 				.andDo(print())
@@ -142,6 +151,7 @@ public class RoleControllerTest {
 		// when
 		mockMvc.perform(MockMvcRequestBuilders
 						.put("/roles")
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(roleEntityAsJsonString))
 				.andDo(print())
@@ -159,6 +169,7 @@ public class RoleControllerTest {
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.put("/roles")
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(roleEntityAsJsonString)));
 		
@@ -179,6 +190,7 @@ public class RoleControllerTest {
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
 						.put("/roles")
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(roleEntityAsJsonString)));
 		
@@ -194,6 +206,7 @@ public class RoleControllerTest {
 		// when
 		mockMvc.perform(MockMvcRequestBuilders
 						.delete("/roles/{id}", 10L)
+						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 		// then
@@ -205,7 +218,8 @@ public class RoleControllerTest {
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> mockMvc.perform(MockMvcRequestBuilders
-						.delete("/roles/{id}", Long.MAX_VALUE)));
+						.delete("/roles/{id}", Long.MAX_VALUE)
+						.with(csrf())));
 		
 		// then
 		assertEquals(IllegalStateException.class,
