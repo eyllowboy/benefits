@@ -14,10 +14,33 @@ spring:
   jpa:
     open-in-view: false
     show-sql: true
+    properties:
+      javax:
+        persistence:
+          sharedCache:
+            mode: ENABLE_SELECTIVE
+      hibernate:
+        javax:
+          cache:
+            missing_cache_strategy: create
+        format_sql: true
+        generate_statistics: true
+        cache:
+          use_second_level_cache: true
+          use_query_cache: true
+          region:
+            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+  logging:
+    level:
+      org:
+        hibernate:
+          type: trace
   liquibase:
     enabled: true
     default-schema: public
     changeLog: classpath:changelog/db.changelog-master.yaml
   main:
     banner-mode: off
-
+    allow-circular-references: true
+  application:
+    name: A-Benefits
