@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -19,6 +20,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -28,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
+@WithMockUser
 class CompanyControllerTest {
 
     @Autowired
@@ -56,7 +59,8 @@ class CompanyControllerTest {
         this.mockMvc.perform(
                         post("/companies")
                                 .content(objectMapper.writeValueAsString(company))
-                                .contentType(MediaType.APPLICATION_JSON))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
@@ -68,7 +72,8 @@ class CompanyControllerTest {
     void whenGetCompanyByIdIsOk() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/companies/{id}", 1L)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
@@ -80,7 +85,8 @@ class CompanyControllerTest {
     void whenGetAllCompanyIsOk() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/companies")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()));
@@ -90,7 +96,7 @@ class CompanyControllerTest {
     void whenGetCompanyWithIncorrectId() throws Exception {
         final long id = 8L;
         NestedServletException NestedServletException = assertThrows(NestedServletException.class,
-                () -> mockMvc.perform(get("/companies/{id}", id)));
+                () -> mockMvc.perform(get("/companies/{id}", id).with(csrf())));
         assertEquals(IllegalStateException.class,
                 NestedServletException.getCause().getClass());
 
@@ -108,7 +114,8 @@ class CompanyControllerTest {
         this.mockMvc.perform(MockMvcRequestBuilders
                         .put("/companies/2")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(companyEntity))
+                        .content(companyEntity)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -125,17 +132,18 @@ class CompanyControllerTest {
                 () -> mockMvc.perform(MockMvcRequestBuilders
                         .put("/companies/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(companyEntity)));
+                        .content(companyEntity)
+                        .with(csrf())));
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
         assertEquals("The company with id: " + id + " was not found in the database.", nestedServletException.getCause().getMessage());
-
     }
 
     @Test
     public void whenDeletePositiveScenario() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders
                         .delete("/companies/4")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -144,11 +152,10 @@ class CompanyControllerTest {
     public void whenDeleteNegativeScenario() {
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
                 () -> this.mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/companies/{id}", Long.MAX_VALUE)));
+                        .delete("/companies/{id}", Long.MAX_VALUE)
+                        .with(csrf())));
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
         assertEquals("The company with id: " + Long.MAX_VALUE + " was not found in the database.",
                 nestedServletException.getCause().getMessage());
     }
-
-
 }

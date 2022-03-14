@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,6 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
+@WithMockUser
 public class CategoryControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -48,7 +51,8 @@ public class CategoryControllerTest {
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/categories")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
                 .andDo(print())
                 //then
                 .andExpect(status().isOk())
@@ -60,7 +64,8 @@ public class CategoryControllerTest {
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/categories/{id}", 1L)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with((csrf())))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk())
@@ -75,7 +80,8 @@ public class CategoryControllerTest {
         NestedServletException NestedServletException = assertThrows(NestedServletException.class, () -> {
             this.mockMvc.perform(MockMvcRequestBuilders
                     .get("/categories/{id}", 100L)
-                    .contentType(MediaType.APPLICATION_JSON));
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(csrf()));
         });
         // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
@@ -88,9 +94,10 @@ public class CategoryControllerTest {
         this.mockMvc.perform(MockMvcRequestBuilders
                         .post("/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("title", "Разное"))
+                        .param("title", "Разное")
+                        .with(csrf()))
                 .andDo(print())
-                // then
+        // then
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.title", is("Разное")));
@@ -104,7 +111,8 @@ public class CategoryControllerTest {
         NestedServletException NestedServletException = assertThrows(NestedServletException.class, () -> {
             this.mockMvc.perform(MockMvcRequestBuilders.post("/categories")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .param("title", "Обучение"));
+                    .param("title", "Обучение")
+                    .with(csrf()));
         });
         // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
@@ -120,9 +128,10 @@ public class CategoryControllerTest {
         this.mockMvc.perform(MockMvcRequestBuilders
                         .put("/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(categoryEntity))
+                        .content(categoryEntity)
+                        .with((csrf())))
                 .andDo(print())
-                // then
+        // then
                 .andExpect(status().isOk());
     }
 
@@ -136,7 +145,8 @@ public class CategoryControllerTest {
         NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
             this.mockMvc.perform(MockMvcRequestBuilders.put("/categories")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(categoryEntity));
+                    .content(categoryEntity)
+                    .with(csrf()));
         });
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
@@ -150,7 +160,8 @@ public class CategoryControllerTest {
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .delete("/categories/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk());
@@ -164,7 +175,8 @@ public class CategoryControllerTest {
         NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
             this.mockMvc.perform(MockMvcRequestBuilders
                     .delete("/categories/{id}", id)
-                    .contentType(MediaType.APPLICATION_JSON));
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(csrf()));
         });
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
@@ -179,7 +191,8 @@ public class CategoryControllerTest {
         NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
             this.mockMvc.perform(MockMvcRequestBuilders
                     .delete("/categories/{id}", id)
-                    .contentType(MediaType.APPLICATION_JSON));
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(csrf()));
         });
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());

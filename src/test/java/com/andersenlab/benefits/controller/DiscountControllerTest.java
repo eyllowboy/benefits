@@ -255,27 +255,13 @@ class DiscountControllerTest {
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/discounts/filter-by-type")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("category", "Еда")
+                        .param("type", "type1")
                         .with(csrf()))
         //then
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].type", is("type1")))
                 .andReturn();
-    }
-
-    @Test
-    void whenFindByTypeIsPositiveScenario() throws Exception {
-        //when
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/discounts/type")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .param("type", "type1")
-                        .with(csrf()))
-                //then
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].type", is("type1")));
     }
 
     @Test

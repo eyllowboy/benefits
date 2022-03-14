@@ -2,7 +2,6 @@ package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.DiscountEntity;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

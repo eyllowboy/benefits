@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,6 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -28,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
+@WithMockUser
 public class LocationControllerTest {
 
     @Autowired
@@ -50,7 +53,8 @@ public class LocationControllerTest {
         // when
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/locations")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk())
@@ -63,7 +67,8 @@ public class LocationControllerTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/locations")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("country", "Россия"))
+                        .param("country", "Россия")
+                        .with(csrf()))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk())
@@ -75,7 +80,8 @@ public class LocationControllerTest {
         // when
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/locations/{id}", 1L)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk())
@@ -89,7 +95,7 @@ public class LocationControllerTest {
     public void whenGetLocationByIdFailIdNotExists() throws Exception {
         // when
         final NestedServletException NestedServletException = assertThrows(NestedServletException.class, () ->
-                mockMvc.perform(get("/locations/{id}", 100L)));
+                mockMvc.perform(get("/locations/{id}", 100L).with(csrf())));
         // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
         assertEquals("Location with this id was not found in the database",
@@ -101,7 +107,8 @@ public class LocationControllerTest {
         // when
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/locations/{country}/{city}", "Россия", "Казань")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk())
@@ -119,7 +126,8 @@ public class LocationControllerTest {
         final NestedServletException NestedServletException = assertThrows(NestedServletException.class, () ->
                 mockMvc.perform(MockMvcRequestBuilders
                                 .get("/locations/{country}/{city}", country, city)
-                                .contentType(MediaType.APPLICATION_JSON))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .with(csrf()))
                         .andDo(print()));
         // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
@@ -134,7 +142,8 @@ public class LocationControllerTest {
                         .post("/locations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("country", "Россия")
-                        .param("city", "Пермь"))
+                        .param("city", "Пермь")
+                        .with(csrf()))
                 .andDo(print())
                 // then
                 .andExpect(status().isCreated())
@@ -154,7 +163,8 @@ public class LocationControllerTest {
                         .post("/locations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("country", country)
-                        .param("city", city)));
+                        .param("city", city)
+                        .with(csrf())));
         // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
         assertEquals("Location with city name '" + city + "' and country '" + country + "' already exists",
@@ -170,7 +180,8 @@ public class LocationControllerTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/locations")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(locationEntity))
+                        .content(locationEntity)
+                        .with(csrf()))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk());
@@ -186,7 +197,8 @@ public class LocationControllerTest {
                 mockMvc.perform(MockMvcRequestBuilders
                         .put("/locations")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(locationEntity)));
+                        .content(locationEntity)
+                        .with(csrf())));
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
         assertEquals("Location with this id was not found in the database",
@@ -200,7 +212,8 @@ public class LocationControllerTest {
         // when
         mockMvc.perform(MockMvcRequestBuilders
                         .delete("/locations/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk());
@@ -214,7 +227,8 @@ public class LocationControllerTest {
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 mockMvc.perform(MockMvcRequestBuilders
                         .delete("/locations/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON)));
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf())));
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
         assertEquals("There is active discounts in this Location in database",
@@ -229,7 +243,8 @@ public class LocationControllerTest {
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 mockMvc.perform(MockMvcRequestBuilders
                         .delete("/locations/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON)));
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf())));
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
         assertEquals("Location with id: '" + id + "' was not found in the database",
@@ -243,7 +258,8 @@ public class LocationControllerTest {
                         .get("/locations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("country", "Россия")
-                        .param("filterMask", "са"))
+                        .param("filterMask", "са")
+                        .with(csrf()))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk())

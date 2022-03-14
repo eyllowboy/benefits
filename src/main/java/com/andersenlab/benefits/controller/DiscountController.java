@@ -106,8 +106,6 @@ public class DiscountController {
     public final Optional<DiscountEntity> oneDiscount(@PathVariable final Long id) {
         final Optional<DiscountEntity> discount = discountService.findByIdDiscount(id);
         return Optional.ofNullable(discount.orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database")));
-
-
     }
 
     /**
@@ -204,17 +202,17 @@ public class DiscountController {
         return discountService.getDiscountsByCriteria(spec);
     }
 
+    /**
+     * Filters {@link DiscountEntity} from the database by discountSize and lastDate.
+     *
+     * @param size the size {@link DiscountEntity} that needs to filtering
+     */
     @Operation(summary = "This is method to filtering the discount by size and lastDate.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Discounts are filtered",
                     content = @Content)
     })
-    /**
-     * Filters {@link DiscountEntity} from the database by discountSize and lastDate.
-     *
-     * @param size the size {@link DiscountEntity} that needs to filtering
-     */
     @GetMapping("/discounts/filter-by-size")
     public final List<DiscountEntity> findBySizeDiscount(@RequestParam(required = false) final String size) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getBySize(size).and(getLastAdded()));

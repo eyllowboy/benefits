@@ -202,18 +202,6 @@ public class RoleControllerTest {
 	}
 	
 	@Test
-	public void whenDeleteRoleIsSuccess() throws Exception {
-		// when
-		mockMvc.perform(MockMvcRequestBuilders
-						.delete("/roles/{id}", 10L)
-						.with(csrf())
-						.contentType(MediaType.APPLICATION_JSON))
-				.andDo(print())
-		// then
-				.andExpect(status().isOk());
-	}
-	
-	@Test
 	public void whenDeleteRoleAndIdNotExists() {
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,

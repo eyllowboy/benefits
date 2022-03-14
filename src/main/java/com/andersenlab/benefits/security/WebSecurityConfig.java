@@ -69,6 +69,24 @@ public class WebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/discount").hasAnyRole("MODERATOR")
                 .antMatchers(HttpMethod.PUT, "/discount/**").hasAnyRole("MODERATOR")
                 .antMatchers(HttpMethod.DELETE, "/discount/**").hasAnyRole("MODERATOR")
+                // categories
+                .antMatchers(HttpMethod.GET, "/categories").hasAnyRole("ADMIN", "MODERATOR", "USER")
+                .antMatchers(HttpMethod.GET, "/categories/**").hasAnyRole("ADMIN", "MODERATOR", "USER")
+                .antMatchers(HttpMethod.POST, "/categories").hasAnyRole("ADMIN")
+                .antMatchers(HttpMethod.PUT, "/categories/**").hasAnyRole("ADMIN")
+                .antMatchers(HttpMethod.DELETE, "/categories/**").hasAnyRole("ADMIN")
+                // locations
+                .antMatchers(HttpMethod.GET, "/locations").hasAnyRole("ADMIN", "MODERATOR", "USER")
+                .antMatchers(HttpMethod.GET, "/locations/**").hasAnyRole("ADMIN", "MODERATOR", "USER")
+                .antMatchers(HttpMethod.POST, "/locations").hasAnyRole("ADMIN")
+                .antMatchers(HttpMethod.PUT, "/locations/**").hasAnyRole("ADMIN")
+                .antMatchers(HttpMethod.DELETE, "/locations/**").hasAnyRole("ADMIN")
+                // companies
+                .antMatchers(HttpMethod.GET, "/companies").hasAnyRole("ADMIN", "MODERATOR", "USER")
+                .antMatchers(HttpMethod.GET, "/companies/**").hasAnyRole("ADMIN", "MODERATOR", "USER")
+                .antMatchers(HttpMethod.POST, "/companies").hasAnyRole("MODERATOR")
+                .antMatchers(HttpMethod.PUT, "/companies/**").hasAnyRole("MODERATOR")
+                .antMatchers(HttpMethod.DELETE, "/companies/**").hasAnyRole("MODERATOR")
                 // swagger
                 .antMatchers(AUTH_WHITELIST).permitAll()
                 .anyRequest().authenticated()
