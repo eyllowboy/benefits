@@ -23,6 +23,23 @@ services:
     restart: always
     logging: *default-logging
 
+  keycloak:
+    container_name: keycloak_container
+    image: jboss/keycloak:16.1.1
+    labels:
+      - keep
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: benefits
+      DB_SCHEMA: public
+    ports:
+      - 8484:8080
+    depends_on:
+      - postgres
+    restart: always
+    logging: *default-logging
+
   benefits-backend:
     image: $AND_DOCKER_REGISTRY/benefits-backend:$CI_COMMIT_BRANCH
     container_name: benefits-backend
@@ -30,6 +47,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/benefits
     ports:
       - 8080:8080
+    depends_on:
+      - keycloak
     restart: always
     logging: *default-logging
 
