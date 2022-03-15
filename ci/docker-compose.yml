@@ -33,8 +33,12 @@ services:
       DB_ADDR: postgres
       DB_DATABASE: benefits
       DB_SCHEMA: public
+      KEYCLOAK_IMPORT: ./keycloak/realm-export.json
+    env_file: $ENV_DEV
     ports:
       - 8484:8080
+    volumes:
+      - ./realm-export.json:./keycloak/realm-export.json
     depends_on:
       - postgres
     restart: always
