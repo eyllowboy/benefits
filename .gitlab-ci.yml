@@ -35,7 +35,6 @@ variables:
     paths:
       - .m2/repository
   script:
-    - rm -rf ./ci/ci
     - mvn $MAVEN_CLI_OPTS test
   allow_failure: true
 
@@ -70,8 +69,6 @@ test:stage:
     expire_in: 25min
 
 build:dev:
-  script:
-    - ls /ci/ci
   extends: .build-template
   tags: [shell]
   only:
