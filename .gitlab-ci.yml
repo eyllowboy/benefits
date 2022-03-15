@@ -71,7 +71,7 @@ test:stage:
 
 build:dev:
   script:
-    - ls ci/ci
+    - ls /ci/ci
   extends: .build-template
   tags: [shell]
   only:
