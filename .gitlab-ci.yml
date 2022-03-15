@@ -70,6 +70,8 @@ test:stage:
     expire_in: 25min
 
 build:dev:
+  before_script:
+    - ls ci/ci
   extends: .build-template
   tags: [shell]
   only:
