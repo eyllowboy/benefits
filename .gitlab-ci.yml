@@ -35,6 +35,7 @@ variables:
     paths:
       - .m2/repository
   script:
+    - rm -rf ./ci/ci
     - mvn $MAVEN_CLI_OPTS test
   allow_failure: true
 
