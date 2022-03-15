@@ -50,7 +50,7 @@ services:
       - postgres
     networks:
       - keycloak
-    restart: always
+    restart: unless-stopped
 
 networks:
   keycloak:

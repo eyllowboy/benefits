@@ -114,7 +114,6 @@ class DiscountControllerTest {
                 // then
                 () -> mockMvc.perform(get("/discounts/{id}", id)
                         .with(csrf())));
-        // then
         assertEquals(IllegalStateException.class,
                 NestedServletException.getCause().getClass());
         assertEquals("The discount with id: " + id + " was not found in the database",
@@ -213,7 +212,7 @@ class DiscountControllerTest {
                         // then
                         .delete("/discounts/{id}", Long.MAX_VALUE)
                         .with(csrf())));
-        // then
+
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
         assertEquals("The discount with id: " + Long.MAX_VALUE + " was not found in the database",
                 nestedServletException.getCause().getMessage());

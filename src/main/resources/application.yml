@@ -46,7 +46,7 @@ spring:
     name: A-Benefits
 
 keycloak:
-  auth-server-url: http://keycloak:8484/auth/
+  auth-server-url: http://localhost:8484/auth/
   realm: benefits
   resource: benefits-auth
   ssl-required: external
@@ -59,6 +59,7 @@ springdoc:
       clientId: benefits-auth
       clientSecret: qyYUkad3HmruCk2ZRw3FP9H52lWc9Poq
   oAuthFlow:
-    authorizationUrl: http://keycloak:8484/auth/realms/benefits/protocol/openid-connect/auth
-    tokenUrl: http://keycloak:8484/auth/realms/benefits/protocol/openid-connect/token
+    authorizationUrl: http://localhost:8484/auth/realms/benefits/protocol/openid-connect/auth
+    tokenUrl: http://localhost:8484/auth/realms/benefits/protocol/openid-connect/token
     use-pkce-with-authorization-code-grant: true
+
