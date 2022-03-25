@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-sequence
+      author: Denis Popov
+      dbms: 'postgresql'
+  - include:
+      file: changelog/changeset/alter_table.sql
