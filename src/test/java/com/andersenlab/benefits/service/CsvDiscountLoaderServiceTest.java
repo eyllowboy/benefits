@@ -59,7 +59,7 @@ public class CsvDiscountLoaderServiceTest {
 
     private Set<CategoryEntity> getCategoryList() {
         Set<CategoryEntity> result = new LinkedHashSet<>();
-        final int size = (int) (random() * 10 + 1);
+        final int size = (int) (random() * 9 + 1);
         for (long i = 1; i <= size; i++) {
             CategoryEntity category = this.categoryRepository.findByTitle("Category" + i)
                     .orElse(new CategoryEntity("Category" + i));
@@ -72,7 +72,7 @@ public class CsvDiscountLoaderServiceTest {
 
     private Set<LocationEntity> getLocationList() {
         Set<LocationEntity> result = new LinkedHashSet<>();
-        final int size = (int) (random() * 10 + 1);
+        final int size = (int) (random() * 9 + 1);
         for (long i = 1; i <= size; i++) {
             LocationEntity location = this.csvDiscountLoaderRepository.findLocationByCity("City" + i)
                     .orElse(new LocationEntity("SomeCountry", "City" + i));
@@ -84,7 +84,7 @@ public class CsvDiscountLoaderServiceTest {
     }
 
     private CompanyEntity getCompany() {
-        final long num = (long) (random() * 10 + 1);
+        final long num = (long) (random() * 9 + 1);
         return (new CompanyEntity(
                         "Company" + num,
                         "Description" + num,
