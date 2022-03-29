@@ -153,6 +153,15 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 		return discountEntity;
 	}
 
+	private boolean compareCompanies(final CompanyEntity company1, final CompanyEntity company2) {
+		return (company1.getTitle().equals(company2.getTitle()) &&
+				company1.getAddress().equals(company2.getAddress()) &&
+				company1.getDescription().equals(company2.getDescription()) &&
+				company1.getPhone().equals(company2.getPhone()) &&
+				company1.getLink().equals(company2.getLink())
+		);
+	}
+
 	private void compareDiscounts(DiscountEntity discount1, DiscountEntity discount2) throws IllegalStateException {
 		if ((discount1 == discount2) ||
 			(discount1.getType().equals(discount2.getType()) &&
@@ -162,7 +171,7 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 			discount1.getImageDiscount().equals(discount2.getImageDiscount()) &&
 			discount1.getArea().equals(discount2.getArea()) &&
 			discount1.getCategories().equals(discount2.getCategories()) &&
-			discount1.getCompany_id().equals(discount2.getCompany_id())
+			compareCompanies(discount1.getCompany_id(), discount2.getCompany_id())
 			))
 		throw new IllegalStateException("SKIP already exists");
 	}

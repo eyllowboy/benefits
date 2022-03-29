@@ -17,12 +17,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static java.lang.Math.random;
-import static java.sql.Timestamp.valueOf;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -30,32 +26,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.andersenlab.benefits.controller.ControllerTestUtils.*;
 
 @SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
 @WithMockUser
 public class CsvDiscountLoaderControllerTest {
+    private final DiscountRepository discountRepository;
+    private final CompanyRepository companyRepository;
+    private final CsvDiscountLoaderRepository csvDiscountLoaderRepository;
+
+    @Autowired
+    public CsvDiscountLoaderControllerTest(DiscountRepository discountRepository,
+                                           CompanyRepository companyRepository,
+                                           CsvDiscountLoaderRepository csvDiscountLoaderRepository) {
+        this.discountRepository = discountRepository;
+        this.companyRepository = companyRepository;
+        this.csvDiscountLoaderRepository = csvDiscountLoaderRepository;
+    }
+
     @Autowired
     MockMvc mockMvc;
-
-    @Autowired
-    DiscountRepository discountRepository;
-
-    @Autowired
-    CompanyRepository companyRepository;
-
-    @Autowired
-    CsvDiscountLoaderRepository csvDiscountLoaderRepository;
-
-    @Autowired
-    CategoryRepository categoryRepository;
-
-    @Autowired
-    LocationRepository locationRepository;
-
-    @Autowired
-    UserRepository userRepository;
 
     @Container
     public static final PostgreSQLContainer<?> postgreSQLContainer =
@@ -69,131 +61,15 @@ public class CsvDiscountLoaderControllerTest {
         registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
     }
 
-    private Set<CategoryEntity> getCategoryList() {
-        Set<CategoryEntity> result = new LinkedHashSet<>();
-        final int size = (int) (random() * 9 + 1);
-        for (long i = 1; i <= size; i++) {
-            CategoryEntity category = this.categoryRepository.findByTitle("Category" + i)
-                    .orElse(new CategoryEntity("Category" + i));
-            if (null == category.getId())
-                categoryRepository.save(category);
-            result.add(category);
-        }
-        return result;
-    }
-
-    private Set<LocationEntity> getLocationList() {
-        Set<LocationEntity> result = new LinkedHashSet<>();
-        final int size = (int) (random() * 9 + 1);
-        for (long i = 1; i <= size; i++) {
-            LocationEntity location = this.csvDiscountLoaderRepository.findLocationByCity("City" + i)
-                    .orElse(new LocationEntity("SomeCountry", "City" + i));
-            if (null == location.getId())
-                locationRepository.save(location);
-            result.add(location);
-        }
-        return result;
-    }
-
-    private CompanyEntity getCompany() {
-        final long num = (long) (random() * 9 + 1);
-        return (new CompanyEntity(
-                        "Company" + num,
-                        "Description" + num,
-                        "Address" + num,
-                        "Phone" + num,
-                        "Link" + num
-                    ));
-    }
-
-    private List<DiscountEntity> getDiscountList(final int discountsCount) {
-        List<DiscountEntity> result = new ArrayList<>();
-        for (long i = 1; i <= discountsCount; i++) {
-            result.add(new DiscountEntity(
-                            i,
-                            "Type" + i,
-                            "Description" + i,
-                            "Condition" + i,
-                            "Size" + i,
-                            DiscountType.DISCOUNT,
-                            valueOf("2022-01-01 00:00:00"),
-                            valueOf("2022-12-31 00:00:00"),
-                            "Image" + i,
-                            getLocationList(),
-                            getCategoryList(),
-                            getCompany()));
-        }
-        return result;
-    }
-
-    private String discountToString(final DiscountEntity discount) {
-        return (
-                discount.getId() + ";" +
-                discount.getCompany_id().getTitle() + ";" +
-                discount.getType() + ";" +
-                discount.getCategories().stream().map(CategoryEntity::getTitle).collect(Collectors.joining("|")) + ";" +
-                discount.getImageDiscount() + ";" +
-                discount.getCompany_id().getDescription() + ";" +
-                discount.getCompany_id().getAddress() + ";" +
-                discount.getCompany_id().getPhone() + ";" +
-                discount.getCompany_id().getLink() + ";" +
-                discount.getSizeDiscount() + ";" +
-                discount.getDiscount_type() + ";" +
-                discount.getDescription() + ";" +
-                discount.getDiscount_condition() + ";" +
-                discount.getDateBegin() + ";" +
-                discount.getDateFinish() + ";" +
-                discount.getArea().stream().map(LocationEntity::getCity).collect(Collectors.joining("|"))
-                );
-    }
-
-    private MockMultipartFile newMockMultipartFile(final List<DiscountEntity> discounts) {
-        StringBuilder contents = new StringBuilder("number;company_title;type;category;image;company_description;company_address;company_phone;links;size;discount_type;discount_description;discount_condition;start_date;end_date;location");
-        discounts.forEach(discount -> contents.append("\n").append(discountToString(discount)));
-        return (new MockMultipartFile(
-                "file",
-                "discounts.csv",
-                "multipart/form-data",
-                contents.toString().getBytes(StandardCharsets.UTF_8)));
-    }
-
-    private boolean isCompaniesEquals(final CompanyEntity company1, final CompanyEntity company2) {
-        return (
-                company1.getTitle().equals(company2.getTitle()) &&
-                company1.getAddress().equals(company2.getAddress()) &&
-                company1.getDescription().equals(company2.getDescription()) &&
-                company1.getPhone().equals(company2.getPhone()) &&
-                company1.getLink().equals(company2.getLink())
-                );
-    }
-
-    private boolean isDiscountsEquals(final DiscountEntity discount1, final DiscountEntity discount2) {
-        if (discount1 == discount2) return true;
-        if (null == discount1 || discount1.getClass() != discount2.getClass()) return false;
-        return (
-                discount1.getType().equals(discount2.getType()) &&
-                discount1.getDescription().equals(discount2.getDescription()) &&
-                discount1.getDiscount_condition().equals(discount2.getDiscount_condition()) &&
-                discount1.getSizeDiscount().equals(discount2.getSizeDiscount()) &&
-                discount1.getImageDiscount().equals(discount2.getImageDiscount()) &&
-                isCompaniesEquals(discount1.getCompany_id(), discount2.getCompany_id())
-        );
-    }
-
     @BeforeEach
-    private void clearData() {
-        this.discountRepository.deleteAll();
-        this.categoryRepository.deleteAll();
-        this.companyRepository.deleteAll();
-        this.userRepository.deleteAll();
-        this.locationRepository.deleteAll();
+    public void clearData() {
+        clearTables();
     }
 
     @Test
     public void whenLoadCsvSuccess() throws Exception {
         // given
-        final int discountsCount = 10;
-        final List<DiscountEntity> discounts = getDiscountList(discountsCount);
+        final List<DiscountEntity> discounts = getDiscountList();
         final MockMultipartFile csvData = newMockMultipartFile(discounts);
         final List<String> result = new ArrayList<>();
         discounts.forEach(discount -> result.add(discount.getId() + ": OK"));
@@ -208,7 +84,7 @@ public class CsvDiscountLoaderControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", is(result)));
         discountsAfterUpload = this.discountRepository.findAll();
-        assertEquals(discountsCount, discountsAfterUpload.size());
+        assertEquals(discounts.size(), discountsAfterUpload.size());
         for (int i = 0; i < discounts.size(); i++)
             assertTrue(isDiscountsEquals(discounts.get(i), discountsAfterUpload.get(i)));
     }
@@ -216,8 +92,7 @@ public class CsvDiscountLoaderControllerTest {
     @Test
     public void whenLoadCsvDiscountExists() throws Exception {
         // given
-        final int discountsCount = 20;
-        final List<DiscountEntity> discounts = getDiscountList(discountsCount);
+        final List<DiscountEntity> discounts = getDiscountList();
         final List<String> result = new ArrayList<>();
         discounts.forEach(discount -> {
             CompanyEntity company = this.csvDiscountLoaderRepository
@@ -241,18 +116,17 @@ public class CsvDiscountLoaderControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", is(result)));
 
-        assertEquals(discountsCount, this.discountRepository.findAll().size());
+        assertEquals(discounts.size(), this.discountRepository.findAll().size());
     }
 
     @Test
     public void whenLoadCsvWithDiscountDuplicate() throws Exception {
         // given
-        int discountsCount = 3;
-        final List<DiscountEntity> discounts = getDiscountList(discountsCount);
+        final List<DiscountEntity> discounts = getDiscountList();
         final List<String> result = new ArrayList<>();
         discounts.forEach(discount -> result.add(discount.getId() + ": OK"));
-        discounts.add(discounts.get(discountsCount - 1));
-        result.add(discountsCount + ": SKIP already exists");
+        discounts.add(discounts.get(discounts.size() - 1));
+        result.add((discounts.size() - 1) + ": SKIP already exists");
         final MockMultipartFile csvData = newMockMultipartFile(discounts);
         final List<DiscountEntity> discountsAfterUpload;
 
@@ -267,16 +141,15 @@ public class CsvDiscountLoaderControllerTest {
             .andExpect(jsonPath("$", is(result)));
 
         discountsAfterUpload = this.discountRepository.findAll();
-        assertEquals(discountsCount, discountsAfterUpload.size());
-        for (int i = 0; i < discountsCount; i++)
+        assertEquals(discounts.size() - 1, discountsAfterUpload.size());
+        for (int i = 0; i < discounts.size() - 1; i++)
             assertTrue(isDiscountsEquals(discounts.get(i), discountsAfterUpload.get(i)));
     }
 
     @Test
     public void whenLoadCsvFailLocationNotFound() throws Exception {
         // given
-        int discountsCount = 1;
-        final List<DiscountEntity> discounts = getDiscountList(discountsCount);
+        final List<DiscountEntity> discounts = getDiscountList();
         final Set<LocationEntity> locationToEdit = discounts.get(0).getArea();
         locationToEdit.iterator().next().setCity("Брест");
         final MockMultipartFile csvData = newMockMultipartFile(discounts);
@@ -294,8 +167,7 @@ public class CsvDiscountLoaderControllerTest {
     @Test
     public void whenLoadCsvFailLongField() throws Exception {
         // given
-        int discountsCount = 10;
-        final List<DiscountEntity> discounts = getDiscountList(discountsCount);
+        final List<DiscountEntity> discounts = getDiscountList();
         discounts.get(0).setType("01234567890123456789012345678901234567890123456789012345678901234567890123456789");
         final MockMultipartFile csvData = newMockMultipartFile(discounts);
 
@@ -312,8 +184,7 @@ public class CsvDiscountLoaderControllerTest {
     @Test
     public void whenLoadCsvFailIncorrectNumberOfDelimitedFields() throws Exception {
         // given
-        int discountsCount = 10;
-        final List<DiscountEntity> discounts = getDiscountList(discountsCount);
+        final List<DiscountEntity> discounts = getDiscountList();
         discounts.get(0).setType("0123456789;0123456789");
         final MockMultipartFile csvData = newMockMultipartFile(discounts);
 
