@@ -56,4 +56,10 @@ public interface CompanyService {
      */
     void deleteCompanyById(final Long id);
 
+    /**
+     * Method allows get company with discount by the company id.
+     *
+     * @param id the id of record in the database, not null
+     */
+    Optional<CompanyEntity> findWithAssociatedDiscount(final Long id);
 }

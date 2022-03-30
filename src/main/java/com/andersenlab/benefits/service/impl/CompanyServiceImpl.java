@@ -61,6 +61,11 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public void deleteCompanyById(final Long id) {
         companyRepository.deleteById(id);
-
     }
+
+    @Override
+    public Optional<CompanyEntity> findWithAssociatedDiscount(Long id) {
+        return companyRepository.findWithAssociatedDiscounts(id);
+    }
+
 }

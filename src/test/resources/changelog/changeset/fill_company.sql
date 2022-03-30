@@ -3,4 +3,5 @@ insert into company (title, description, address, phone, link) values
 ('company2', 'description2', 'address2', '8910-00-00', 'link2'),
 ('company3', 'description3', 'address3', '8920-00-00', 'link3'),
 ('company4', 'description4', 'address4', '8930-00-00', 'link4'),
-('company5', 'description5', 'address5', '8940-00-00', 'link5');
+('company5', 'description5', 'address5', '8940-00-00', 'link5'),
+('company6', 'description6', 'address6', '8940-00-00', 'link6');

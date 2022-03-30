@@ -50,8 +50,9 @@ public class CompanyController {
     })
     @PostMapping("/companies")
     public final Optional<CompanyEntity> addCompany(@RequestBody CompanyEntity companyEntity) {
-        return Optional.ofNullable(companyService.createCompany(companyEntity)
-                .orElseThrow(() -> new IllegalStateException("The company with id: " + companyEntity.getId() + " already exists.")));
+        companyService.findByIdCompany(companyEntity.getId()).ifPresent(company -> {
+            throw new IllegalStateException("The company with id: " + companyEntity.getId() + " already exists.");});
+        return companyService.createCompany(companyEntity);
     }
 
     /**
@@ -135,6 +136,9 @@ public class CompanyController {
     @DeleteMapping("/companies/{id}")
     public void deleteCompanyById(@PathVariable final Long id) {
         companyService.findByIdCompany(id).orElseThrow(() -> new IllegalStateException("The company with id: " + id + " was not found in the database."));
+        final Optional<CompanyEntity> companyEntity = companyService.findWithAssociatedDiscount(id);
+        if (companyEntity.isPresent() && companyEntity.get().getDiscounts().size() > 0)
+            throw new IllegalStateException("There is active discounts in this Category in database");
         companyService.deleteCompanyById(id);
     }
 

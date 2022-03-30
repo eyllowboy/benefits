@@ -89,9 +89,13 @@ public class DiscountController {
     })
     @PostMapping("/discounts")
     public final ResponseEntity<DiscountEntity> newDiscount(@RequestBody final DiscountEntity newDiscount) {
-        final Optional<DiscountEntity> savedDiscount = discountService.createDiscount(newDiscount);
-        return new ResponseEntity<DiscountEntity>(
-                savedDiscount.orElseThrow(() -> new IllegalStateException("The discount with id: " + newDiscount.getId() + " was not saved in the database")), HttpStatus.CREATED);
+        discountService.findByIdDiscount(newDiscount.getId()).ifPresent(discount -> {
+            throw new IllegalStateException("The discount with id: " +
+                    newDiscount.getId() + " already saved in the database");});
+        final DiscountEntity savedDiscount = discountService.createDiscount(newDiscount)
+                .orElseThrow(() -> new IllegalStateException("The discount with id: " +
+                        newDiscount.getId() + " was not saved in the database"));
+        return new ResponseEntity<>(savedDiscount, HttpStatus.CREATED);
     }
 
     /**
@@ -161,7 +165,7 @@ public class DiscountController {
                     content = @Content)
     })
     @GetMapping("/discounts/filter-by-city")
-    public final List<DiscountEntity> findByCityAndCategoryAndDate(@RequestParam(required = false) final String city) {
+    public final List<DiscountEntity> findLastByCity(@RequestParam(required = false) final String city) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByLocation(city).and(getLastAdded()));
         return discountService.getDiscountsByCriteria(spec);
     }
@@ -179,7 +183,7 @@ public class DiscountController {
                     content = @Content)
     })
     @GetMapping("/discounts/filter-by-category")
-    public final List<DiscountEntity> findByCategoryAndDate(@RequestParam(required = false) final String category) {
+    public final List<DiscountEntity> findLastByCategory(@RequestParam(required = false) final String category) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByCategory(category).and(getLastAdded()));
         return discountService.getDiscountsByCriteria(spec);
     }
@@ -196,7 +200,7 @@ public class DiscountController {
                     content = @Content)
     })
     @GetMapping("/discounts/filter-by-type")
-    public final List<DiscountEntity> findByTypeAndLastDate(@RequestParam(required = false) final String type) {
+    public final List<DiscountEntity> findLastByType(@RequestParam(required = false) final String type) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByType(type).and(getLastAdded()));
         return discountService.getDiscountsByCriteria(spec);
     }
@@ -213,7 +217,7 @@ public class DiscountController {
                     content = @Content)
     })
     @GetMapping("/discounts/filter-by-size")
-    public final List<DiscountEntity> findBySizeDiscount(@RequestParam(required = false) final String size) {
+    public final List<DiscountEntity> findLastBySize(@RequestParam(required = false) final String size) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getBySize(size).and(getLastAdded()));
         return discountService.getDiscountsByCriteria(spec);
     }

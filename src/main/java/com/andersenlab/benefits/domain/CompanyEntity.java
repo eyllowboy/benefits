@@ -50,10 +50,10 @@ public class CompanyEntity {
     @Column(name = "link")
     private String link;
 
-    @Transient
     @OneToMany(mappedBy = "company_id")
     @JsonIgnore
-    private List<DiscountEntity> discountEntityList;
+    @Column(name = "discount_id")
+    private List<DiscountEntity> discounts;
 
     public CompanyEntity(String title, String description, String address, String phone, String link) {
         this.title = title;
