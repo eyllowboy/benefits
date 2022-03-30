@@ -16,7 +16,6 @@ import java.util.Set;
 @Setter
 @EqualsAndHashCode
 @ToString
-
 public class DiscountEntity {
 
     @Schema(description = "Identifier", type = "int64", minimum = "1")
@@ -74,7 +73,7 @@ public class DiscountEntity {
             inverseJoinColumns = @JoinColumn(name = "category_id"))
     private Set<CategoryEntity> categories;
 
-    @Schema(description = "Companies", type = "entities")
+    @Schema(description = "Company", type = "entities")
     @ManyToOne
     @JoinColumn(name = "company_id")
     private CompanyEntity company_id;

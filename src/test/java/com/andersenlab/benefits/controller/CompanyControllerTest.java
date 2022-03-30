@@ -141,7 +141,7 @@ class CompanyControllerTest {
     @Test
     public void whenDeletePositiveScenario() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/companies/4")
+                        .delete("/companies/6")
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andDo(print())
