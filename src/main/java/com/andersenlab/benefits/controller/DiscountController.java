@@ -165,7 +165,7 @@ public class DiscountController {
                     content = @Content)
     })
     @GetMapping("/discounts/filter-by-city")
-    public final List<DiscountEntity> findByCityAndDate(@RequestParam(required = false) final String city) {
+    public final List<DiscountEntity> findLastByCity(@RequestParam(required = false) final String city) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByLocation(city).and(getLastAdded()));
         return discountService.getDiscountsByCriteria(spec);
     }
@@ -183,7 +183,7 @@ public class DiscountController {
                     content = @Content)
     })
     @GetMapping("/discounts/filter-by-category")
-    public final List<DiscountEntity> findByCategoryAndDate(@RequestParam(required = false) final String category) {
+    public final List<DiscountEntity> findLastByCategory(@RequestParam(required = false) final String category) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByCategory(category).and(getLastAdded()));
         return discountService.getDiscountsByCriteria(spec);
     }
@@ -200,7 +200,7 @@ public class DiscountController {
                     content = @Content)
     })
     @GetMapping("/discounts/filter-by-type")
-    public final List<DiscountEntity> findByTypeAndLastDate(@RequestParam(required = false) final String type) {
+    public final List<DiscountEntity> findLastByType(@RequestParam(required = false) final String type) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByType(type).and(getLastAdded()));
         return discountService.getDiscountsByCriteria(spec);
     }
@@ -217,7 +217,7 @@ public class DiscountController {
                     content = @Content)
     })
     @GetMapping("/discounts/filter-by-size")
-    public final List<DiscountEntity> findBySizeDiscount(@RequestParam(required = false) final String size) {
+    public final List<DiscountEntity> findLastBySize(@RequestParam(required = false) final String size) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getBySize(size).and(getLastAdded()));
         return discountService.getDiscountsByCriteria(spec);
     }
