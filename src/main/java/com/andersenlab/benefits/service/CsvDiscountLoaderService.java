@@ -1,6 +1,5 @@
 package com.andersenlab.benefits.service;
 
-import com.andersenlab.benefits.domain.LocationEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,8 +15,8 @@ public interface CsvDiscountLoaderService {
     /***
      * Method to load list of Discounts from CSV file. Failsafe.
      * @param file MultipartFile file contains contents of Discounts list
-     * @param delimiter string separator which delimits columns of fields
+     * @param delimiter string separator which delimits columns of fields (default ";")
      * @return List of line-by-line separated result of import Discounts
      */
-    public List<String> loadDiscountsFromCsv(final MultipartFile file, final String delimiter);
+    List<String> loadDiscountsFromCsv(final MultipartFile file, final String delimiter);
 }

@@ -29,30 +29,28 @@ public class CsvDiscountLoaderServiceTest {
     private final List<LocationEntity> locations = new ArrayList<>();
     private final List<CategoryEntity> categories = new ArrayList<>();
     private final List<DiscountEntity> discounts = new ArrayList<>();
+    private final CsvDiscountLoaderServiceImpl csvDiscountLoaderService;
 
-    CsvDiscountLoaderServiceImpl csvDiscountLoaderService;
-
     @MockBean
-    CsvDiscountLoaderRepository csvDiscountLoaderRepository;
+    private final DiscountRepository discountRepository;
     @MockBean
-    DiscountRepository discountRepository;
+    private final CompanyRepository companyRepository;
     @MockBean
-    CompanyRepository companyRepository;
+    private final CategoryRepository categoryRepository;
     @MockBean
-    CategoryRepository categoryRepository;
-    @MockBean
-    LocationRepository locationRepository;
+    private final LocationRepository locationRepository;
 
     @Autowired
-    public CsvDiscountLoaderServiceTest(CsvDiscountLoaderServiceImpl csvDiscountLoaderService) {
+    public CsvDiscountLoaderServiceTest(final CsvDiscountLoaderServiceImpl csvDiscountLoaderService,
+                                        final DiscountRepository discountRepository,
+                                        final CompanyRepository companyRepository,
+                                        final CategoryRepository categoryRepository,
+                                        final LocationRepository locationRepository) {
         this.csvDiscountLoaderService = csvDiscountLoaderService;
-    }
-
-    private void saveDiscountsParameters(Collection<DiscountEntity> discountList) {
-        discountList.forEach(item -> {
-            item.getArea().forEach(area -> area = saveItem(locations, area, Objects::equals));
-            item.getCategories().forEach(category -> category = saveItem(categories, category, Objects::equals));
-        });
+        this.discountRepository = discountRepository;
+        this.companyRepository = companyRepository;
+        this.categoryRepository = categoryRepository;
+        this.locationRepository = locationRepository;
     }
 
     @BeforeEach
@@ -67,41 +65,40 @@ public class CsvDiscountLoaderServiceTest {
 
         when(this.locationRepository.save(any())).thenAnswer(invocation ->
                 saveItem(this.locations, invocation.getArgument(0), Objects::equals));
+        when(this.locationRepository.findAll()).thenReturn(this.locations);
 
         when(this.categoryRepository.save(any())).thenAnswer(invocation ->
                 saveItem(this.categories, invocation.getArgument(0), Objects::equals));
+        when(this.categoryRepository.findAll()).thenReturn(this.categories);
         when(this.categoryRepository.findByTitle(any())).thenAnswer(invocation -> {
             CategoryEntity result = this.categories.stream().filter(category ->
                     Objects.equals(category.getTitle(), invocation.getArgument(0))).findFirst().orElse(null);
             return result != null ? Optional.of(result) : Optional.empty();
         });
 
-        when(this.discountRepository.save(any())).thenAnswer(invocation ->
-                saveItem(this.discounts, invocation.getArgument(0), ServiceTestUtils::isDiscountsEquals));
+        when(this.discountRepository.save(any())).thenAnswer(invocation -> {
+            DiscountEntity discount = invocation.getArgument(0);
+            discount.setCompany_id(saveItem(this.companies, discount.getCompany_id(), ServiceTestUtils::isCompaniesEquals));
+            return saveItem(this.discounts, discount, ServiceTestUtils::isDiscountsEquals);
+        });
         when(this.discountRepository.saveAll(any())).thenAnswer(invocation -> {
             List<DiscountEntity> items = invocation.getArgument(0);
             List<DiscountEntity> result = new ArrayList<>();
-            items.forEach(item -> result.add(saveItem(this.discounts, item, ServiceTestUtils::isDiscountsEquals)));
+            items.forEach(item -> {
+                item.setCompany_id(saveItem(this.companies, item.getCompany_id(), ServiceTestUtils::isCompaniesEquals));
+                result.add(saveItem(this.discounts, item, ServiceTestUtils::isDiscountsEquals));
+            });
             saveDiscountsParameters(discounts);
             return result;
         });
         when(this.discountRepository.findAll()).thenReturn(this.discounts);
+    }
 
-        when(this.csvDiscountLoaderRepository.findLocationByCity(any())).thenAnswer(invocation -> {
-            if (locations.size() == 0)
-                return Optional.empty();
-            LocationEntity result = this.locations.stream().filter(location ->
-                Objects.equals(location.getCity(), invocation.getArgument(0))).findFirst().orElse(null);
-            return null != result ? Optional.of(result) : Optional.empty();
+    private void saveDiscountsParameters(final Collection<DiscountEntity> discountList) {
+        discountList.forEach(item -> {
+            item.getArea().forEach(area -> area.setId(saveItem(locations, area, Objects::equals).getId()));
+            item.getCategories().forEach(category -> category.setId(saveItem(categories, category, Objects::equals).getId()));
         });
-        when(this.csvDiscountLoaderRepository.findCompanyByTitle(any())).thenAnswer(invocation -> {
-            CompanyEntity result = this.companies.stream().filter(company ->
-                    Objects.equals(company.getTitle(), invocation.getArgument(0))).findFirst().orElse(null);
-            return null != result ? Optional.of(result) : Optional.empty();
-        });
-        when(this.csvDiscountLoaderRepository.findDiscountByCompanyId(any())).thenAnswer(invocation ->
-            discounts.stream().filter(discount ->
-                isCompaniesEquals(discount.getCompany_id(), invocation.getArgument(0))).toList());
     }
 
     @Test

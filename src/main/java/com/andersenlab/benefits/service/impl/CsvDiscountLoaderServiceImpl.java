@@ -3,8 +3,8 @@ package com.andersenlab.benefits.service.impl;
 import com.andersenlab.benefits.domain.*;
 import com.andersenlab.benefits.repository.CategoryRepository;
 import com.andersenlab.benefits.repository.CompanyRepository;
-import com.andersenlab.benefits.repository.CsvDiscountLoaderRepository;
 import com.andersenlab.benefits.repository.DiscountRepository;
+import com.andersenlab.benefits.repository.LocationRepository;
 import com.andersenlab.benefits.service.CsvDiscountLoaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,129 +31,147 @@ import static java.time.temporal.TemporalAdjusters.lastDayOfYear;
  */
 @Service
 public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
-	private String[] header;
-	private final String id = "number";
-	private final String companyTitle = "company_title";
-	private final String type = "type";
-	private final String category = "category";
-	private final String image = "image";
-	private final String companyDescription = "company_description";
-	private final String companyAddress = "company_address";
-	private final String companyPhone = "company_phone";
-	private final String links = "links";
-	private final String discountSize = "size";
-	private final String discountType = "discount_type";
-	private final String discountDescription = "discount_description";
-	private final String discountCondition = "discount_condition";
-	private final String startDate = "start_date";
-	private final String endDate = "end_date";
-	private final String location = "location";
-
-	private final CsvDiscountLoaderRepository csvDiscountLoaderRepository;
-
+	private final Map<String, String> suitableHeader = new LinkedHashMap<>(){{
+		put("id", 					"number");
+		put("companyTitle", 		"company_title");
+		put("type", 				"type");
+		put("category",				"category");
+		put("image",				"image");
+		put("companyDescription",	"company_description");
+		put("companyAddress",		"company_address");
+		put("companyPhone",			"company_phone");
+		put("links",				"links");
+		put("discountSize", 		"size");
+		put("discountType", 		"discount_type");
+		put("discountDescription",	"discount_description");
+		put("discountCondition",	"discount_condition");
+		put("startDate",			"start_date");
+		put("endDate",				"end_date");
+		put("location",				"location");
+	}};
+	private final List<String> header = new ArrayList<>();
 	private final CategoryRepository categoryRepository;
-
 	private final CompanyRepository companyRepository;
-
 	private final DiscountRepository discountRepository;
+	private final LocationRepository locationRepository;
 
 	@Autowired
-	public CsvDiscountLoaderServiceImpl(CsvDiscountLoaderRepository csvDiscountLoaderRepository,
-										CategoryRepository categoryRepository,
-										CompanyRepository companyRepository,
-										DiscountRepository discountRepository) {
-		this.csvDiscountLoaderRepository = csvDiscountLoaderRepository;
+	public CsvDiscountLoaderServiceImpl(final CategoryRepository categoryRepository,
+										final CompanyRepository companyRepository,
+										final DiscountRepository discountRepository,
+										final LocationRepository locationRepository) {
 		this.categoryRepository = categoryRepository;
 		this.companyRepository = companyRepository;
 		this.discountRepository = discountRepository;
+		this.locationRepository = locationRepository;
 	}
 
-	private Date getDate(String date, boolean isStartDate) {
+	public List<String> loadDiscountsFromCsv(final MultipartFile file, final String delimiter) {
+		final List<String> response = new ArrayList<>();
+		try {
+			InputStreamReader isr = new InputStreamReader(file.getInputStream());
+			try (BufferedReader input = new BufferedReader(isr)) {
+				String line = input.readLine();
+				header.clear();
+				header.addAll(Arrays.stream(line.split(delimiter)).toList());
+				checkHeadersSuitable();
+				while (input.ready() && !line.isEmpty()) {
+					line = input.readLine();
+					String[] splittedLine = line.split(delimiter);
+					response.add(splittedLine.length == this.header.size() ?
+							putRowToTables(parseLine(splittedLine)) :
+							splittedLine[0] + ": Number of delimited fields does not match header");
+				}
+			}
+		} catch (IllegalStateException ex) {
+			throw new IllegalStateException("Headers titles not suitable");
+		} catch (IOException ex) {
+			throw new IllegalStateException("Check uploaded file is correct", ex);
+		}
+		return response;
+	}
+
+	private Date getDate(final String date, final boolean isStartDate) {
 		try {
 			return (new SimpleDateFormat("dd.MM.yyyy")).parse(date);
 		} catch (ParseException e) {
 			return Date.from(isStartDate ?
-				LocalDate.now().with(firstDayOfYear()).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant() :
-				LocalDate.now().plus(100L, ChronoUnit.YEARS).with(lastDayOfYear()).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+					LocalDate.now().with(firstDayOfYear()).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant() :
+					LocalDate.now().plus(100L, ChronoUnit.YEARS).with(lastDayOfYear()).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 		}
 	}
 
-	private boolean isHeadersSuitable() {
-		return (this.header[0].equals(id) &&
-				this.header[1].equals(companyTitle) &&
-				this.header[2].equals(type) &&
-				this.header[3].equals(category) &&
-				this.header[4].equals(image) &&
-				this.header[5].equals(companyDescription) &&
-				this.header[6].equals(companyAddress) &&
-				this.header[7].equals(companyPhone) &&
-				this.header[8].equals(links) &&
-				this.header[9].equals(discountSize) &&
-				this.header[10].equals(discountType) &&
-				this.header[11].equals(discountDescription) &&
-				this.header[12].equals(discountCondition) &&
-				this.header[13].equals(startDate) &&
-				this.header[14].equals(endDate) &&
-				this.header[15].equals(location)
-				);
+	private void checkHeadersSuitable() throws IOException, IllegalStateException {
+		if (header.size() == 0)
+			throw new IOException();
+		Iterator<String> headerIterator = header.iterator();
+		suitableHeader.forEach((key, value) -> {
+			if (!headerIterator.next().equals(value))
+				throw new IllegalStateException();
+		});
 	}
 
-	private Map<String, String> parseLine(String[] splittedLine) {
-		Map<String, String> result = new LinkedHashMap<>(this.header.length * 2);
-		for (int i = 0; i < this.header.length; i++) {
-			result.put(this.header[i], splittedLine[i]);
-		}
+	private Map<String, String> parseLine(final String[] splittedLine) {
+		Map<String, String> result = new LinkedHashMap<>(header.size() * 2);
+		Iterator<String> headerTitle = suitableHeader.values().iterator();
+		Arrays.stream(splittedLine).forEach(item -> result.put(headerTitle.next(), item));
 		return result;
 	}
 
-	private List<String> splitMultilineValue(String value) {
+	private List<String> splitMultilineValue(final String value) {
 		return (Arrays.asList(value.split("\\|")));
 	}
 
-	private CompanyEntity getCompany(Map<String, String> row) {
-			return this.csvDiscountLoaderRepository.findCompanyByTitle(row.get(this.companyTitle)).orElse(
-					new CompanyEntity(row.get(this.companyTitle),
-							row.get(this.companyDescription),
-							row.get(this.companyAddress),
-							row.get(this.companyPhone),
-							row.get(this.links)));
+	private CompanyEntity getCompany(final Map<String, String> row) {
+		return this.companyRepository.findAll().stream().filter(company ->
+						company.getTitle().equals(row.get(suitableHeader.get("companyTitle")))).findFirst()
+				.orElse(new CompanyEntity(
+						row.get(suitableHeader.get("companyTitle")),
+						row.get(suitableHeader.get("companyDescription")),
+						row.get(suitableHeader.get("companyAddress")),
+						row.get(suitableHeader.get("companyPhone")),
+						row.get(suitableHeader.get("links"))));
 	}
 
-	private Set<LocationEntity> getLocation(Map<String, String> row) {
-		Set<LocationEntity> locations = new HashSet<>();
-		splitMultilineValue(row.get(this.location))
-			.forEach(city -> locations.add(this.csvDiscountLoaderRepository.findLocationByCity(city)
-				.orElseThrow(() -> new IllegalStateException("City " + city + " was not found in database"))));
-		return locations;
+	private Set<LocationEntity> getLocation(final Map<String, String> row) throws IllegalStateException {
+		List<LocationEntity> locations = this.locationRepository.findAll();
+		List<String> searchedCities = splitMultilineValue(row.get(suitableHeader.get("location")));
+		Set<LocationEntity> result  = new LinkedHashSet<>();
+		searchedCities.forEach(city -> result.add(locations.stream().filter(location ->
+				location.getCity().equals(city)).findFirst().orElseThrow(() ->
+				new IllegalStateException("City " + city + " was not found in database"))));
+		return result;
 	}
 
-	private Set<CategoryEntity> getCategory(Map<String, String> row) {
-		Set<CategoryEntity> categories = new HashSet<>();
-		splitMultilineValue(row.get(this.category))
-			.forEach(title -> categories.add(this.categoryRepository.findByTitle(title)
-				.orElseThrow(() -> new IllegalStateException("Category " + title + " was not found in database"))));
-		return categories;
+	private Set<CategoryEntity> getCategory(final Map<String, String> row) {
+		List<CategoryEntity> categories = this.categoryRepository.findAll();
+		List<String> searchedCategories = splitMultilineValue(row.get(suitableHeader.get("category")));
+		Set<CategoryEntity> result = new LinkedHashSet<>();
+		searchedCategories.forEach(title -> result.add(categories.stream().filter(category ->
+				category.getTitle().equals(title)).findFirst().orElseThrow(() ->
+				new IllegalStateException("Category " + title + " was not found in database"))));
+		return result;
 	}
 
-	private DiscountEntity getDiscount(Map<String, String> row, CompanyEntity companyEntity) throws IllegalStateException {
+	private DiscountEntity getDiscount(final Map<String, String> row, final CompanyEntity companyEntity) throws IllegalStateException {
 		Set<LocationEntity> locations = getLocation(row);
 		Set<CategoryEntity> categories = getCategory(row);
 		DiscountEntity discountEntity = new DiscountEntity();
-		discountEntity.setType(row.get(this.type));
-		discountEntity.setDescription(row.get(this.discountDescription));
-		discountEntity.setDiscount_condition(row.get(this.discountCondition));
-		discountEntity.setSizeDiscount(row.get(this.discountSize));
-		discountEntity.setDiscount_type(DiscountType.valueOf(row.get(this.discountType)));
-		discountEntity.setDateBegin(getDate(row.get(this.startDate), true));
-		discountEntity.setDateFinish(getDate(row.get(this.endDate), false));
-		discountEntity.setImageDiscount(row.get(this.image));
+		discountEntity.setType(row.get(suitableHeader.get("type")));
+		discountEntity.setDescription(row.get(suitableHeader.get("discountDescription")));
+		discountEntity.setDiscount_condition(row.get(suitableHeader.get("discountCondition")));
+		discountEntity.setSizeDiscount(row.get(suitableHeader.get("discountSize")));
+		discountEntity.setDiscount_type(DiscountType.valueOf(row.get(suitableHeader.get("discountType"))));
+		discountEntity.setDateBegin(getDate(row.get(suitableHeader.get("startDate")), true));
+		discountEntity.setDateFinish(getDate(row.get(suitableHeader.get("endDate")), false));
+		discountEntity.setImageDiscount(row.get(suitableHeader.get("image")));
 		discountEntity.setArea(locations);
 		discountEntity.setCategories(categories);
 		discountEntity.setCompany_id(companyEntity);
 		return discountEntity;
 	}
 
-	private boolean compareCompanies(final CompanyEntity company1, final CompanyEntity company2) {
+	private boolean equalCompanies(final CompanyEntity company1, final CompanyEntity company2) {
 		return (company1.getTitle().equals(company2.getTitle()) &&
 				company1.getAddress().equals(company2.getAddress()) &&
 				company1.getDescription().equals(company2.getDescription()) &&
@@ -162,58 +180,39 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 		);
 	}
 
-	private void compareDiscounts(DiscountEntity discount1, DiscountEntity discount2) throws IllegalStateException {
-		if ((discount1 == discount2) ||
-			(discount1.getType().equals(discount2.getType()) &&
-			discount1.getDescription().equals(discount2.getDescription()) &&
-			discount1.getDiscount_condition().equals(discount2.getDiscount_condition()) &&
-			discount1.getSizeDiscount().equals(discount2.getSizeDiscount()) &&
-			discount1.getImageDiscount().equals(discount2.getImageDiscount()) &&
-			discount1.getArea().equals(discount2.getArea()) &&
-			discount1.getCategories().equals(discount2.getCategories()) &&
-			compareCompanies(discount1.getCompany_id(), discount2.getCompany_id())
-			))
-		throw new IllegalStateException("SKIP already exists");
+	private boolean equalDiscounts(final DiscountEntity discount1, final DiscountEntity discount2) throws IllegalStateException {
+		return ((discount1 == discount2) ||
+				(discount1.getType().equals(discount2.getType()) &&
+						discount1.getDescription().equals(discount2.getDescription()) &&
+						discount1.getDiscount_condition().equals(discount2.getDiscount_condition()) &&
+						discount1.getSizeDiscount().equals(discount2.getSizeDiscount()) &&
+						discount1.getImageDiscount().equals(discount2.getImageDiscount()) &&
+						discount1.getArea().equals(discount2.getArea()) &&
+						discount1.getCategories().equals(discount2.getCategories()) &&
+						equalCompanies(discount1.getCompany_id(), discount2.getCompany_id())
+				));
 	}
 
 	@Transactional(rollbackFor = {DataIntegrityViolationException.class, IllegalStateException.class})
-	private String putRowToTables (Map<String, String> row) {
+	private String putRowToTables (final Map<String, String> row) {
 		try {
 			CompanyEntity companyEntity = getCompany(row);
 			if (null == companyEntity.getId())
-				this.companyRepository.save(companyEntity);
-			List<DiscountEntity> discountEntities = this.csvDiscountLoaderRepository.findDiscountByCompanyId(companyEntity);
+				companyEntity = this.companyRepository.save(companyEntity);
+			final long companyId = companyEntity.getId();
+			List<DiscountEntity> discounts = discountRepository.findAll();
 			DiscountEntity newDiscount = getDiscount(row, companyEntity);
-			discountEntities.forEach(discount -> compareDiscounts(discount, newDiscount));
+			discounts.stream().filter(discount ->
+							null != discount.getCompany_id().getId() &&
+									discount.getCompany_id().getId().equals(companyId) &&
+									equalDiscounts(discount, newDiscount))
+					.findFirst().ifPresent(found -> {throw new IllegalStateException("SKIP already exists");});
 			this.discountRepository.save(newDiscount);
-			return (row.get(this.id) + ": OK");
+			return (row.get(suitableHeader.get("id")) + ": OK");
 		} catch (IllegalStateException ex) {
-			return (row.get(this.id) + ": " + ex.getMessage());
+			return (row.get(suitableHeader.get("id")) + ": " + ex.getMessage());
 		} catch (DataIntegrityViolationException ex) {
-			return (row.get(this.id) + ": " + ex.getCause().getCause());
+			return (row.get(suitableHeader.get("id")) + ": " + ex.getCause().getCause());
 		}
-	}
-
-	public List<String> loadDiscountsFromCsv(final MultipartFile file, String delimiter) {
-		final List<String> response = new ArrayList<>();
-		try {
-			InputStreamReader isr = new InputStreamReader(file.getInputStream());
-			try (BufferedReader input = new BufferedReader(isr)) {
-				String line = input.readLine();
-				this.header = line.split(delimiter);
-				if (!isHeadersSuitable())
-					throw new IllegalStateException("Headers titles not suitable");
-				while (input.ready() && !line.isEmpty()) {
-					line = input.readLine();
-					String[] splittedLine = line.split(delimiter);
-					response.add(splittedLine.length == this.header.length ?
-							putRowToTables(parseLine(splittedLine)) :
-							splittedLine[0] + ": Number of delimited fields does not match header");
-				}
-			}
-		} catch (IOException ex) {
-			throw new IllegalStateException("Check uploaded file is correct", ex);
-		}
-		return response;
 	}
 }

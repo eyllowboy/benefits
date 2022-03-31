@@ -49,7 +49,7 @@ public class CsvDiscountLoaderController {
     private final CsvDiscountLoaderService csvDiscountLoaderService;
 
     @Autowired
-    public CsvDiscountLoaderController(CsvDiscountLoaderService csvDiscountLoaderService) {
+    public CsvDiscountLoaderController(final CsvDiscountLoaderService csvDiscountLoaderService) {
         this.csvDiscountLoaderService = csvDiscountLoaderService;
     }
 
@@ -66,8 +66,7 @@ public class CsvDiscountLoaderController {
     @PostMapping(value = "/upload-csv-file", consumes = {"multipart/form-data"})
     public List<String> uploadCsvFile(@RequestParam(name = "file") final MultipartFile file,
                                       @RequestParam(name = "delimiter", defaultValue = ";") final String delimiter) {
-        if (file.isEmpty() ||
-                !"csv".equals(Objects.requireNonNull(file.getOriginalFilename()).split("\\.")[1])) {
+        if (file.isEmpty() || !Objects.requireNonNull(file.getOriginalFilename()).endsWith(".csv")) {
             throw new IllegalStateException("Please select a CSV file to upload");
         } else {
             return csvDiscountLoaderService.loadDiscountsFromCsv(file, "\\" + delimiter);

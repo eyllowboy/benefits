@@ -19,11 +19,7 @@ public class ServiceTestUtils {
 
     private static final int listLength = 10;
 
-    public static int getRndEntityPos() {
-        return (int) (random() * (listLength - 1) + 1);
-    }
-
-    public static CategoryEntity getCategory(long num) {
+    public static CategoryEntity getCategory(final long num) {
         return new CategoryEntity("Category" + num);
     }
 
@@ -36,7 +32,7 @@ public class ServiceTestUtils {
         return result;
     }
 
-    public static LocationEntity getLocation(long num) {
+    public static LocationEntity getLocation(final long num) {
         return new LocationEntity("SomeCountry", "City" + num);
     }
 
@@ -60,34 +56,6 @@ public class ServiceTestUtils {
         ));
     }
 
-    public static RoleEntity getRole(long num) {
-		RoleEntity role = new RoleEntity("roleName" + num, "code" + num);
-		role.setId(num);
-		return role;
-	}
-
-    public static List<RoleEntity> getRoleList() {
-		final List<RoleEntity> result = new ArrayList<>(listLength);
-		for (int i = 1; i <= listLength; i++) {
-			result.add(getRole(i));
-		}
-		return result;
-	}
-
-    public static UserEntity getUser(long num) {
-		UserEntity user = new UserEntity("userLogin" + num, getRole(num), getLocation(num));
-		user.setId(num);
-		return user;
-	}
-
-	public static List<UserEntity> getUserList() {
-		final List<UserEntity> result = new ArrayList<>(listLength);
-		for (int i = 1; i <= listLength; i++) {
-			result.add(getUser(i));
-		}
-		return result;
-	}
-
     public static List<DiscountEntity> getDiscountList() {
         List<DiscountEntity> result = new ArrayList<>();
         for (long i = 1; i <= listLength; i++) {
@@ -108,30 +76,29 @@ public class ServiceTestUtils {
         return result;
     }
 
-    public static String discountToString(DiscountEntity discount) {
-        return (new StringBuilder()
-                .append(discount.getId()).append(";")
-                .append(discount.getCompany_id().getTitle()).append(";")
-                .append(discount.getType()).append(";")
-                .append(discount.getCategories().stream()
-                        .map(CategoryEntity::getTitle).collect(Collectors.joining("|"))).append(";")
-                .append(discount.getImageDiscount()).append(";")
-                .append(discount.getCompany_id().getDescription()).append(";")
-                .append(discount.getCompany_id().getAddress()).append(";")
-                .append(discount.getCompany_id().getPhone()).append(";")
-                .append(discount.getCompany_id().getLink()).append(";")
-                .append(discount.getSizeDiscount()).append(";")
-                .append(discount.getDiscount_type()).append(";")
-                .append(discount.getDescription()).append(";")
-                .append(discount.getDiscount_condition()).append(";")
-                .append(discount.getDateBegin()).append(";")
-                .append(discount.getDateFinish()).append(";")
-                .append(discount.getArea().stream()
-                        .map(LocationEntity::getCity).collect(Collectors.joining("|"))
-                ).toString());
+    public static String discountToString(final DiscountEntity discount) {
+        return (discount.getId() + ";" +
+                discount.getCompany_id().getTitle() + ";" +
+                discount.getType() + ";" +
+                discount.getCategories().stream()
+                        .map(CategoryEntity::getTitle).collect(Collectors.joining("|")) +
+                ";" +
+                discount.getImageDiscount() + ";" +
+                discount.getCompany_id().getDescription() + ";" +
+                discount.getCompany_id().getAddress() + ";" +
+                discount.getCompany_id().getPhone() + ";" +
+                discount.getCompany_id().getLink() + ";" +
+                discount.getSizeDiscount() + ";" +
+                discount.getDiscount_type() + ";" +
+                discount.getDescription() + ";" +
+                discount.getDiscount_condition() + ";" +
+                discount.getDateBegin() + ";" +
+                discount.getDateFinish() + ";" +
+                discount.getArea().stream()
+                        .map(LocationEntity::getCity).collect(Collectors.joining("|")));
     }
 
-    public static MockMultipartFile newMockMultipartFile(List<DiscountEntity> discounts) {
+    public static MockMultipartFile newMockMultipartFile(final List<DiscountEntity> discounts) {
         StringBuilder contents = new StringBuilder("number;company_title;type;category;image;company_description;company_address;company_phone;links;size;discount_type;discount_description;discount_condition;start_date;end_date;location");
         discounts.forEach(discount -> contents.append("\n").append(discountToString(discount)));
         return (new MockMultipartFile(
