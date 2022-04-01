@@ -88,7 +88,7 @@ public class CsvDiscountLoaderServiceTest {
                 item.setCompany_id(saveItem(this.companies, item.getCompany_id(), ServiceTestUtils::isCompaniesEquals));
                 result.add(saveItem(this.discounts, item, ServiceTestUtils::isDiscountsEquals));
             });
-            saveDiscountsParameters(discounts);
+            saveDiscountsParameters(this.discounts);
             return result;
         });
         when(this.discountRepository.findAll()).thenReturn(this.discounts);
@@ -96,8 +96,8 @@ public class CsvDiscountLoaderServiceTest {
 
     private void saveDiscountsParameters(final Collection<DiscountEntity> discountList) {
         discountList.forEach(item -> {
-            item.getArea().forEach(area -> area.setId(saveItem(locations, area, Objects::equals).getId()));
-            item.getCategories().forEach(category -> category.setId(saveItem(categories, category, Objects::equals).getId()));
+            item.getArea().forEach(area -> area.setId(saveItem(this.locations, area, Objects::equals).getId()));
+            item.getCategories().forEach(category -> category.setId(saveItem(this.categories, category, Objects::equals).getId()));
         });
     }
 
@@ -118,7 +118,7 @@ public class CsvDiscountLoaderServiceTest {
     @Test
     public void whenLoadCsvDiscountExists() {
         // given
-        final List<DiscountEntity> discountList = discountRepository.saveAll(getDiscountList());
+        final List<DiscountEntity> discountList = this.discountRepository.saveAll(getDiscountList());
         final List<String> benchmark = new ArrayList<>(discountList.stream().map(x -> x.getId() + ": SKIP already exists").toList());
         final MockMultipartFile csvData = newMockMultipartFile(discountList);
 
@@ -148,8 +148,8 @@ public class CsvDiscountLoaderServiceTest {
         discountsAfterUpload = this.discountRepository.findAll();
         assertEquals(discountList.size() - 1, discountsAfterUpload.size());
         assertEquals(benchmark, result);
-        for (int i = 0; i < Math.min(discountList.size(), discounts.size()); i++)
-            assertTrue(isDiscountsEquals(discounts.get(i), discountsAfterUpload.get(i)));
+        for (int i = 0; i < Math.min(discountList.size(), this.discounts.size()); i++)
+            assertTrue(isDiscountsEquals(this.discounts.get(i), discountsAfterUpload.get(i)));
     }
 
     @Test

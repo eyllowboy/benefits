@@ -63,7 +63,7 @@ public class ControllerTestUtils {
 
     public Set<CategoryEntity> getCategoryList() {
         Set<CategoryEntity> result = new LinkedHashSet<>();
-        final int size = (int) (random() * (listLength - 1)  + 1);
+        final int size = (int) (random() * (this.listLength - 1)  + 1);
         for (long i = 1; i <= size; i++) {
             CategoryEntity category = this.categoryRepository.findByTitle("Category" + i)
                     .orElse(new CategoryEntity("Category" + i));
@@ -76,7 +76,7 @@ public class ControllerTestUtils {
 
     public Set<LocationEntity> getLocationList() {
         Set<LocationEntity> result = new LinkedHashSet<>();
-        final int size = (int) (random() * (listLength - 1)  + 1);
+        final int size = (int) (random() * (this.listLength - 1)  + 1);
         List<LocationEntity> locations = this.locationRepository.findAll();
         for (long i = 1; i <= size; i++) {
             long finalI = i;
@@ -111,7 +111,7 @@ public class ControllerTestUtils {
 
     public List<DiscountEntity> getDiscountList() {
         List<DiscountEntity> result = new ArrayList<>();
-        for (long i = 1; i <= listLength; i++) {
+        for (long i = 1; i <= this.listLength; i++) {
             result.add(getDiscount(i));
         }
         return result;

@@ -216,7 +216,7 @@ public class CsvDiscountLoaderControllerTest {
 
         // when
         final NestedServletException NestedServletException = assertThrows(NestedServletException.class, () ->
-                mockMvc.perform(MockMvcRequestBuilders
+                this.mockMvc.perform(MockMvcRequestBuilders
                                 .multipart("/upload-csv-file")
                                 .file(incorrectCsvFile)
                                 .with(csrf()))
