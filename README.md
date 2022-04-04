@@ -25,24 +25,22 @@ via the web. \
 Roles are assigned same as in a). 
 - All endpoints can be viewed in "Realm settings" -> "Endpoints".
 4. If you want to authorize via http, then you need to send a POST request to the address 
-5. http://localhost:8484/auth/realms/benefits/protocol/openid-connect/token
+http://localhost:8484/auth/realms/benefits/protocol/openid-connect/token
 with matching body. See an example: ./keycloak/benefits.postman_collection.json 
-6. (postman collection file, just import in postman)
+(postman collection file, just import in postman)
 
-7. To start app:
+5. To start app:
 - in root dir at first build its
 > mvn clean install
 - then to run
 > java -jar ./target/a-benefits-0.0.1-SNAPSHOT.jar
 - to stop
 > mvn spring-boot:stop
-5. App run on http://localhost:8080/benefits/
-6. Swagger run on http://localhost:8080/benefits/swagger-ui/index.html \
+6. App run on http://localhost:8080/benefits/
+7. Swagger run on http://localhost:8080/benefits/swagger-ui/index.html \
 "client_id" is benefits-auth.
 "Secret" also is required for authorization. Go to keycloak 
 "Clients" -> "benefits-auth" under "Credentials" tab copy it. 
 Next, enter the username and password of the user you created in step 3. \
 In order to log in as a different user, you need to wait until the end of the session or 
 force them to end in keycloak in "Sessions".
-
-
