@@ -1,8 +1,12 @@
 package com.andersenlab.benefits.controller;
 
+import com.andersenlab.benefits.domain.DiscountEntity;
+import com.andersenlab.benefits.domain.DiscountType;
 import com.andersenlab.benefits.domain.LocationEntity;
+import com.andersenlab.benefits.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,7 +20,8 @@ import org.springframework.web.util.NestedServletException;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
+import java.util.Date;
+import java.util.Set;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,8 +38,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithMockUser
 public class LocationControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    private final MockMvc mockMvc;
+
+    private final LocationRepository locationRepository;
+
+    private  final RoleRepository roleRepository;
+
+    private final UserRepository userRepository;
+
+    private  final DiscountRepository discountRepository;
+
+    private final CompanyRepository companyRepository;
+
+    private  final CategoryRepository categoryRepository;
 
     @Container
     public static final PostgreSQLContainer<?> postgreSQLContainer =
@@ -43,9 +59,39 @@ public class LocationControllerTest {
                     .withUsername("benefits")
                     .withPassword("ben0147");
 
+    @Autowired
+    public LocationControllerTest(MockMvc mockMvc, LocationRepository locationRepository, RoleRepository roleRepository, UserRepository userRepository, DiscountRepository discountRepository, CompanyRepository companyRepository, CategoryRepository categoryRepository) {
+        this.mockMvc = mockMvc;
+        this.locationRepository = locationRepository;
+        this.roleRepository = roleRepository;
+        this.userRepository = userRepository;
+        this.discountRepository = discountRepository;
+        this.companyRepository = companyRepository;
+        this.categoryRepository = categoryRepository;
+    }
+
     @DynamicPropertySource
     public static void postgreSQLProperties(final DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
+    }
+
+    @BeforeEach
+    private void deleteAndSaveLocationInContainer() {
+        this.discountRepository.deleteAll();
+        this.categoryRepository.deleteAll();
+        this.companyRepository.deleteAll();
+        this.userRepository.deleteAll();
+        this.locationRepository.deleteAll();
+        this.roleRepository.deleteAll();
+        createAndSaveLocationInContainer();
+    }
+
+    private void createAndSaveLocationInContainer() {
+        final int size = 5;
+        for (long i = 1; i <= size; i++) {
+            LocationEntity location = new LocationEntity("Country" + i, "City" + i);
+            locationRepository.save(location);
+        }
     }
 
     @Test
@@ -67,7 +113,7 @@ public class LocationControllerTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/locations")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("country", "Россия")
+                        .param("country", "Country10")
                         .with(csrf()))
                 .andDo(print())
                 // then
@@ -77,25 +123,29 @@ public class LocationControllerTest {
 
     @Test
     public void whenGetLocationByIdSuccess() throws Exception {
+        final LocationEntity lastLocationFromContainer = locationRepository.findByCity("Country5", "City5").get();
         // when
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/locations/{id}", 1L)
+                        .get("/locations/{id}", lastLocationFromContainer.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.country", is("Russia")))
-                .andExpect(jsonPath("$.city", is("Moscow")));
+                .andExpect(jsonPath("$.id", is(lastLocationFromContainer.getId().intValue())))
+                .andExpect(jsonPath("$.country", is(lastLocationFromContainer.getCountry())))
+                .andExpect(jsonPath("$.city", is(lastLocationFromContainer.getCity())));
     }
 
     @Test
     public void whenGetLocationByIdFailIdNotExists() throws Exception {
+        // given
+        final LocationEntity lastLocationFromContainer = locationRepository.findByCity("Country5", "City5").get();
+        long notExistId = lastLocationFromContainer.getId()+1;
         // when
         final NestedServletException NestedServletException = assertThrows(NestedServletException.class, () ->
-                mockMvc.perform(get("/locations/{id}", 100L).with(csrf())));
+                mockMvc.perform(get("/locations/{id}", notExistId).with(csrf())));
         // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
         assertEquals("Location with this id was not found in the database",
@@ -104,17 +154,21 @@ public class LocationControllerTest {
 
     @Test
     public void whenGetLocationByCitySuccess() throws Exception {
+        // given
+        final LocationEntity lastLocationFromContainer = locationRepository.findByCity("Country5", "City5").get();
+        String country = lastLocationFromContainer.getCountry();
+        String city = lastLocationFromContainer.getCity();
         // when
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/locations/{country}/{city}", "Russia", "Kazan")
+                        .get("/locations/{country}/{city}", "Country5", "City5")
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
-                .andExpect(jsonPath("$.country", is("Russia")))
-                .andExpect(jsonPath("$.city", is("Kazan")));
+                .andExpect(jsonPath("$.country", is(country)))
+                .andExpect(jsonPath("$.city", is(city)));
     }
 
     @Test
@@ -155,8 +209,9 @@ public class LocationControllerTest {
     @Test
     public void whenAddLocationFailLocationExists() throws Exception {
         // given
-        final String country = "Russia";
-        final String city = "Samara";
+        final LocationEntity lastLocationFromContainer = locationRepository.findByCity("Country5", "City5").get();
+        final String country = lastLocationFromContainer.getCountry();
+        final String city = lastLocationFromContainer.getCity();
         // when
         final NestedServletException NestedServletException = assertThrows(NestedServletException.class, () ->
                 mockMvc.perform(MockMvcRequestBuilders
@@ -174,8 +229,9 @@ public class LocationControllerTest {
     @Test
     public void whenUpdateLocationSuccess() throws Exception {
         // given
-        final LocationEntity location = new LocationEntity(2L, "Россия", "СПБ");
-        final String locationEntity = new ObjectMapper().writeValueAsString(location);
+        final LocationEntity lastLocationFromContainer = locationRepository.findByCity("Country5", "City5").get();
+        lastLocationFromContainer.setCountry("Россия");
+        final String locationEntity = new ObjectMapper().writeValueAsString(lastLocationFromContainer);
         // when
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/locations")
@@ -190,8 +246,9 @@ public class LocationControllerTest {
     @Test
     public void whenUpdateLocationFailIdNotExists() throws Exception {
         // given
-        LocationEntity location = new LocationEntity(100L, "Россия", "Moscow");
-        final String locationEntity = new ObjectMapper().writeValueAsString(location);
+        final LocationEntity lastLocationFromContainer = locationRepository.findByCity("Country5", "City5").get();
+        lastLocationFromContainer.setId(lastLocationFromContainer.getId()+1);
+        final String locationEntity = new ObjectMapper().writeValueAsString(lastLocationFromContainer);
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 mockMvc.perform(MockMvcRequestBuilders
@@ -208,7 +265,8 @@ public class LocationControllerTest {
     @Test
     public void whenDeleteLocationWithoutDiscountsSuccess() throws Exception {
         // given
-        final Long id = 10L;
+        final LocationEntity lastLocationFromContainer = locationRepository.findByCity("Country5", "City5").get();
+        final Long id = lastLocationFromContainer.getId();
         // when
         mockMvc.perform(MockMvcRequestBuilders
                         .delete("/locations/{id}", id)
@@ -222,11 +280,25 @@ public class LocationControllerTest {
     @Test
     public void whenDeleteLocationFailHasActiveDiscounts() throws Exception {
         // given
-        final Long id = 1L;
+        final LocationEntity location = new LocationEntity("Counry","City");
+        final DiscountEntity discount = new DiscountEntity();
+        discount.setType("type");
+        discount.setDescription("descriptioin");
+        discount.setDiscount_condition("discount_condition");
+        discount.setSizeDiscount("10");
+        discount.setDiscount_type(DiscountType.DISCOUNT);
+        discount.setDateBegin(new Date());
+        discount.setDateFinish(new Date());
+        discount.setImageDiscount("imageDiscont");
+
+        var savedLocation = locationRepository.save(location);
+        final Set<LocationEntity> locationEntitySet = Set.of(savedLocation);
+        discount.setArea(locationEntitySet);
+        discountRepository.save(discount);
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/locations/{id}", id)
+                        .delete("/locations/{id}", savedLocation.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf())));
         // then
@@ -238,7 +310,8 @@ public class LocationControllerTest {
     @Test
     public void whenDeleteLocationFailIdNotExists() throws Exception {
         // given
-        final Long id = 100L;
+        final LocationEntity lastLocationFromContainer = locationRepository.findByCity("Country5", "City5").get();
+        final Long id = lastLocationFromContainer.getId()+1;
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 mockMvc.perform(MockMvcRequestBuilders
@@ -257,7 +330,7 @@ public class LocationControllerTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/locations")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("country", "Россия")
+                        .param("country", "Contry5")
                         .param("filterMask", "са")
                         .with(csrf()))
                 .andDo(print())
