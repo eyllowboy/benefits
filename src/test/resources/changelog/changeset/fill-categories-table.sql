@@ -1,12 +1,12 @@
 INSERT INTO categories(title) VALUES
-('Еда'),
-('Спорт'),
-('Красота и здоровье'),
-('Детям'),
-('Обучение'),
-('Путешествия'),
-('Дом и бытовые услуги'),
-('Развлечения и праздники'),
-('Магазины'),
-('Для животных'),
-('Авто');
+('Food'),
+('beauty and health'),
+('Sport'),
+('children'),
+('Education'),
+('Trips'),
+('Home and household services'),
+('Entertainment and holidays'),
+('The shops'),
+('For animals'),
+('Auto');

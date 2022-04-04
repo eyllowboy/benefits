@@ -157,14 +157,14 @@ public class CsvDiscountLoaderServiceTest {
         // given
         final List<DiscountEntity> discountList = getDiscountList();
         final Set<LocationEntity> locationToEdit = discountList.get(0).getArea();
-        locationToEdit.iterator().next().setCity("Брест");
+        locationToEdit.iterator().next().setCity("Brest");
         final MockMultipartFile csvData = newMockMultipartFile(discountList);
 
         // when
         final List<String> result = this.csvDiscountLoaderService.loadDiscountsFromCsv(csvData, ";");
 
         // then
-        assertEquals("1: City Брест was not found in database", result.get(0));
+        assertEquals("1: City Brest was not found in database", result.get(0));
     }
 
     @Test

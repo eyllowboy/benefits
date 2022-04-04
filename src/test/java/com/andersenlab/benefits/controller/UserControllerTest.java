@@ -83,8 +83,8 @@ public class UserControllerTest {
 				.andExpect(jsonPath("$.roleEntity.id", is(1)))
 				.andExpect(jsonPath("$.roleEntity.name", is("System administrator")))
 				.andExpect(jsonPath("$.roleEntity.code", is("ROLE_ADMIN")))
-				.andExpect(jsonPath("$.location.country", is("Россия")))
-				.andExpect(jsonPath("$.location.city", is("Москва")));
+				.andExpect(jsonPath("$.location.country", is("Russia")))
+				.andExpect(jsonPath("$.location.city", is("Moscow")));
 	}
 	
 	@Test
@@ -119,8 +119,8 @@ public class UserControllerTest {
 				.andExpect(jsonPath("$.roleEntity.id", is(1)))
 				.andExpect(jsonPath("$.roleEntity.name", is("System administrator")))
 				.andExpect(jsonPath("$.roleEntity.code", is("ROLE_ADMIN")))
-				.andExpect(jsonPath("$.location.country", is("Россия")))
-				.andExpect(jsonPath("$.location.city", is("Москва")));
+				.andExpect(jsonPath("$.location.country", is("Russia")))
+				.andExpect(jsonPath("$.location.city", is("Moscow")));
 	}
 	
 	@Test

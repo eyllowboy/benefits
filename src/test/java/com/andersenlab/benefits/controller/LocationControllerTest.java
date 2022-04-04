@@ -87,8 +87,8 @@ public class LocationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.country", is("Россия")))
-                .andExpect(jsonPath("$.city", is("Москва")));
+                .andExpect(jsonPath("$.country", is("Russia")))
+                .andExpect(jsonPath("$.city", is("Moscow")));
     }
 
     @Test
@@ -106,15 +106,15 @@ public class LocationControllerTest {
     public void whenGetLocationByCitySuccess() throws Exception {
         // when
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/locations/{country}/{city}", "Россия", "Казань")
+                        .get("/locations/{country}/{city}", "Russia", "Kazan")
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
-                .andExpect(jsonPath("$.country", is("Россия")))
-                .andExpect(jsonPath("$.city", is("Казань")));
+                .andExpect(jsonPath("$.country", is("Russia")))
+                .andExpect(jsonPath("$.city", is("Kazan")));
     }
 
     @Test
@@ -155,8 +155,8 @@ public class LocationControllerTest {
     @Test
     public void whenAddLocationFailLocationExists() throws Exception {
         // given
-        final String country = "Россия";
-        final String city = "Самара";
+        final String country = "Russia";
+        final String city = "Samara";
         // when
         final NestedServletException NestedServletException = assertThrows(NestedServletException.class, () ->
                 mockMvc.perform(MockMvcRequestBuilders

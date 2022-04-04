@@ -223,7 +223,7 @@ class DiscountControllerTest {
         //when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/discounts/filter-by-city")
-                        .param("city", "Москва")
+                        .param("city", "Moscow")
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
         //then
@@ -239,7 +239,7 @@ class DiscountControllerTest {
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/discounts/filter-by-category")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("category", "Еда")
+                        .param("category", "Food")
                         .with(csrf()))
         //then
                 .andDo(print())

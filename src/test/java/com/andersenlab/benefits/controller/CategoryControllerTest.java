@@ -71,7 +71,7 @@ public class CategoryControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.title", is("Еда")));
+                .andExpect(jsonPath("$.title", is("Food")));
     }
 
     @Test
@@ -106,12 +106,12 @@ public class CategoryControllerTest {
     @Test
     public void whenAddCategoryFailCategoryExists() throws Exception {
         // given
-        final String title = "Обучение";
+        final String title = "Education";
         // when
         NestedServletException NestedServletException = assertThrows(NestedServletException.class, () -> {
             this.mockMvc.perform(MockMvcRequestBuilders.post("/categories")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .param("title", "Обучение")
+                    .param("title", "Education")
                     .with(csrf()));
         });
         // then
@@ -122,7 +122,7 @@ public class CategoryControllerTest {
     @Test
     public void whenUpdateCategorySuccess() throws Exception {
         //given
-        final CategoryEntity category = new CategoryEntity(6L, "Food");
+        final CategoryEntity category = new CategoryEntity(6L, "Foods");
         final String categoryEntity = (new ObjectMapper()).writeValueAsString(category);
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
