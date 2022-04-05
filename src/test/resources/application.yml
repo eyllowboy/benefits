@@ -31,7 +31,7 @@ spring:
   liquibase:
     enabled: true
     default-schema: public
-    changeLog: classpath:changelog/db.changelog-master.yaml
+    changeLog: classpath:db/changelog/db.changelog-master.yaml
   main:
     banner-mode: off
     allow-circular-references: true

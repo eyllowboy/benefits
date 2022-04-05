@@ -154,7 +154,7 @@ public class CsvDiscountLoaderControllerTest {
         // given
         final List<DiscountEntity> discounts = ctu.getDiscountList();
         final Set<LocationEntity> locationToEdit = discounts.get(0).getArea();
-        locationToEdit.iterator().next().setCity("Брест");
+        locationToEdit.iterator().next().setCity("Brest");
         final MockMultipartFile csvData = ctu.newMockMultipartFile(discounts);
 
         // when
@@ -165,7 +165,7 @@ public class CsvDiscountLoaderControllerTest {
             .andDo(print())
 
         // then
-            .andExpect(jsonPath("$[0]", is("1: City Брест was not found in database")));
+            .andExpect(jsonPath("$[0]", is("1: City Brest was not found in database")));
     }
 
     @Test

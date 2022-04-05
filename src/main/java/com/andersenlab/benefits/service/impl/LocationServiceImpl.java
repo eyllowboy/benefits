@@ -6,6 +6,7 @@ import com.andersenlab.benefits.service.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,6 +48,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
+    @Transactional
     public void updateLocationEntity(final Long id, final String country, final String city) {
         locationRepository.updateLocationEntity(id, country, city);
     }
@@ -57,7 +59,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public LocationEntity save(final LocationEntity entity) {
+    public final LocationEntity save(final LocationEntity entity) {
         return locationRepository.save(entity);
     }
 
@@ -67,6 +69,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
+    @Transactional
     public Optional<LocationEntity> findWithAssociatedDiscounts(final Long id) {
         return locationRepository.findWithAssociatedDiscounts(id);
     }

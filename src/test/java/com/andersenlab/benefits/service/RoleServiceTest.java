@@ -3,6 +3,7 @@ package com.andersenlab.benefits.service;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.repository.RoleRepository;
 import com.andersenlab.benefits.service.impl.RoleServiceImpl;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,11 +11,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
+import static com.andersenlab.benefits.service.ServiceTestUtils.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(properties = "spring.main.lazy-initialization=true",
@@ -23,87 +25,140 @@ public class RoleServiceTest {
 	private final RoleService roleService;
 	
 	@MockBean
-	private RoleRepository roleRepository;
+	RoleRepository roleRepository;
 	
 	@Autowired
 	public RoleServiceTest(final RoleService roleService) {
 		this.roleService = roleService;
 	}
-	
+
 	@Test
-	public void  whenFindAll() {
+	public void  whenFindAllSuccess() {
 		// given
-		final List<RoleEntity> roleEntities = List.of(
-				new RoleEntity("user", "user"),
-				new RoleEntity("user1", "user1"),
-				new RoleEntity("user2", "user2"));
-		
+		final List<RoleEntity> rolesList = getRoleList();
+		when(this.roleRepository.findAll()).thenReturn(rolesList);
+
 		// when
-		when(roleRepository.findAll()).thenReturn(roleEntities);
-		final List<RoleEntity> foundRoleEntities = roleService.findAll();
-		
+		final List<RoleEntity> foundRoleEntities = this.roleService.findAll();
+
 		// then
-		assertEquals(roleEntities, foundRoleEntities);
-		verify(roleRepository, times(1)).findAll();
+		assertEquals(rolesList, foundRoleEntities);
+		verify(this.roleRepository, times(1)).findAll();
 	}
-	
+
 	@Test
-	public void whenFindById() {
+	public void whenFindByIdSuccess() {
 		// given
-		final Optional<RoleEntity> roleEntity = Optional.of(new RoleEntity("user", "user"));
-		
+		final int rolePos = getRndEntityPos();
+		final List<RoleEntity> rolesList = getRoleList();
+		when(this.roleRepository.findById(anyLong())).thenAnswer(invocation -> {
+			Long idx = invocation.getArgument(0);
+			return Optional.of(rolesList.get(idx.intValue()));
+		});
+
 		// when
-		when(roleRepository.findById(anyLong())).thenReturn(roleEntity);
-		final Optional<RoleEntity> foundRoleEntity = roleService.findById(1L);
-		
+		final RoleEntity foundRoleEntity = this.roleService.findById((long) rolePos).orElseThrow();
+
 		// then
-		assertEquals(roleEntity, foundRoleEntity);
-		verify(roleRepository, times(1)).findById(1L);
+		assertEquals(rolesList.get(rolePos), foundRoleEntity);
+		verify(this.roleRepository, times(1)).findById((long) rolePos);
 	}
-	
+
 	@Test
-	public void whenSave() {
+	public void whenFindByCodeSuccess() {
 		// given
-		final RoleEntity roleEntity = new RoleEntity("user", "user");
-		
+		final int rolePos = getRndEntityPos();
+		final List<RoleEntity> rolesList = getRoleList();
+		when(this.roleRepository.findByCode(anyString())).thenAnswer(invocation ->
+			rolesList.stream().filter(item ->
+				Objects.equals(item.getCode(), invocation.getArgument(0))).findFirst());
+
 		// when
-		when(roleRepository.save(any(RoleEntity.class))).thenReturn(roleEntity);
-		final RoleEntity savedRoleEntity = roleService.save(roleEntity);
-		
+		final Optional<RoleEntity> foundRole = this.roleService.findByCode(rolesList.get(rolePos).getCode());
+
 		// then
-		assertEquals(roleEntity, savedRoleEntity);
-		verify(roleRepository, times(1)).save(roleEntity);
+		assertEquals(Optional.of(rolesList.get(rolePos)), foundRole);
+		verify(this.roleRepository, times(1)).findByCode(rolesList.get(rolePos).getCode());
 	}
-	
+
 	@Test
-	public void whenDelete() {
-		// when
-		roleService.delete(anyLong());
-		
-		// then
-		verify(roleRepository, times(1)).deleteById(anyLong());
-	}
-	
-	@Test
-	public void whenUpdate() {
-		// when
-		roleRepository.updateRoleEntity(anyLong(), anyString(), anyString());
-		
-		// then
-		verify(roleRepository, times(1)).updateRoleEntity(anyLong(), anyString(), anyString());
-	}
-	
-	@Test
-	public void whenFindByCode() {
+	public void whenSaveSuccess() {
 		// given
-		final Optional<RoleEntity> roleEntity = Optional.of(new RoleEntity("user", "user"));
-		
+		final List<RoleEntity> rolesList = getRoleList();
+		final RoleEntity role = getRole(getRndEntityPos());
+		when(this.roleRepository.save(any(RoleEntity.class))).thenAnswer(invocation ->
+			saveItem(rolesList, invocation.getArgument(0), Objects::equals));
+
 		// when
-		when(roleRepository.findByCode(anyString())).thenReturn(roleEntity);
-		final Optional<RoleEntity> foundRoleEntity = roleService.findByCode("user");
-		
+		final RoleEntity savedRole = this.roleService.save(role);
+
 		// then
-		assertEquals(roleEntity, foundRoleEntity);
-		verify(roleRepository, times(1)).findByCode("user");
+		assertEquals(role, savedRole);
+		verify(this.roleRepository, times(1)).save(role);
+	}
+
+	@Test
+	public void whenUpdateSuccess() {
+		// given
+		final int rolePos = getRndEntityPos();
+		final List<RoleEntity> rolesList = getRoleList();
+		final RoleEntity role = rolesList.get(rolePos);
+		doAnswer(invocation -> {
+			RoleEntity newRole = new RoleEntity(
+				invocation.getArgument(0),
+				invocation.getArgument(1),
+				invocation.getArgument(2));
+			Long idx = invocation.getArgument(0);
+			rolesList.set(idx.intValue(), newRole);
+			return null;
+		}).when(this.roleRepository).updateRoleEntity(anyLong(), anyString(), anyString());
+
+		// when
+		this.roleService.updateRoleEntity((long) rolePos, role.getName(), role.getCode());
+
+		// then
+		assertEquals(role, rolesList.get(rolePos));
+		verify(this.roleRepository, times(1))
+			.updateRoleEntity((long) rolePos, role.getName(), role.getCode());
+	}
+
+	@Test
+	public void whenDeleteSuccess() {
+		// given
+		final int rolePos = getRndEntityPos();
+		final List<RoleEntity> rolesList = getRoleList();
+		final RoleEntity role = rolesList.get(rolePos);
+		doAnswer(invocation ->  {rolesList.remove(rolesList.stream()
+			.filter(item -> Objects.equals(item.getId(), invocation.getArgument(0)))
+			.findFirst().orElse(null));
+			return null;}).when(this.roleRepository).deleteById(anyLong());
+
+		// when
+		this.roleService.delete(role.getId());
+
+		// then
+		Assertions.assertFalse(rolesList.contains(role));
+		verify(this.roleRepository, times(1)).deleteById(role.getId());
+	}
+
+	@Test
+	public void whenFindWithAssociatedUsers() {
+		// given
+		final int rolePos = getRndEntityPos();
+		final List<RoleEntity> rolesList = getRoleList();
+		when(this.roleRepository.findWithAssociatedUsers(anyLong())).thenAnswer(invocation -> {
+			Long idx = invocation.getArgument(0);
+			RoleEntity role = rolesList.get(idx.intValue());
+			role.setUsers(new HashSet<>(getUserList()));
+			return Optional.of(role);
+		});
+
+		// when
+		final RoleEntity foundRoleEntity = this.roleService.findWithAssociatedUsers((long) rolePos).orElseThrow();
+
+		// then
+		assertEquals(rolesList.get(rolePos), foundRoleEntity);
+		assertNotNull(foundRoleEntity.getUsers());
+		verify(this.roleRepository, times(1)).findWithAssociatedUsers((long) rolePos);
 	}
 }
