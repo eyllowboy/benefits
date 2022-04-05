@@ -197,7 +197,6 @@ public class CategoryControllerTest {
                 .andDo(print())
                 // then
                 .andExpect(status().isOk());
-
     }
 
     @Test

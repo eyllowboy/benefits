@@ -5,6 +5,7 @@ import com.andersenlab.benefits.repository.CategoryRepository;
 import com.andersenlab.benefits.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public void updateCategoryEntity(Long id, String title) {
         categoryRepository.updateCategoryEntity(id, title);
     }
@@ -46,7 +48,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryEntity save(CategoryEntity entity) {
+    public final CategoryEntity save(CategoryEntity entity) {
         return categoryRepository.save(entity);
     }
 
@@ -56,7 +58,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public Optional<CategoryEntity> findWithAssociatedDiscounts(final Long id) {
         return categoryRepository.findWithAssociatedDiscounts(id);
-    };
+    }
 }

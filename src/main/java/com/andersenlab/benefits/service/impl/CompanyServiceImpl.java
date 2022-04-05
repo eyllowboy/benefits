@@ -5,6 +5,7 @@ import com.andersenlab.benefits.repository.CompanyRepository;
 import com.andersenlab.benefits.service.CompanyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -59,12 +60,12 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public void deleteCompanyById(final Long id) {
+    public final void deleteCompanyById(final Long id) {
         companyRepository.deleteById(id);
     }
 
     @Override
-    public Optional<CompanyEntity> findWithAssociatedDiscount(Long id) {
+    public final Optional<CompanyEntity> findWithAssociatedDiscount(Long id) {
         return companyRepository.findWithAssociatedDiscounts(id);
     }
 
