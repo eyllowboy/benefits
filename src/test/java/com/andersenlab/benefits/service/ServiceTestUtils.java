@@ -19,6 +19,10 @@ public class ServiceTestUtils {
 
     private static final int listLength = 10;
 
+    public static int getRndEntityPos() {
+        return (int) (random() * (listLength - 1) + 1);
+    }
+
     public static CategoryEntity getCategory(final long num) {
         return new CategoryEntity("Category" + num);
     }
@@ -54,6 +58,34 @@ public class ServiceTestUtils {
                 "Phone" + num,
                 "Link" + num
         ));
+    }
+
+    public static RoleEntity getRole(long num) {
+        RoleEntity role = new RoleEntity("roleName" + num, "code" + num);
+        role.setId(num);
+        return role;
+    }
+
+    public static List<RoleEntity> getRoleList() {
+        final List<RoleEntity> result = new ArrayList<>(listLength);
+        for (int i = 1; i <= listLength; i++) {
+            result.add(getRole(i));
+        }
+        return result;
+    }
+
+    public static UserEntity getUser(long num) {
+        UserEntity user = new UserEntity("userLogin" + num, getRole(num), getLocation(num));
+        user.setId(num);
+        return user;
+    }
+
+    public static List<UserEntity> getUserList() {
+        final List<UserEntity> result = new ArrayList<>(listLength);
+        for (int i = 1; i <= listLength; i++) {
+            result.add(getUser(i));
+        }
+        return result;
     }
 
     public static List<DiscountEntity> getDiscountList() {
@@ -109,8 +141,12 @@ public class ServiceTestUtils {
     }
 
     public static boolean isDiscountsEquals(final DiscountEntity discount1, final DiscountEntity discount2) {
-        if (discount1 == discount2) return true;
-        if (null == discount1 || discount1.getClass() != discount2.getClass()) return false;
+        if (discount1 == discount2) {
+            return true;
+        }
+        if (null == discount1 || discount1.getClass() != discount2.getClass()) {
+            return false;
+        }
         return (
                 discount1.getType().equals(discount2.getType()) &&
                         discount1.getDescription().equals(discount2.getDescription()) &&

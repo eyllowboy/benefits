@@ -1,10 +1,9 @@
 package com.andersenlab.benefits.service;
 
-import com.andersenlab.benefits.domain.LocationEntity;
-import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import com.andersenlab.benefits.repository.UserRepository;
 import com.andersenlab.benefits.service.impl.UserServiceImpl;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,110 +11,135 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
+import static com.andersenlab.benefits.service.ServiceTestUtils.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(properties = "spring.main.lazy-initialization=true",
 		classes = {UserService.class, UserServiceImpl.class})
 public class UserServiceTest {
 	private final UserService userService;
-	
+
 	@MockBean
-	private UserRepository userRepository;
+	private final UserRepository userRepository;
 	
 	@Autowired
-	public UserServiceTest(final UserService userService) {
+	public UserServiceTest(final UserService userService,
+						   final UserRepository userRepository) {
 		this.userService = userService;
+		this.userRepository = userRepository;
 	}
-	
+
 	@Test
-	public void whenFindAll() {
+	public void whenFindAllSuccess() {
 		// given
-		final LocationEntity location = new LocationEntity(1L, "Россия", "Уфа");
-		final List<UserEntity> userEntities = List.of(
-				new UserEntity("user", new RoleEntity("user", "user"), location),
-				new UserEntity("user1", new RoleEntity("user1", "user1"), location),
-				new UserEntity("user2", new RoleEntity("user2", "user2"), location));
-		
+		final List<UserEntity> usersList = getUserList();
+		when(this.userRepository.findAll()).thenReturn(usersList);
+
 		// when
-		when(userRepository.findAll()).thenReturn(userEntities);
-		final List<UserEntity> foundUserEntities = userService.findAll();
+		final List<UserEntity> foundUserEntities = this.userService.findAll();
 		
 		// then
-		assertEquals(userEntities, foundUserEntities);
-		verify(userRepository, times(1)).findAll();
+		assertEquals(usersList, foundUserEntities);
+		verify(this.userRepository, times(1)).findAll();
 	}
 	
 	@Test
-	public void whenFindById() {
+	public void whenFindByIdSuccess() {
 		// given
-		final LocationEntity location = new LocationEntity(1L, "Россия", "Уфа");
-		final UserEntity userEntity = new UserEntity("user", new RoleEntity("user", "user"), location);
-		
+		final int userPos = getRndEntityPos();
+		final List<UserEntity> usersList = getUserList();
+		when(this.userRepository.findById(anyLong())).thenAnswer(invocation -> {
+				Long idx = invocation.getArgument(0);
+				return Optional.of(usersList.get(idx.intValue()));
+		});
+
 		// when
-		when(userRepository.findById(anyLong())).thenReturn(Optional.of(userEntity));
-		final UserEntity foundUserEntity = userService.findById(1L).orElseThrow();
-		
+		final UserEntity foundUserEntity = this.userService.findById((long) userPos).orElseThrow();
+
 		// then
-		assertEquals(userEntity, foundUserEntity);
-		verify(userRepository, times(1)).findById(1L);
+		assertEquals(usersList.get(userPos), foundUserEntity);
+		verify(this.userRepository, times(1)).findById((long) userPos);
 	}
 	
 	@Test
-	public void whenSave() {
+	public void whenSaveSuccess() {
 		// given
-		final LocationEntity location = new LocationEntity(1L, "Россия", "Уфа");
-		final UserEntity userEntity = new UserEntity("user", new RoleEntity("user", "user"), location);
-		
+		final List<UserEntity> usersList = getUserList();
+		final UserEntity user = getUser(getRndEntityPos());
+		when(this.userRepository.save(any(UserEntity.class))).thenAnswer(invocation ->
+				saveItem(usersList, invocation.getArgument(0), Objects::equals));
+
 		// when
-		when(userRepository.save(any(UserEntity.class))).thenReturn(userEntity);
-		final UserEntity foundUserEntity = userService.save(userEntity);
+		final UserEntity savedUser = this.userService.save(user);
 		
 		// then
-		assertEquals(userEntity, foundUserEntity);
-		verify(userRepository, times(1)).save(userEntity);
+		assertEquals(user, savedUser);
+		verify(this.userRepository, times(1)).save(user);
 	}
 	
 	@Test
-	public void whenDelete() {
-		// when
-		userService.delete(anyLong());
-		
-		// then
-		verify(userRepository, times(1)).deleteById(anyLong());
-	}
-	
-	@Test
-	public void whenFindByLogin() {
+	public void whenDeleteSuccess() {
 		// given
-		final LocationEntity location = new LocationEntity(1L, "Россия", "Уфа");
-		final Optional<UserEntity> userEntity =
-				Optional.of(new UserEntity("user", new RoleEntity("user", "user"), location));
-		
+		final int userPos = getRndEntityPos();
+		final List<UserEntity> usersList = getUserList();
+		final UserEntity user = usersList.get(userPos);
+		doAnswer(invocation ->  {usersList.remove(usersList.stream()
+					.filter(item -> Objects.equals(item.getId(), invocation.getArgument(0)))
+					.findFirst().orElse(null));
+			return null;
+		}).when(this.userRepository).deleteById(anyLong());
+
 		// when
-		when(userRepository.findByLogin(anyString())).thenReturn(userEntity);
-		final Optional<UserEntity> foundUserEntity = userService.findByLogin("u");
+		this.userService.delete(user.getId());
 		
 		// then
-		assertEquals(userEntity, foundUserEntity);
-		verify(userRepository, times(1)).findByLogin("u");
+		Assertions.assertFalse(usersList.contains(user));
+		verify(this.userRepository, times(1)).deleteById(user.getId());
 	}
 	
 	@Test
-	public void whenUpdate() {
+	public void whenFindByLoginSuccess() {
 		// given
-		final RoleEntity roleEntity = new RoleEntity(1L, "abc", "def");
-		final LocationEntity location = new LocationEntity(1L, "Россия", "Уфа");
-		
+		final int userPos = getRndEntityPos();
+		final List<UserEntity> usersList = getUserList();
+		when(this.userRepository.findByLogin(anyString())).thenAnswer(invocation -> usersList.stream().filter(item ->
+				Objects.equals(item.getLogin(), invocation.getArgument(0))).findFirst());
+
 		// when
-		userRepository.updateUserEntity(1L, "abc", roleEntity, location);
+		final Optional<UserEntity> foundUser = this.userService.findByLogin(usersList.get(userPos).getLogin());
 		
 		// then
-		verify(userRepository, times(1))
-				.updateUserEntity(1L, "abc", roleEntity, location);
+		assertEquals(Optional.of(usersList.get(userPos)), foundUser);
+		verify(this.userRepository, times(1)).findByLogin(usersList.get(userPos).getLogin());
+	}
+	
+	@Test
+	public void whenUpdateSuccess() {
+		// given
+		final int userPos = getRndEntityPos();
+		final List<UserEntity> usersList = getUserList();
+		final UserEntity user = usersList.get(userPos);
+		doAnswer(invocation -> {
+			UserEntity newUser = new UserEntity(
+					invocation.getArgument(0),
+					invocation.getArgument(1),
+					invocation.getArgument(2),
+					invocation.getArgument(3));
+			Long idx = invocation.getArgument(0);
+			usersList.set(idx.intValue(), newUser);
+			return null;
+		}).when(this.userRepository).updateUserEntity(anyLong(), anyString(), any(), any());
+
+		// when
+		this.userService.updateUserEntity((long) userPos, user.getLogin(), user.getRoleEntity(), user.getLocation());
+		
+		// then
+		assertEquals(user, usersList.get(userPos));
+		verify(this.userRepository, times(1))
+				.updateUserEntity((long) userPos, user.getLogin(), user.getRoleEntity(), user.getLocation());
 	}
 }

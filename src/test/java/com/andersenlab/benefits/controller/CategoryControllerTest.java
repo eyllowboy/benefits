@@ -196,7 +196,9 @@ public class CategoryControllerTest {
                         .with((csrf())))
                 .andDo(print())
                 // then
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(category.getId().intValue())))
+                .andExpect(jsonPath("$.title", is(category.getTitle())));
     }
 
     @Test

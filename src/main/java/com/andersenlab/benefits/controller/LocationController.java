@@ -51,7 +51,7 @@ public class LocationController {
                     content = @Content)
     })
     @PostMapping("/locations")
-    public final ResponseEntity<LocationEntity> addLocation(
+    public ResponseEntity<LocationEntity> addLocation(
             @RequestParam(value = "country") final String country,
             @RequestParam(value = "city") final String city) {
         locationService.findByCity(country, city).ifPresent(locationEntity -> {

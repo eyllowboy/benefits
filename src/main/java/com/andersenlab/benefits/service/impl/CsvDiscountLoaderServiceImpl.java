@@ -187,8 +187,6 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 						discount1.getDiscount_condition().equals(discount2.getDiscount_condition()) &&
 						discount1.getSizeDiscount().equals(discount2.getSizeDiscount()) &&
 						discount1.getImageDiscount().equals(discount2.getImageDiscount()) &&
-						discount1.getArea().equals(discount2.getArea()) &&
-						discount1.getCategories().equals(discount2.getCategories()) &&
 						equalCompanies(discount1.getCompany_id(), discount2.getCompany_id())
 				));
 	}

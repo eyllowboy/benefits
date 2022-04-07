@@ -4,12 +4,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/create-locations-table.yaml
   - include:
-      file: db/changelog/changeset/fill-locations-table.sql
-  - include:
-      file: db/changelog/db.changelog-category.yaml
-  - include:
-      file: db/changelog/db.changelog-company.yaml
-  - include:
       file: db/changelog/changeset/create-discounts-table.yaml
   - include:
       file: db/changelog/changeset/create-roles-table.yaml
@@ -17,6 +11,10 @@ databaseChangeLog:
       file: db/changelog/changeset/create-users-table.yaml
   - include:
       file: db/changelog/changeset/fill-roles-table.yaml
+  - include:
+      file: db/changelog/db.changelog-category.yaml
+  - include:
+      file: db/changelog/db.changelog-company.yaml
   - include:
       file: db/changelog/db.changelog-location_discount.yaml
   - include:
