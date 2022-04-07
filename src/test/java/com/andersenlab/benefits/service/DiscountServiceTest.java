@@ -107,7 +107,7 @@ class DiscountServiceTest {
                         discount1.getDiscount_condition().equals(discount2.getDiscount_condition()) &&
                         discount1.getSizeDiscount().equals(discount2.getSizeDiscount()) &&
                         discount1.getImageDiscount().equals(discount2.getImageDiscount()) &&
-                        isCompaniesEquals(discount1.getCompany_id(), discount2.getCompany_id())
+                        isCompaniesEquals(discount1.getCompany(), discount2.getCompany())
         );
     }
 
