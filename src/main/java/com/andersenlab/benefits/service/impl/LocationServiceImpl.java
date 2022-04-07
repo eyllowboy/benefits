@@ -62,8 +62,12 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public LocationEntity save(final LocationEntity entity) {
+<<<<<<< HEAD
         ValidateUtils.validateEntityPost(entity);
         return this.locationRepository.save(entity);
+=======
+        return locationRepository.save(entity);
+>>>>>>> 55eb5ba (Added toString method to Role, Location, Company, Category with exclude Set<> of associated entities (lazy init). Edited @EqualsAndHashCode to exclude Id and Set<> dependency)
     }
 
     @Override
