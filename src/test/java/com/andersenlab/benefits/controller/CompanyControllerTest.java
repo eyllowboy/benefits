@@ -117,7 +117,8 @@ class CompanyControllerTest {
     @Test
     void whenGetCompanyByIdIsOk() throws Exception {
         // given
-        final CompanyEntity company = new CompanyEntity("title6", "description6", "address6", "phone6", "title6");
+        final String companyTitle = "title6";
+        final CompanyEntity company = new CompanyEntity(companyTitle, "description6", "address6", "phone6", "title6");
         final CompanyEntity saveEntity = companyRepository.save(company);
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
@@ -129,7 +130,7 @@ class CompanyControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.id", is(saveEntity.getId().intValue())))
-                .andExpect(jsonPath("$.title", is("title6")));
+                .andExpect(jsonPath("$.title", is(companyTitle)));
     }
 
     @Test
@@ -146,7 +147,7 @@ class CompanyControllerTest {
     }
 
     @Test
-    void whenGetCompanyWithIncorrectId() throws Exception {
+    void whenGetCompanyWithIncorrectId() {
         //given
         final CompanyEntity company = new CompanyEntity("title6", "description6", "address6", "phone6", "title6");
         final CompanyEntity saveEntity = companyRepository.save(company);
@@ -228,18 +229,18 @@ class CompanyControllerTest {
     }
 
     @Test
-    public void whenDeleteCompanyFailHasActiveDiscounts() throws Exception {
+    public void whenDeleteCompanyFailHasActiveDiscounts() {
         // given
         final CompanyEntity companyWithActiveDiscount = new CompanyEntity("title6", "description6", "address6", "phone6", "title6");
         final DiscountEntity discount = new DiscountEntity();
         discount.setType("type");
-        discount.setDescription("descriptioin");
+        discount.setDescription("description");
         discount.setDiscount_condition("discount_condition");
         discount.setSizeDiscount("10");
         discount.setDiscount_type(DiscountType.DISCOUNT);
         discount.setDateBegin(new Date());
         discount.setDateFinish(new Date());
-        discount.setImageDiscount("imageDiscont");
+        discount.setImageDiscount("imageDiscount");
         var savedCompany = companyRepository.save(companyWithActiveDiscount);
         discount.setCompany_id(savedCompany);
         discountRepository.save(discount);
