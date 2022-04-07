@@ -14,10 +14,12 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor()
 public class UserEntity {
     @Schema(description = "Identifier", type = "int64", minimum = "1")
+    @EqualsAndHashCode.Exclude
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_id_seq")
     @SequenceGenerator(name = "user_id_seq", sequenceName = "user_id", allocationSize = 1)
@@ -43,18 +45,5 @@ public class UserEntity {
         this.login = login;
         this.roleEntity = roleEntity;
         this.location = location;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final UserEntity that = (UserEntity) o;
-        return login.equals(that.login);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(login);
     }
 }

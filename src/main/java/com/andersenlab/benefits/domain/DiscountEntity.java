@@ -5,6 +5,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.Set;
@@ -14,14 +15,15 @@ import java.util.Set;
 @Table(name = "discounts")
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 @EqualsAndHashCode
 @ToString
+@Getter
+@Setter
 public class DiscountEntity {
 
     @Schema(description = "Identifier", type = "int64", minimum = "1")
     @Id
+    @EqualsAndHashCode.Exclude
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "discount_id_seq")
     @SequenceGenerator(name = "discount_id_seq", sequenceName = "discount_id", allocationSize = 1)
     @Column(name = "id")
@@ -53,12 +55,14 @@ public class DiscountEntity {
     private DiscountType discount_type;
 
     @Schema(description = "Date of beginning", type = "date")
+    @EqualsAndHashCode.Exclude
     @NotNull
     @Column(name = "start_date")
     @Temporal(TemporalType.DATE)
     private Date dateBegin;
 
     @Schema(description = "Date of ending", type = "date")
+    @EqualsAndHashCode.Exclude
     @Column(name = "end_date")
     @Temporal(TemporalType.DATE)
     private Date dateFinish;
@@ -69,6 +73,8 @@ public class DiscountEntity {
     private String imageDiscount;
 
     @Schema(description = "Location of discount", type = "collection of entities")
+    @EqualsAndHashCode.Exclude
+    @NotEmpty
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "location_discount",
             joinColumns = @JoinColumn(name = "discount_id"),
@@ -76,6 +82,8 @@ public class DiscountEntity {
     private Set<LocationEntity> area;
 
     @Schema(description = "Categories", type = "collections of entities")
+    @EqualsAndHashCode.Exclude
+    @NotEmpty
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "category_discount",
             joinColumns = @JoinColumn(name = "discount_id"),
@@ -83,8 +91,10 @@ public class DiscountEntity {
     private Set<CategoryEntity> categories;
 
     @Schema(description = "Company", type = "entities")
+    @EqualsAndHashCode.Exclude
     @NotNull
     @ManyToOne
     @JoinColumn(name = "company_id")
-    private CompanyEntity company_id;
+    private CompanyEntity company;
 }
+

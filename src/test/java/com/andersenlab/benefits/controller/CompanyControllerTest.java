@@ -234,9 +234,9 @@ class CompanyControllerTest {
         discount.setDateBegin(new Date());
         discount.setDateFinish(new Date());
         discount.setImageDiscount("imageDiscount");
-        var savedCompany = this.companyRepository.save(companyWithActiveDiscount);
-        discount.setCompany_id(savedCompany);
-        this.discountRepository.save(discount);
+        var savedCompany = companyRepository.save(companyWithActiveDiscount);
+        discount.setCompany(savedCompany);
+        discountRepository.save(discount);
         final Long id = savedCompany.getId();
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->

@@ -6,8 +6,6 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.util.Objects;
 import java.util.Set;
 
 @Schema(name = "Category", description = "Category entity")
@@ -15,13 +13,14 @@ import java.util.Set;
 @Table(name = "categories")
 @Getter
 @Setter
-@ToString
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor()
 public class CategoryEntity {
 
     @Schema(description = "Identifier", type = "int64", minimum = "1")
     @Id
+    @EqualsAndHashCode.Exclude
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "category_id_seq")
     @SequenceGenerator(name = "category_id_seq", sequenceName = "category_id", allocationSize = 1)
     private Long id;
@@ -32,6 +31,7 @@ public class CategoryEntity {
     private String title;
 
     @JsonIgnore
+    @EqualsAndHashCode.Exclude
     @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
     private Set<DiscountEntity> discounts;
 
@@ -45,15 +45,10 @@ public class CategoryEntity {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        CategoryEntity that = (CategoryEntity) o;
-        return Objects.equals(getTitle(), that.getTitle());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(title);
+    public String toString() {
+        return "CategoryEntity{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                '}';
     }
 }
