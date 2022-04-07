@@ -129,9 +129,10 @@ public class RoleServiceTest {
 		final List<RoleEntity> rolesList = getRoleList();
 		final RoleEntity role = rolesList.get(rolePos);
 		doAnswer(invocation ->  {rolesList.remove(rolesList.stream()
-			.filter(item -> Objects.equals(item.getId(), invocation.getArgument(0)))
-			.findFirst().orElse(null));
-			return null;}).when(this.roleRepository).deleteById(anyLong());
+					.filter(item -> Objects.equals(item.getId(), invocation.getArgument(0)))
+					.findFirst().orElse(null));
+					return null;})
+				.when(this.roleRepository).deleteById(anyLong());
 
 		// when
 		this.roleService.delete(role.getId());

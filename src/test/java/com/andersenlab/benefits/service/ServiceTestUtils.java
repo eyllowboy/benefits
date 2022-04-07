@@ -141,8 +141,12 @@ public class ServiceTestUtils {
     }
 
     public static boolean isDiscountsEquals(final DiscountEntity discount1, final DiscountEntity discount2) {
-        if (discount1 == discount2) return true;
-        if (null == discount1 || discount1.getClass() != discount2.getClass()) return false;
+        if (discount1 == discount2) {
+            return true;
+        }
+        if (null == discount1 || discount1.getClass() != discount2.getClass()) {
+            return false;
+        }
         return (
                 discount1.getType().equals(discount2.getType()) &&
                         discount1.getDescription().equals(discount2.getDescription()) &&

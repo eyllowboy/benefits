@@ -30,22 +30,22 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public final List<CompanyEntity> findAllCompany() {
+    public List<CompanyEntity> findAllCompany() {
         return companyRepository.findAll();
     }
 
     @Override
-    public final Optional<CompanyEntity> findByIdCompany(final Long id) {
+    public Optional<CompanyEntity> findByIdCompany(final Long id) {
         return companyRepository.findById(id);
     }
 
     @Override
-    public final Optional<CompanyEntity> createCompany(final CompanyEntity company) {
+    public Optional<CompanyEntity> createCompany(final CompanyEntity company) {
         return Optional.of(companyRepository.save(company));
     }
 
     @Override
-    public final Optional<CompanyEntity> updateCompanyById(final Long id, final CompanyEntity newCompany) {
+    public Optional<CompanyEntity> updateCompanyById(final Long id, final CompanyEntity newCompany) {
         companyRepository.findById(id).map(company -> {
             company.setTitle(newCompany.getTitle());
             company.setDescription(newCompany.getDescription());
@@ -60,12 +60,12 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public final void deleteCompanyById(final Long id) {
+    public void deleteCompanyById(final Long id) {
         companyRepository.deleteById(id);
     }
 
     @Override
-    public final Optional<CompanyEntity> findWithAssociatedDiscount(Long id) {
+    public Optional<CompanyEntity> findWithAssociatedDiscount(Long id) {
         return companyRepository.findWithAssociatedDiscounts(id);
     }
 

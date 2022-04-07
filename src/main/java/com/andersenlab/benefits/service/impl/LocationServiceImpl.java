@@ -59,7 +59,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public final LocationEntity save(final LocationEntity entity) {
+    public LocationEntity save(final LocationEntity entity) {
         return locationRepository.save(entity);
     }
 

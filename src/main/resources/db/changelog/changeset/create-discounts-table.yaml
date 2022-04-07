@@ -16,7 +16,7 @@ databaseChangeLog:
                        nullable:  false
                 -  column:
                      name:  company_id
-                     type:  int
+                     type:  BIGINT
                 -  column:
                      name: type
                      type: varchar(50)

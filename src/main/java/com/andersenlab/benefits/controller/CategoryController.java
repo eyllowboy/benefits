@@ -49,7 +49,7 @@ public class CategoryController {
                     content = @Content)
     })
     @PostMapping("/categories")
-    public final ResponseEntity<CategoryEntity> addCategory(@RequestParam(value = "title") final String title) {
+    public ResponseEntity<CategoryEntity> addCategory(@RequestParam(value = "title") final String title) {
         categoryService.findByTitle(title).ifPresent(categoryEntity -> {
             throw new IllegalStateException("Category with title '" + title + "' already exists");
         });
