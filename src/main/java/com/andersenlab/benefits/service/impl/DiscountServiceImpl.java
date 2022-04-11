@@ -28,7 +28,7 @@ public class DiscountServiceImpl implements DiscountService {
 
 
     @Autowired
-    public DiscountServiceImpl(DiscountRepository discountRepository) {
+    public DiscountServiceImpl(final DiscountRepository discountRepository) {
         this.discountRepository = discountRepository;
     }
 
