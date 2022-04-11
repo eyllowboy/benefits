@@ -33,10 +33,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public CategoryEntity updateCategoryEntity(final Long id, final String title) {
-        var category = categoryRepository.findById(id).orElseThrow();
-        category.setTitle(title);
-        return categoryRepository.save(category);
+    public void updateCategoryEntity(final Long id, final String title) {
+        categoryRepository.updateCategoryEntity(id, title);
     }
 
     @Override

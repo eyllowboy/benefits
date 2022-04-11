@@ -28,7 +28,7 @@ public interface CategoryService extends CrudService<CategoryEntity>{
      * @param id the id of {@link CategoryEntity} in the database, not null
      * @param title the title of {@link CategoryEntity} stored in the database, not null
      */
-    CategoryEntity updateCategoryEntity(final Long id, final String title);
+    void updateCategoryEntity(final Long id, final String title);
 
     /**
      * Method to get {@link CategoryEntity} with EAGER fetch associated {@link DiscountEntity}

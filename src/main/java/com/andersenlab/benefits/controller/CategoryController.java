@@ -96,9 +96,9 @@ public class CategoryController {
     })
     @PutMapping("/categories")
     public ResponseEntity<CategoryEntity> updateCategory(@RequestBody final CategoryEntity category) {
-        categoryService.findById(category.getId())
+        CategoryEntity updatedCategory = categoryService.findById(category.getId())
                 .orElseThrow(() -> new IllegalStateException("Category with this id was not found in the database"));
-        var updatedCategory = categoryService.updateCategoryEntity(category.getId(), category.getTitle());
+        categoryService.updateCategoryEntity(category.getId(), category.getTitle());
         return ResponseEntity.ok(updatedCategory);
     }
 
