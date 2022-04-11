@@ -29,7 +29,7 @@ public class CompanyController {
     private final CompanyService companyService;
 
     @Autowired
-    public CompanyController(CompanyService companyService) {
+    public CompanyController(final CompanyService companyService) {
         this.companyService = companyService;
     }
 
@@ -49,7 +49,7 @@ public class CompanyController {
                     content = @Content)
     })
     @PostMapping("/companies")
-    public final Optional<CompanyEntity> addCompany(@RequestBody CompanyEntity companyEntity) {
+    public Optional<CompanyEntity> addCompany(@RequestBody final CompanyEntity companyEntity) {
         companyService.findByIdCompany(companyEntity.getId()).ifPresent(company -> {
             throw new IllegalStateException("The company with id: " + companyEntity.getId() + " already exists.");});
         return companyService.createCompany(companyEntity);
@@ -71,7 +71,7 @@ public class CompanyController {
                     content = @Content)
     })
     @GetMapping("/companies/{id}")
-    public final CompanyEntity getCompanyById(@PathVariable final Long id) {
+    public CompanyEntity getCompanyById(@PathVariable final Long id) {
         return (companyService.findByIdCompany(id))
                 .orElseThrow(() -> new IllegalStateException("Company with this id was not found in the database."));
     }
@@ -91,7 +91,7 @@ public class CompanyController {
                     content = @Content)
     })
     @GetMapping("/companies")
-    public final List<CompanyEntity> getAllCompany() {
+    public List<CompanyEntity> getAllCompany() {
         return companyService.findAllCompany();
     }
 
@@ -113,7 +113,7 @@ public class CompanyController {
                     content = @Content)
     })
     @PutMapping("/companies/{id}")
-    public final Optional<CompanyEntity> updatedCompany(@PathVariable final Long id, @RequestBody final CompanyEntity company) {
+    public Optional<CompanyEntity> updatedCompany(@PathVariable final Long id, @RequestBody final CompanyEntity company) {
         companyService.findByIdCompany(id).orElseThrow(() -> new IllegalStateException("The company with id: " + id + " was not found in the database."));
         return companyService.updateCompanyById(id, company);
     }

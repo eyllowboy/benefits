@@ -134,7 +134,7 @@ public class RoleController {
                     content = @Content)
     })
     @GetMapping("/roles/{id}")
-    public RoleEntity getRole(@PathVariable @DecimalMin("1") Long id) {
+    public RoleEntity getRole(@PathVariable @DecimalMin("1") final Long id) {
         final Optional<RoleEntity> roleEntity = roleService.findById(id);
 
         return roleEntity.orElseThrow(
@@ -154,7 +154,7 @@ public class RoleController {
                     content = @Content)
     })
     @DeleteMapping("/roles/{id}")
-    public void deleteRole(@PathVariable @DecimalMin("1") Long id) {
+    public void deleteRole(@PathVariable @DecimalMin("1") final Long id) {
         roleService.findById(id).orElseThrow(() ->
                 new IllegalStateException("Role with this id was not found in the database"));
         final Optional<RoleEntity> roleEntity = roleService.findWithAssociatedUsers(id);

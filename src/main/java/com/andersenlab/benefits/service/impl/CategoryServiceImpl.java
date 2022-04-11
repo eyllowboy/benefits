@@ -48,7 +48,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public final CategoryEntity save(CategoryEntity entity) {
+    public CategoryEntity save(CategoryEntity entity) {
         return categoryRepository.save(entity);
     }
 
