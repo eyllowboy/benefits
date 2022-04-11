@@ -29,7 +29,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @Autowired
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(final CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 

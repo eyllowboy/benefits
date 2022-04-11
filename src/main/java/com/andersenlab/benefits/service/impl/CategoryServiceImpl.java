@@ -22,18 +22,18 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
     @Autowired
-    public CategoryServiceImpl(CategoryRepository categoryRepository) {
+    public CategoryServiceImpl(final CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
     }
 
     @Override
-    public Optional<CategoryEntity> findByTitle(String title) {
+    public Optional<CategoryEntity> findByTitle(final String title) {
         return categoryRepository.findByTitle(title);
     }
 
     @Override
     @Transactional
-    public CategoryEntity updateCategoryEntity(Long id, String title) {
+    public CategoryEntity updateCategoryEntity(final Long id, final String title) {
         var category = categoryRepository.findById(id).orElseThrow();
         category.setTitle(title);
         return categoryRepository.save(category);
@@ -45,17 +45,17 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Optional<CategoryEntity> findById(Long id) {
+    public Optional<CategoryEntity> findById(final Long id) {
         return categoryRepository.findById(id);
     }
 
     @Override
-    public final CategoryEntity save(CategoryEntity entity) {
+    public CategoryEntity save(final CategoryEntity entity) {
         return categoryRepository.save(entity);
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(final Long id) {
         categoryRepository.deleteById(id);
     }
 

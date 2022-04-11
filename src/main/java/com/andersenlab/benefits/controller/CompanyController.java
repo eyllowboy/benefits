@@ -29,7 +29,7 @@ public class CompanyController {
     private final CompanyService companyService;
 
     @Autowired
-    public CompanyController(CompanyService companyService) {
+    public CompanyController(final CompanyService companyService) {
         this.companyService = companyService;
     }
 
@@ -49,7 +49,7 @@ public class CompanyController {
                     content = @Content)
     })
     @PostMapping("/companies")
-    public Optional<CompanyEntity> addCompany(@RequestBody CompanyEntity companyEntity) {
+    public Optional<CompanyEntity> addCompany(@RequestBody final CompanyEntity companyEntity) {
         companyService.findByIdCompany(companyEntity.getId()).ifPresent(company -> {
             throw new IllegalStateException("The company with id: " + companyEntity.getId() + " already exists.");});
         return companyService.createCompany(companyEntity);

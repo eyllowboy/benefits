@@ -52,7 +52,7 @@ public class DiscountController {
     private final DiscountServiceImpl discountService;
 
     @Autowired
-    public DiscountController(DiscountServiceImpl discountService) {
+    public DiscountController(final DiscountServiceImpl discountService) {
         this.discountService = discountService;
     }
 

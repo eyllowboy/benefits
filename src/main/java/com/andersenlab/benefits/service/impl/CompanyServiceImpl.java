@@ -25,7 +25,7 @@ public class CompanyServiceImpl implements CompanyService {
     private final CompanyRepository companyRepository;
 
     @Autowired
-    public CompanyServiceImpl(CompanyRepository companyRepository) {
+    public CompanyServiceImpl(final CompanyRepository companyRepository) {
         this.companyRepository = companyRepository;
     }
 
@@ -60,12 +60,12 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public final void deleteCompanyById(final Long id) {
+    public void deleteCompanyById(final Long id) {
         companyRepository.deleteById(id);
     }
 
     @Override
-    public final Optional<CompanyEntity> findWithAssociatedDiscount(Long id) {
+    public Optional<CompanyEntity> findWithAssociatedDiscount(final Long id) {
         return companyRepository.findWithAssociatedDiscounts(id);
     }
 

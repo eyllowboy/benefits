@@ -30,7 +30,7 @@ public class LocationController {
     private final LocationService locationService;
 
     @Autowired
-    public LocationController(LocationService locationService) {
+    public LocationController(final LocationService locationService) {
         this.locationService = locationService;
     }
 
