@@ -62,11 +62,7 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-<<<<<<< HEAD
     public Optional<CompanyEntity> findWithAssociatedDiscount(final Long id) {
-=======
-    public Optional<CompanyEntity> findWithAssociatedDiscount(Long id) {
->>>>>>> 55eb5ba5b7b75130adf19340848937fc63e3d9ff
         return companyRepository.findWithAssociatedDiscounts(id);
     }
 
