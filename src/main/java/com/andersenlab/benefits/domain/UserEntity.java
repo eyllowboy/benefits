@@ -28,7 +28,7 @@ public class UserEntity {
     private String login;
 
     @Schema(description = "Role", type = "RoleEntity")
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
+    @ManyToOne
     @JoinColumn(name = "role_id")
     private RoleEntity roleEntity;
 

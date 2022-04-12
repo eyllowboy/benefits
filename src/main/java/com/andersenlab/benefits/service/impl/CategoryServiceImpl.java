@@ -5,6 +5,7 @@ import com.andersenlab.benefits.repository.CategoryRepository;
 import com.andersenlab.benefits.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,17 +22,18 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
     @Autowired
-    public CategoryServiceImpl(CategoryRepository categoryRepository) {
+    public CategoryServiceImpl(final CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
     }
 
     @Override
-    public Optional<CategoryEntity> findByTitle(String title) {
+    public Optional<CategoryEntity> findByTitle(final String title) {
         return categoryRepository.findByTitle(title);
     }
 
     @Override
-    public void updateCategoryEntity(Long id, String title) {
+    @Transactional
+    public void updateCategoryEntity(final Long id, final String title) {
         categoryRepository.updateCategoryEntity(id, title);
     }
 
@@ -41,22 +43,23 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Optional<CategoryEntity> findById(Long id) {
+    public Optional<CategoryEntity> findById(final Long id) {
         return categoryRepository.findById(id);
     }
 
     @Override
-    public CategoryEntity save(CategoryEntity entity) {
+    public CategoryEntity save(final CategoryEntity entity) {
         return categoryRepository.save(entity);
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(final Long id) {
         categoryRepository.deleteById(id);
     }
 
     @Override
+    @Transactional
     public Optional<CategoryEntity> findWithAssociatedDiscounts(final Long id) {
         return categoryRepository.findWithAssociatedDiscounts(id);
-    };
+    }
 }

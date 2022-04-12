@@ -30,12 +30,10 @@ public interface LocationRepository extends JpaRepository<LocationEntity, Long> 
     List<Optional<LocationEntity>> findByFirstLetters(@Param(value = "country") final String country,
                                                       @Param(value = "filterMask") final String filterMask);
 
-    @Transactional
     @Query("FROM LocationEntity loc JOIN FETCH loc.discounts WHERE loc.id = :id")
     Optional<LocationEntity> findWithAssociatedDiscounts(@Param(value = "id") final Long id);
 
     @Modifying
-    @Transactional
     @Query("UPDATE LocationEntity loc SET loc.country = :country, loc.city = :city where loc.id = :id")
     void updateLocationEntity(@Param(value = "id") final Long id,
                               @Param(value = "country") final String country,

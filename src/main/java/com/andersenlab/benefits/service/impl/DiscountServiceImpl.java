@@ -28,29 +28,29 @@ public class DiscountServiceImpl implements DiscountService {
 
 
     @Autowired
-    public DiscountServiceImpl(DiscountRepository discountRepository) {
+    public DiscountServiceImpl(final DiscountRepository discountRepository) {
         this.discountRepository = discountRepository;
     }
 
     @Override
-    public final Optional<DiscountEntity> findByIdDiscount(final Long id) {
+    public Optional<DiscountEntity> findByIdDiscount(final Long id) {
         return discountRepository.findById(id);
     }
 
     @Override
-    public final List<Optional<DiscountEntity>> findAllDiscounts() {
+    public List<Optional<DiscountEntity>> findAllDiscounts() {
         return discountRepository.findAll().stream()
                 .map(discount -> Optional.of(Objects.requireNonNullElseGet(discount, DiscountEntity::new)))
                 .toList();
     }
 
     @Override
-    public final Optional<DiscountEntity> createDiscount(final DiscountEntity discount) {
+    public Optional<DiscountEntity> createDiscount(final DiscountEntity discount) {
         return Optional.of(discountRepository.save(discount));
     }
 
     @Override
-    public final Optional<DiscountEntity> updateDiscountById(final Long id, final DiscountEntity newDiscount) {
+    public Optional<DiscountEntity> updateDiscountById(final Long id, final DiscountEntity newDiscount) {
         discountRepository.findById(id).map(discount -> {
             discount.setType(newDiscount.getType());
             discount.setDescription(newDiscount.getDescription());
@@ -73,7 +73,7 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
-    public final List<DiscountEntity> getDiscountsByCriteria(final Specification<DiscountEntity> specificDiscountEntity) {
+    public List<DiscountEntity> getDiscountsByCriteria(final Specification<DiscountEntity> specificDiscountEntity) {
         return discountRepository.findAll(specificDiscountEntity);
     }
 }

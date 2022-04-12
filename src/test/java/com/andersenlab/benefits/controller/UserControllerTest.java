@@ -3,9 +3,10 @@ package com.andersenlab.benefits.controller;
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
-import com.andersenlab.benefits.service.LocationService;
+import com.andersenlab.benefits.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
+import org.json.JSONObject;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,33 +15,42 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.NestedServletException;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.xml.stream.Location;
+import java.util.List;
+import java.util.Optional;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static java.lang.Math.random;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
 @WithMockUser
 public class UserControllerTest {
-	@Autowired
-	private MockMvc mockMvc;
+	private final MockMvc mockMvc;
+	private final RoleRepository roleRepository;
+	private final UserRepository userRepository;
+	private final ControllerTestUtils ctu;
 
 	@Autowired
-	private LocationService locationService;
+	public UserControllerTest(final MockMvc mockMvc,
+							  final RoleRepository roleRepository,
+							  final UserRepository userRepository,
+							  final ControllerTestUtils ctu) {
+		this.mockMvc = mockMvc;
+		this.roleRepository = roleRepository;
+		this.userRepository = userRepository;
+		this.ctu = ctu;
+	}
 
 	@Container
 	public static final PostgreSQLContainer<?> postgreSQLContainer =
@@ -50,228 +60,251 @@ public class UserControllerTest {
 					.withPassword("ben0147");
 	
 	@DynamicPropertySource
-	public static void postgreSQLProperties(final DynamicPropertyRegistry registry) {
+	static void postgreSQLProperties(final DynamicPropertyRegistry registry) {
 		registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
 	}
-	
+
+	@BeforeEach
+	public void clearData() {
+		ctu.clearTables();
+	}
+
 	@Test
 	public void whenGetAllUsers() throws Exception {
+		// given
+		final List<UserEntity> users = this.userRepository.saveAll(ctu.getUserList());
+		final MvcResult result;
+		final List<UserEntity> usersResult;
+
 		// when
-		mockMvc.perform(MockMvcRequestBuilders
-						.get("/users")
-						.with(csrf())
-						.contentType(MediaType.APPLICATION_JSON))
-				.andDo(print())
+		result = this.mockMvc.perform(MockMvcRequestBuilders
+					.get("/users")
+					.with(csrf())
+					.contentType(MediaType.APPLICATION_JSON))
+					.andDo(print())
+					.andReturn();
+
 		// then
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$", notNullValue()));
+		assertEquals(200, result.getResponse().getStatus());
+		usersResult = ctu.getUsersFromJson(result.getResponse().getContentAsString());
+		usersResult.forEach(item -> assertTrue(users.contains(item)));
 	}
-	
+
 	@Test
 	public void whenGetUserByIdAndIdExists() throws Exception {
+		// given
+		final int userPos = ctu.getRndEntityPos();
+		final List<UserEntity> users = this.userRepository.saveAll(ctu.getUserList());
+		final MvcResult result;
+
 		// when
-		mockMvc.perform(MockMvcRequestBuilders
-						.get("/users/{id}", 1L)
-						.with(csrf())
-						.contentType(MediaType.APPLICATION_JSON))
+		result = this.mockMvc.perform(MockMvcRequestBuilders
+				.get("/users/{id}", users.get(userPos).getId())
+				.with(csrf())
+				.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
+				.andReturn();
+
 		// then
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$", notNullValue()))
-				.andExpect(jsonPath("$.id", is(1)))
-				.andExpect(jsonPath("$.login", is("admin")))
-				.andExpect(jsonPath("$.roleEntity.id", is(1)))
-				.andExpect(jsonPath("$.roleEntity.name", is("System administrator")))
-				.andExpect(jsonPath("$.roleEntity.code", is("ROLE_ADMIN")))
-				.andExpect(jsonPath("$.location.country", is("Россия")))
-				.andExpect(jsonPath("$.location.city", is("Москва")));
+		assertEquals(200, result.getResponse().getStatus());
+		assertEquals(users.get(userPos), ctu.getUserFromJson(new JSONObject(result.getResponse().getContentAsString())));
 	}
-	
+
 	@Test
 	public void whenGetUserByIdAndIdNotExists() {
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
-				() -> mockMvc.perform(get("/users/{id}", Long.MAX_VALUE)
-						.with(csrf())));
+				() -> this.mockMvc.perform(get("/users/{id}", Long.MAX_VALUE).with(csrf())));
 		
 		// then
-		assertEquals(IllegalStateException.class,
-				nestedServletException.getCause().getClass());
+		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("User with this id was not found in the database",
 				nestedServletException.getCause().getMessage());
 	}
-	
+
 	@Test
 	public void whenAddUserIsSuccess() throws Exception {
+		// given
+		final UserEntity user = ctu.getUser(ctu.getRndEntityPos());
+		final MvcResult result;
+
 		// when
-		mockMvc.perform(MockMvcRequestBuilders
-						.post("/users")
-						.with(csrf())
-						.contentType(MediaType.APPLICATION_JSON)
-						.param("login", "login_1")
-						.param("roleId", "1")
-						.param("locationId", "1"))
+		result = this.mockMvc.perform(MockMvcRequestBuilders
+				.post("/users")
+				.with(csrf())
+				.contentType(MediaType.APPLICATION_JSON)
+				.param("login", user.getLogin())
+				.param("roleId", user.getRoleEntity().getId().toString())
+				.param("locationId", user.getLocation().getId().toString()))
 				.andDo(print())
+				.andReturn();
 		// then
-				.andExpect(jsonPath("$", notNullValue()))
-				.andExpect(jsonPath("$.id", isA(Number.class)))
-				.andExpect(jsonPath("$.login", is("login_1")))
-				.andExpect(jsonPath("$.roleEntity.id", is(1)))
-				.andExpect(jsonPath("$.roleEntity.name", is("System administrator")))
-				.andExpect(jsonPath("$.roleEntity.code", is("ROLE_ADMIN")))
-				.andExpect(jsonPath("$.location.country", is("Россия")))
-				.andExpect(jsonPath("$.location.city", is("Москва")));
+		assertEquals(201, result.getResponse().getStatus());
+		assertEquals(1, this.userRepository.findAll().size());
+		assertEquals(user, ctu.getUserFromJson(new JSONObject(result.getResponse().getContentAsString())));
 	}
-	
+
 	@Test
 	public void whenAddUserAndLoginIsExists() {
+		// given
+		final int listLength = 10;
+		final UserEntity user = this.userRepository.save(ctu.getUser((int) (random() * (listLength - 1) + 1)));
+
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
-				() -> mockMvc.perform(MockMvcRequestBuilders
+				() -> this.mockMvc.perform(MockMvcRequestBuilders
 						.post("/users")
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
-						.param("login", "admin")
-						.param("roleId", "1")
-						.param("locationId", "1")));
+						.param("login", user.getLogin())
+						.param("roleId", user.getRoleEntity().getId().toString())
+						.param("locationId", user.getLocation().getId().toString())));
 		
 		// then
-		assertEquals(IllegalStateException.class,
-				nestedServletException.getCause().getClass());
+		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("User with such 'login' is already exists",
 				nestedServletException.getCause().getMessage());
 	}
-	
+
 	@Test
 	public void whenAddUserAndRoleIsNotExists() {
+		// given
+		final RoleEntity role = this.roleRepository.save(ctu.getRole(ctu.getRndEntityPos()));
+		final LocationEntity location = ctu.getLocation(ctu.getRndEntityPos());
+
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
-				() -> mockMvc.perform(MockMvcRequestBuilders
+				() -> this.mockMvc.perform(MockMvcRequestBuilders
 						.post("/users")
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
-						.param("login", "admin_2")
-						.param("roleId", "9223372036854775807")
-						.param("locationId", "1")));
+						.param("login", "userLogin")
+						.param("roleId", Long.toString(role.getId() + 1))
+						.param("locationId", Long.toString(location.getId()))));
 		
 		// then
-		assertEquals(IllegalStateException.class,
-				nestedServletException.getCause().getClass());
+		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("Role with this id was not found in the database",
 				nestedServletException.getCause().getMessage());
 	}
-	
+
 	@Test
 	public void whenUpdateUserWithNewLoginAndRoleIdIsExists() throws Exception {
 		// given
-		final RoleEntity roleEntity = new RoleEntity(6L, "incorrect_name_1", "incorrect_role_code_1");
-		final LocationEntity location = locationService.findById(1L).orElseThrow();
-		final UserEntity userEntity = new UserEntity(5L, "new_login_1", roleEntity, location);
-		final String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(userEntity);
-		
+		final Long id = this.userRepository.save(ctu.getUser(ctu.getRndEntityPos())).getId();
+		final UserEntity user = ctu.getUser(ctu.getRndEntityPos());
+		user.setId(id);
+		user.setLogin("newUserLogin");
+		final MvcResult result;
+
 		// when
-		mockMvc.perform(MockMvcRequestBuilders
-						.put("/users")
-						.with(csrf())
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(roleEntityAsJsonString))
+		result = this.mockMvc.perform(MockMvcRequestBuilders
+				.put("/users")
+				.with(csrf())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(new ObjectMapper().writeValueAsString(user)))
 				.andDo(print())
+				.andReturn();
 		// then
-				.andExpect(status().isOk());
+		assertEquals(200, result.getResponse().getStatus());
+		assertEquals(1, this.userRepository.findAll().size());
+		assertEquals(user, this.userRepository.findById(id).orElseThrow());
 	}
-	
+
 	@Test
-	public void whenUpdateUserAndLoginIsExists() throws Exception {
+	public void whenUpdateUserAndLoginIsExists() {
 		// given
-		final RoleEntity roleEntity = new RoleEntity(6L, "incorrect_name_1", "incorrect_role_code_1");
-		final LocationEntity location = new LocationEntity("Россия", "Уфа");
-		final UserEntity userEntity = new UserEntity(5L, "admin", roleEntity, location);
-		final String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(userEntity);
-		
+		final List<UserEntity> users = this.userRepository.saveAll(ctu.getUserList());
+		final UserEntity userSetLoginTo = users.get(users.size() - 1);
+		userSetLoginTo.setLogin(users.get(0).getLogin());
+
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
-				() -> mockMvc.perform(MockMvcRequestBuilders
+				() -> this.mockMvc.perform(MockMvcRequestBuilders
 						.put("/users")
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(roleEntityAsJsonString)));
+						.content(new ObjectMapper().writeValueAsString(userSetLoginTo))));
 		
 		// then
-		assertEquals(IllegalStateException.class,
-				nestedServletException.getCause().getClass());
+		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("User with such 'login' is already exists",
 				nestedServletException.getCause().getMessage());
 	}
-	
+
 	@Test
-	public void whenUpdateUserAndRoleIsNotExists() throws Exception {
+	public void whenUpdateUserAndRoleIsNotExists() {
 		// given
-		final RoleEntity roleEntity = new RoleEntity(Long.MAX_VALUE, "incorrect_name_1", "incorrect_role_code_1");
-		final LocationEntity location = new LocationEntity("Россия", "Уфа");
-		final UserEntity userEntity = new UserEntity(5L, "new_login_2", roleEntity, location);
-		final String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(userEntity);
-		
+		final UserEntity user = this.userRepository.save(ctu.getUser(ctu.getRndEntityPos()));
+		final RoleEntity role = ctu.getRole(Long.MAX_VALUE);
+		role.setId(Long.MAX_VALUE);
+		user.setRoleEntity(role);
+
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
-				() -> mockMvc.perform(MockMvcRequestBuilders
+				() -> this.mockMvc.perform(MockMvcRequestBuilders
 						.put("/users")
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(roleEntityAsJsonString)));
+						.content(new ObjectMapper().writeValueAsString(user))));
 		
 		// then
-		assertEquals(IllegalStateException.class,
-				nestedServletException.getCause().getClass());
+		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("Role with this id was not found in the database",
 				nestedServletException.getCause().getMessage());
 	}
-	
+
 	@Test
-	public void whenUpdateUserAndIdNotExists() throws Exception {
+	public void whenUpdateUserAndIdNotExists() {
 		// given
-		final RoleEntity roleEntity = new RoleEntity(1L, "incorrect_name_1", "incorrect_role_code_1");
-		final LocationEntity location = new LocationEntity("Россия", "Уфа");
-		final UserEntity userEntity = new UserEntity(Long.MAX_VALUE, "new_login_3", roleEntity, location);
-		final String roleEntityAsJsonString = new ObjectMapper().writeValueAsString(userEntity);
+		final UserEntity user = this.userRepository.saveAll(ctu.getUserList()).get(0);
+		user.setId(Long.MAX_VALUE);
 		
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
-				() -> mockMvc.perform(MockMvcRequestBuilders
+				() -> this.mockMvc.perform(MockMvcRequestBuilders
 						.put("/users")
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(roleEntityAsJsonString)));
+						.content(new ObjectMapper().writeValueAsString(user))));
 		
 		// then
-		assertEquals(IllegalStateException.class,
-				nestedServletException.getCause().getClass());
+		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("User with this id was not found in the database",
 				nestedServletException.getCause().getMessage());
 	}
-	
+
 	@Test
 	public void whenDeleteUserIsSuccess() throws Exception {
+		// given
+		final List<UserEntity> users = this.userRepository.saveAll(ctu.getUserList());
+		final UserEntity userForDelete = users.get(ctu.getRndEntityPos());
+		final MvcResult result;
+
 		// when
-		mockMvc.perform(MockMvcRequestBuilders
-						.delete("/users/{id}", 7L)
+		result = this.mockMvc.perform(MockMvcRequestBuilders
+						.delete("/users/{id}", userForDelete.getId())
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
+				.andReturn();
+
 		// then
-				.andExpect(status().isOk());
+		assertEquals(200, result.getResponse().getStatus());
+		assertEquals(Optional.empty(), this.userRepository.findById(userForDelete.getId()));
+		assertEquals(users.size() - 1, this.userRepository.findAll().size());
 	}
-	
+
 	@Test
 	public void whenDeleteUserAndIdNotExists() {
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
-				() -> mockMvc.perform(MockMvcRequestBuilders
-						.delete("/users/{id}", Long.MAX_VALUE)
-						.with(csrf())));
+				() -> this.mockMvc.perform(MockMvcRequestBuilders
+					.delete("/users/{id}", Long.MAX_VALUE)
+					.with(csrf())));
 		
 		// then
-		assertEquals(IllegalStateException.class,
-				nestedServletException.getCause().getClass());
+		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("User with this id was not found in the database",
 				nestedServletException.getCause().getMessage());
 	}

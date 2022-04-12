@@ -15,7 +15,7 @@ import java.util.Date;
 public class DiscountSpec {
 
 
-    public static Specification<DiscountEntity> getByCategory(String category) {
+    public static Specification<DiscountEntity> getByCategory(final String category) {
         return new Specification<DiscountEntity>() {
             @Override
             public Predicate toPredicate(Root<DiscountEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
@@ -27,7 +27,7 @@ public class DiscountSpec {
 
     }
 
-    public static Specification<DiscountEntity> getByLocation(String location) {
+    public static Specification<DiscountEntity> getByLocation(final String location) {
         return new Specification<DiscountEntity>() {
             @Override
             public Predicate toPredicate(Root<DiscountEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
@@ -49,7 +49,7 @@ public class DiscountSpec {
         };
     }
 
-    public static Specification<DiscountEntity> getByType(String type) {
+    public static Specification<DiscountEntity> getByType(final String type) {
         return new Specification<DiscountEntity>() {
             @Override
             public Predicate toPredicate(Root<DiscountEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
@@ -59,7 +59,7 @@ public class DiscountSpec {
 
     }
 
-    public static Specification<DiscountEntity> getBySize(String sizeDiscount) {
+    public static Specification<DiscountEntity> getBySize(final String sizeDiscount) {
         return new Specification<DiscountEntity>() {
             @Override
             public Predicate toPredicate(Root<DiscountEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {

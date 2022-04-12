@@ -5,6 +5,7 @@ import com.andersenlab.benefits.repository.CompanyRepository;
 import com.andersenlab.benefits.service.CompanyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,27 +25,27 @@ public class CompanyServiceImpl implements CompanyService {
     private final CompanyRepository companyRepository;
 
     @Autowired
-    public CompanyServiceImpl(CompanyRepository companyRepository) {
+    public CompanyServiceImpl(final CompanyRepository companyRepository) {
         this.companyRepository = companyRepository;
     }
 
     @Override
-    public final List<CompanyEntity> findAllCompany() {
+    public List<CompanyEntity> findAllCompany() {
         return companyRepository.findAll();
     }
 
     @Override
-    public final Optional<CompanyEntity> findByIdCompany(final Long id) {
+    public Optional<CompanyEntity> findByIdCompany(final Long id) {
         return companyRepository.findById(id);
     }
 
     @Override
-    public final Optional<CompanyEntity> createCompany(final CompanyEntity company) {
+    public Optional<CompanyEntity> createCompany(final CompanyEntity company) {
         return Optional.of(companyRepository.save(company));
     }
 
     @Override
-    public final Optional<CompanyEntity> updateCompanyById(final Long id, final CompanyEntity newCompany) {
+    public Optional<CompanyEntity> updateCompanyById(final Long id, final CompanyEntity newCompany) {
         companyRepository.findById(id).map(company -> {
             company.setTitle(newCompany.getTitle());
             company.setDescription(newCompany.getDescription());
@@ -64,7 +65,7 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public Optional<CompanyEntity> findWithAssociatedDiscount(Long id) {
+    public Optional<CompanyEntity> findWithAssociatedDiscount(final Long id) {
         return companyRepository.findWithAssociatedDiscounts(id);
     }
 

@@ -29,7 +29,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @Autowired
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(final CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 
@@ -49,7 +49,7 @@ public class CategoryController {
                     content = @Content)
     })
     @PostMapping("/categories")
-    public final ResponseEntity<CategoryEntity> addCategory(@RequestParam(value = "title") final String title) {
+    public ResponseEntity<CategoryEntity> addCategory(@RequestParam(value = "title") final String title) {
         categoryService.findByTitle(title).ifPresent(categoryEntity -> {
             throw new IllegalStateException("Category with title '" + title + "' already exists");
         });
@@ -95,10 +95,11 @@ public class CategoryController {
                     content = @Content)
     })
     @PutMapping("/categories")
-    public void updateCategory(@RequestBody final CategoryEntity category) {
-        categoryService.findById(category.getId())
+    public ResponseEntity<CategoryEntity> updateCategory(@RequestBody final CategoryEntity category) {
+        CategoryEntity updatedCategory = categoryService.findById(category.getId())
                 .orElseThrow(() -> new IllegalStateException("Category with this id was not found in the database"));
         categoryService.updateCategoryEntity(category.getId(), category.getTitle());
+        return ResponseEntity.ok(updatedCategory);
     }
 
     /**
