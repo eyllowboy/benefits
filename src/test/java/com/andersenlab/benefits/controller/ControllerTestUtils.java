@@ -156,14 +156,14 @@ public class ControllerTestUtils {
     public String discountToString(final DiscountEntity discount) {
         return (
                 discount.getId() + ";" +
-                        discount.getCompany_id().getTitle() + ";" +
+                        discount.getCompany().getTitle() + ";" +
                         discount.getType() + ";" +
                         discount.getCategories().stream().map(CategoryEntity::getTitle).collect(Collectors.joining("|")) + ";" +
                         discount.getImageDiscount() + ";" +
-                        discount.getCompany_id().getDescription() + ";" +
-                        discount.getCompany_id().getAddress() + ";" +
-                        discount.getCompany_id().getPhone() + ";" +
-                        discount.getCompany_id().getLink() + ";" +
+                        discount.getCompany().getDescription() + ";" +
+                        discount.getCompany().getAddress() + ";" +
+                        discount.getCompany().getPhone() + ";" +
+                        discount.getCompany().getLink() + ";" +
                         discount.getSizeDiscount() + ";" +
                         discount.getDiscount_type() + ";" +
                         discount.getDescription() + ";" +
@@ -207,7 +207,7 @@ public class ControllerTestUtils {
                         discount1.getDiscount_condition().equals(discount2.getDiscount_condition()) &&
                         discount1.getSizeDiscount().equals(discount2.getSizeDiscount()) &&
                         discount1.getImageDiscount().equals(discount2.getImageDiscount()) &&
-                        isCompaniesEquals(discount1.getCompany_id(), discount2.getCompany_id())
+                        isCompaniesEquals(discount1.getCompany(), discount2.getCompany())
         );
     }
 

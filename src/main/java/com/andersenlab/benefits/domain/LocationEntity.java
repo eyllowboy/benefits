@@ -7,7 +7,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import java.util.Objects;
 import java.util.Set;
 
 @Schema(name = "Location", description = "Location entity")
@@ -15,12 +14,13 @@ import java.util.Set;
 @Table(name = "locations")
 @Getter
 @Setter
-@ToString
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor()
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class LocationEntity {
     @Schema(description = "Identifier", type = "int64", minimum = "1")
+    @EqualsAndHashCode.Exclude
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "location_id_seq")
     @SequenceGenerator(name = "location_id_seq", sequenceName = "location_id", allocationSize = 1)
@@ -36,6 +36,7 @@ public class LocationEntity {
     @Column
     private String city;
 
+    @EqualsAndHashCode.Exclude
     @JsonIgnore
     @ManyToMany(mappedBy = "area", fetch = FetchType.LAZY)
     private Set<DiscountEntity> discounts;
@@ -52,15 +53,11 @@ public class LocationEntity {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final LocationEntity that = (LocationEntity) o;
-        return country.equals(that.country) && city.equals(that.city);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(country, city);
+    public String toString() {
+        return "LocationEntity{" +
+                "id=" + id +
+                ", country='" + country + '\'' +
+                ", city='" + city + '\'' +
+                '}';
     }
 }

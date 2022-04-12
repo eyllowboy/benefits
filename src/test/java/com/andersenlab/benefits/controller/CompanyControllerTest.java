@@ -242,7 +242,7 @@ class CompanyControllerTest {
         discount.setDateFinish(new Date());
         discount.setImageDiscount("imageDiscount");
         var savedCompany = companyRepository.save(companyWithActiveDiscount);
-        discount.setCompany_id(savedCompany);
+        discount.setCompany(savedCompany);
         discountRepository.save(discount);
         final Long id = savedCompany.getId();
         // when
