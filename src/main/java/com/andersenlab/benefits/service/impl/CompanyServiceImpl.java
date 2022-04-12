@@ -52,21 +52,11 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public void deleteCompanyById(final Long id) {
-<<<<<<< HEAD
         this.companyRepository.deleteById(id);
     }
 
     @Override
     public Optional<CompanyEntity> findWithAssociatedDiscount(final Long id) {
         return this.companyRepository.findWithAssociatedDiscounts(id);
-=======
-        companyRepository.deleteById(id);
     }
-
-    @Override
-    public Optional<CompanyEntity> findWithAssociatedDiscount(Long id) {
-        return companyRepository.findWithAssociatedDiscounts(id);
->>>>>>> 55eb5ba (Added toString method to Role, Location, Company, Category with exclude Set<> of associated entities (lazy init). Edited @EqualsAndHashCode to exclude Id and Set<> dependency)
-    }
-
 }
