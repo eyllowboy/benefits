@@ -137,7 +137,7 @@ public class CategoryControllerTest {
     public void whenGetAllCategoriesSuccess() throws Exception {
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/categories?page=0&size=5")
+                        .get("/categories?page=0&size=4")
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andDo(print())
@@ -145,7 +145,7 @@ public class CategoryControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.number", is(0)))
-                .andExpect(jsonPath("$.size", is(5)));
+                .andExpect(jsonPath("$.size", is(4)));
     }
 
 
