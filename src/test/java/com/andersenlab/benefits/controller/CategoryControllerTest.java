@@ -180,7 +180,7 @@ public class CategoryControllerTest {
 
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .put("/categories")
+                        .patch("/categories/{id}", category.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(category))
                         .with((csrf())))
@@ -200,7 +200,8 @@ public class CategoryControllerTest {
         final String categoryEntity = (this.objectMapper).writeValueAsString(category);
         // when
         NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
-            this.mockMvc.perform(MockMvcRequestBuilders.put("/categories")
+            this.mockMvc.perform(MockMvcRequestBuilders
+                    .patch("/categories/{id}", category.getId())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(categoryEntity)
                     .with(csrf()));

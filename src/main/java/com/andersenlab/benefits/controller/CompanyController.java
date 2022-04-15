@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -116,10 +117,14 @@ public class CompanyController {
                     description = "Internal Server Error",
                     content = @Content)
     })
-    @PutMapping("/companies/{id}")
-    public Optional<CompanyEntity> updatedCompany(@PathVariable final Long id, @RequestBody final CompanyEntity company) {
-        this.companyService.findByIdCompany(id).orElseThrow(() -> new IllegalStateException("The company with id: " + id + " was not found in the database."));
-        return this.companyService.updateCompanyById(id, company);
+    @PatchMapping("/companies/{id}")
+    public ResponseEntity<CompanyEntity> updatedCompany(@PathVariable final Long id,
+                                                        @RequestBody final CompanyEntity company) {
+        final CompanyEntity existingCompany = this.companyService.findByIdCompany(id).orElseThrow(() ->
+            new IllegalStateException("The company with id: " + id + " was not found in the database."));
+        BeanUtils.copyProperties(company, existingCompany, "id");
+        this.companyService.updateCompanyById(id, existingCompany);
+        return ResponseEntity.ok(this.companyService.updateCompanyById(existingCompany.getId(), existingCompany).orElseThrow());
     }
 
     /**
