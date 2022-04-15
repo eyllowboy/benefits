@@ -26,10 +26,13 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.lang.Math.random;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
 @Testcontainers
@@ -73,21 +76,16 @@ public class UserControllerTest {
 	public void whenGetAllUsers() throws Exception {
 		// given
 		final List<UserEntity> users = this.userRepository.saveAll(ctu.getUserList());
-		final MvcResult result;
-		final List<UserEntity> usersResult;
-
 		// when
-		result = this.mockMvc.perform(MockMvcRequestBuilders
-					.get("/users")
+		this.mockMvc.perform(MockMvcRequestBuilders
+					.get("/users?page=0&size=10")
 					.with(csrf())
 					.contentType(MediaType.APPLICATION_JSON))
 					.andDo(print())
-					.andReturn();
-
-		// then
-		assertEquals(200, result.getResponse().getStatus());
-		usersResult = ctu.getUsersFromJson(result.getResponse().getContentAsString());
-		usersResult.forEach(item -> assertTrue(users.contains(item)));
+				// then
+				.andExpect(jsonPath("$", notNullValue()))
+				.andExpect(jsonPath("$.number", is(0)))
+				.andExpect(jsonPath("$.size", is(10)));
 	}
 
 	@Test

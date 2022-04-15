@@ -4,6 +4,8 @@ import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.repository.LocationRepository;
 import com.andersenlab.benefits.service.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -33,8 +35,8 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public List<LocationEntity> findAll() {
-        return locationRepository.findAll();
+    public Page<LocationEntity> findAll(final Pageable pageable) {
+        return locationRepository.findAll(pageable);
     }
 
     @Override

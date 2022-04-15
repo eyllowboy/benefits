@@ -98,13 +98,15 @@ public class LocationControllerTest {
     public void whenGetAllLocationsSuccess() throws Exception {
         // when
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/locations")
+                        .get("/locations?page=0&size=4")
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", notNullValue()));
+                .andExpect(jsonPath("$", notNullValue()))
+                .andExpect(jsonPath("$.number", is(0)))
+                .andExpect(jsonPath("$.size", is(4)));
     }
 
     @Test

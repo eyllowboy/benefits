@@ -9,6 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.*;
@@ -37,14 +40,15 @@ public class UserServiceTest {
 	public void whenFindAllSuccess() {
 		// given
 		final List<UserEntity> usersList = getUserList();
-		when(this.userRepository.findAll()).thenReturn(usersList);
+		final Page<UserEntity> pageOfUsers = new PageImpl<>(usersList);
+		when(this.userRepository.findAll(PageRequest.of(0,10))).thenReturn(pageOfUsers);
 
 		// when
-		final List<UserEntity> foundUserEntities = this.userService.findAll();
+		final Page<UserEntity> foundUserEntities = this.userService.findAll(PageRequest.of(0,10));
 		
 		// then
-		assertEquals(usersList, foundUserEntities);
-		verify(this.userRepository, times(1)).findAll();
+		assertEquals(pageOfUsers, foundUserEntities);
+		verify(this.userRepository, times(1)).findAll(PageRequest.of(0,10));
 	}
 	
 	@Test

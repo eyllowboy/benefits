@@ -1,6 +1,8 @@
 package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.DiscountEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +32,7 @@ public interface DiscountService {
      *
      * @return the list of discounts from database, error if not processed
      */
-    List<Optional<DiscountEntity>> findAllDiscounts();
+    Page<DiscountEntity> findAllDiscounts(final Pageable pageable);
 
     /**
      * Method allows creates new the discount.

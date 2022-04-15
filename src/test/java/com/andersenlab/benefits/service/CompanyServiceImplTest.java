@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.service;
 
+import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.CompanyEntity;
 import com.andersenlab.benefits.repository.CompanyRepository;
 import com.andersenlab.benefits.service.impl.CompanyServiceImpl;
@@ -8,6 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
@@ -42,14 +46,13 @@ class CompanyServiceImplTest {
                 new CompanyEntity("Company3", "Description3", "Street3", "8900-00-00", "www.link3.ru"),
                 new CompanyEntity("Company4", "Description4", "Street3", "8900-00-00", "www.link3.ru")
         );
-
-        //when
-        when(companyRepository.findAll()).thenReturn(companies);
-        final List<CompanyEntity> companyEntities = companyService.findAllCompany();
-
-        //then
-        assertEquals(companies, companyEntities);
-        verify(companyRepository, times(1)).findAll();
+        final Page<CompanyEntity> pageOfCompany = new PageImpl<>(companies);
+        // when
+        when(this.companyRepository.findAll(PageRequest.of(0,4))).thenReturn(pageOfCompany);
+        final Page<CompanyEntity> foundCompany = this.companyService.findAllCompany(PageRequest.of(0,4));
+        // then
+        assertEquals(pageOfCompany, foundCompany);
+        verify(this.companyRepository, times(1)).findAll(PageRequest.of(0,4));
 
     }
 

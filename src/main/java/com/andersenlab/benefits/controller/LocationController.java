@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -168,8 +170,8 @@ public class LocationController {
                     content = @Content)
     })
     @GetMapping(value = "/locations")
-    public List<LocationEntity> getLocations() {
-        return locationService.findAll();
+    public Page<LocationEntity> getLocations(final Pageable pageable) {
+        return locationService.findAll(pageable);
     }
 
     /**

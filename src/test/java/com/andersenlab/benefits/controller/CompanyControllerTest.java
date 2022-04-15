@@ -137,13 +137,15 @@ class CompanyControllerTest {
     void whenGetAllCompanyIsOk() throws Exception {
         //when
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/companies")
+                        .get("/companies?page=0&size=5")
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", notNullValue()));
+                .andExpect(jsonPath("$", notNullValue()))
+                .andExpect(jsonPath("$.number", is(0)))
+                .andExpect(jsonPath("$.size", is(5)));
     }
 
     @Test

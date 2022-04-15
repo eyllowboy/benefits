@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -142,7 +144,7 @@ public class CategoryController {
                     content = @Content)
     })
     @GetMapping(value = "/categories")
-    public List<CategoryEntity> getCategories() {
-        return categoryService.findAll();
+    public Page<CategoryEntity> getCategories(final Pageable pageable) {
+        return categoryService.findAll(pageable);
     }
 }

@@ -9,6 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.*;
@@ -36,14 +39,15 @@ public class RoleServiceTest {
 	public void  whenFindAllSuccess() {
 		// given
 		final List<RoleEntity> rolesList = getRoleList();
-		when(this.roleRepository.findAll()).thenReturn(rolesList);
+		final Page<RoleEntity> pageOfRole = new PageImpl<>(rolesList);
+		when(this.roleRepository.findAll(PageRequest.of(0,3))).thenReturn(pageOfRole);
 
 		// when
-		final List<RoleEntity> foundRoleEntities = this.roleService.findAll();
+		final Page<RoleEntity> foundRoleEntities = this.roleService.findAll(PageRequest.of(0,3));
 
 		// then
-		assertEquals(rolesList, foundRoleEntities);
-		verify(this.roleRepository, times(1)).findAll();
+		assertEquals(pageOfRole, foundRoleEntities);
+		verify(this.roleRepository, times(1)).findAll(PageRequest.of(0,3));
 	}
 
 	@Test

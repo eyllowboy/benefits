@@ -4,6 +4,8 @@ import com.andersenlab.benefits.domain.CompanyEntity;
 import com.andersenlab.benefits.repository.CompanyRepository;
 import com.andersenlab.benefits.service.CompanyService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,8 +32,8 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public List<CompanyEntity> findAllCompany() {
-        return companyRepository.findAll();
+    public Page<CompanyEntity> findAllCompany(final Pageable pageable) {
+        return companyRepository.findAll(pageable);
     }
 
     @Override

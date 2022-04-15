@@ -4,6 +4,8 @@ import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.repository.CategoryRepository;
 import com.andersenlab.benefits.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,8 +40,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryEntity> findAll() {
-        return categoryRepository.findAll();
+    public Page<CategoryEntity> findAll(final Pageable pageable) {
+        return categoryRepository.findAll(pageable);
     }
 
     @Override

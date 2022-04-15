@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -68,11 +70,9 @@ public class DiscountController {
                     content = @Content(mediaType = "application/json"))
     })
     @GetMapping("/discounts")
-    public List<DiscountEntity> allDiscount() {
-        return discountService.findAllDiscounts()
-                .stream()
-                .map(d -> d.orElseThrow(() -> new IllegalStateException("We have some problems with the database")))
-                .toList();
+    public Page<DiscountEntity> allDiscount(final Pageable pageable) {
+        return discountService.findAllDiscounts(pageable);
+
     }
 
     /**

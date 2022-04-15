@@ -8,6 +8,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
@@ -39,12 +42,13 @@ public class CategoryServiceTest {
                 new CategoryEntity("Категория 1"),
                 new CategoryEntity("Категория 2"),
                 new CategoryEntity("Категория 3"));
+        final Page<CategoryEntity> pageOfCategory = new PageImpl<>(categories);
         // when
-        when(this.categoryRepository.findAll()).thenReturn(categories);
-        final List<CategoryEntity> foundCategory = this.categoryService.findAll();
+        when(this.categoryRepository.findAll(PageRequest.of(0,3))).thenReturn(pageOfCategory);
+        final Page<CategoryEntity> foundCategory = this.categoryService.findAll(PageRequest.of(0,3));
         // then
-        assertEquals(categories, foundCategory);
-        verify(this.categoryRepository, times(1)).findAll();
+        assertEquals(pageOfCategory, foundCategory);
+        verify(this.categoryRepository, times(1)).findAll(PageRequest.of(0,3));
     }
 
     @Test

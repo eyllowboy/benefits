@@ -9,6 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -188,14 +191,13 @@ class DiscountServiceTest {
         // given
         final int listLength = 10;
         final List<DiscountEntity> discountList = this.discountRepository.saveAll(getDiscountList(listLength));
-
-        //when-
-        final List<Optional<DiscountEntity>> discountResult = this.discountService.findAllDiscounts();
-
-        //then
-        assertEquals(listLength, discountResult.size());
-        for (int i = 0; i < listLength; i++)
-            assertTrue(isDiscountsEquals(discountList.get(i), discountResult.get(i).orElseThrow()));
+        final Page<DiscountEntity> pageOfDiscount = new PageImpl<>(discountList);
+        // when
+        when(this.discountRepository.findAll(PageRequest.of(0,10))).thenReturn(pageOfDiscount);
+        final Page<DiscountEntity> foundCategory = this.discountRepository.findAll(PageRequest.of(0,10));
+        // then
+        assertEquals(pageOfDiscount, foundCategory);
+        verify(this.discountRepository, times(1)).findAll(PageRequest.of(0,10));
     }
 
     @Test

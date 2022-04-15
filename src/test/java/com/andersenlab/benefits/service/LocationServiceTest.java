@@ -8,6 +8,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
@@ -37,14 +40,14 @@ public class LocationServiceTest {
                 new LocationEntity("Россия", "Москва"),
                 new LocationEntity("Украина", "Киев"),
                 new LocationEntity("Белоруссия", "Минск"));
-
+        final Page<LocationEntity> pageOfLocation = new PageImpl<>(locations);
         // when
-        when(locationRepository.findAll()).thenReturn(locations);
-        final List<LocationEntity> foundLocations = locationService.findAll();
+        when(locationRepository.findAll(PageRequest.of(0,3))).thenReturn(pageOfLocation);
+        final Page<LocationEntity> foundLocations = locationService.findAll(PageRequest.of(0,3));
 
         // then
-        assertEquals(locations, foundLocations);
-        verify(locationRepository, times(1)).findAll();
+        assertEquals(pageOfLocation, foundLocations);
+        verify(locationRepository, times(1)).findAll(PageRequest.of(0,3));
     }
 
     @Test

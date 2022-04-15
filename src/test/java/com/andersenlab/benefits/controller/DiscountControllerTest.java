@@ -22,10 +22,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.*;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @Testcontainers
@@ -70,21 +74,21 @@ public class DiscountControllerTest {
     public void whenGetAllDiscountsSuccess() throws Exception {
         // given
         final List<DiscountEntity> discounts = this.discountRepository.saveAll(ctu.getDiscountList());
-        final MvcResult result;
-        final List<DiscountEntity> discountsResult;
+//        final MvcResult result;
+//        final List<DiscountEntity> discountsResult;
 
         // when
-        result = this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/discounts")
+        this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/discounts?page=0&size=6")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andReturn();
+                // then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", notNullValue()))
+                .andExpect(jsonPath("$.number", is(0)))
+                .andExpect(jsonPath("$.size", is(6)));
 
-        // then
-        assertEquals(200, result.getResponse().getStatus());
-        discountsResult = ctu.getDiscountsFromJson(result.getResponse().getContentAsString());
-        discountsResult.forEach(item -> assertTrue(discounts.contains(item)));
     }
 
     @Test
