@@ -97,4 +97,3 @@ public class DiscountEntity {
     @JoinColumn(name = "company_id")
     private CompanyEntity company;
 }
-

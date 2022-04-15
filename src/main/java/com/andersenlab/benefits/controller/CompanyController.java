@@ -145,6 +145,4 @@ public class CompanyController {
             throw new IllegalStateException("There is active discounts in this Category in database");
         this.companyService.deleteCompanyById(id);
     }
-
-
 }

@@ -49,14 +49,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-<<<<<<< HEAD
     public CategoryEntity save(final CategoryEntity entity) {
         ValidateUtils.validateEntityPost(entity);
         return this.categoryRepository.save(entity);
-=======
-    public CategoryEntity save(CategoryEntity entity) {
-        return categoryRepository.save(entity);
->>>>>>> 55eb5ba (Added toString method to Role, Location, Company, Category with exclude Set<> of associated entities (lazy init). Edited @EqualsAndHashCode to exclude Id and Set<> dependency)
     }
 
     @Override
