@@ -6,6 +6,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,22 +28,21 @@ public class CompanyEntity {
 
     @Schema(description = "Title Company", type = "string", minLength = 1, maxLength = 50)
     @NotBlank
-    @Column(name = "title", length = 50)
+    @Column(name = "title")
     private String title;
 
     @Schema(description = "Description company", type = "string", minLength = 1, maxLength = 1000)
     @NotBlank
-    @Column(name = "description", length = 1000)
+    @Column(name = "description")
     private String description;
 
     @Schema(description = "Address company", type = "string", minLength = 1, maxLength = 150)
-    @NotBlank
-    @Column(name = "address", length = 150)
+    @Column(name = "address")
     private String address;
 
     @Schema(description = "Phone company", type = "string", minLength = 1, maxLength = 20)
     @NotBlank
-    @Column(name = "phone", length = 20)
+    @Column(name = "phone")
     private String phone;
 
     @Schema(description = "Link company", type = "string", minLength = 1)
@@ -50,9 +50,8 @@ public class CompanyEntity {
     @Column(name = "link")
     private String link;
 
-    @OneToMany(mappedBy = "company_id")
     @JsonIgnore
-    @Column(name = "discount_id")
+    @OneToMany(mappedBy = "company_id")
     private List<DiscountEntity> discounts;
 
     public CompanyEntity(String title, String description, String address, String phone, String link) {

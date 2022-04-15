@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,7 +70,7 @@ public class DiscountController {
     })
     @GetMapping("/discounts")
     public List<DiscountEntity> allDiscount() {
-        return discountService.findAllDiscounts()
+        return this.discountService.findAllDiscounts()
                 .stream()
                 .map(d -> d.orElseThrow(() -> new IllegalStateException("We have some problems with the database")))
                 .toList();
@@ -78,7 +79,7 @@ public class DiscountController {
     /**
      * Create {@link DiscountEntity} in the database.
      *
-     * @param newDiscount of the entity {@link DiscountEntity}
+     * @param newDiscount new {@link DiscountEntity} to be added
      * @throws IllegalStateException if {@link DiscountEntity} with this id was not saved in the database.
      */
     @Operation(summary = "This is create the new discount.")
@@ -88,11 +89,12 @@ public class DiscountController {
                     content = @Content)
     })
     @PostMapping("/discounts")
-    public ResponseEntity<DiscountEntity> newDiscount(@RequestBody final DiscountEntity newDiscount) {
-        discountService.findByIdDiscount(newDiscount.getId()).ifPresent(discount -> {
-            throw new IllegalStateException("The discount with id: " +
+    public ResponseEntity<DiscountEntity> newDiscount(@Valid @RequestBody final DiscountEntity newDiscount) {
+        if (null != newDiscount.getId())
+            this.discountService.findByIdDiscount(newDiscount.getId()).ifPresent(discount -> {
+                throw new IllegalStateException("The discount with id: " +
                     newDiscount.getId() + " already saved in the database");});
-        final DiscountEntity savedDiscount = discountService.createDiscount(newDiscount)
+        final DiscountEntity savedDiscount = this.discountService.createDiscount(newDiscount)
                 .orElseThrow(() -> new IllegalStateException("The discount with id: " +
                         newDiscount.getId() + " was not saved in the database"));
         return new ResponseEntity<>(savedDiscount, HttpStatus.CREATED);
@@ -112,7 +114,7 @@ public class DiscountController {
     })
     @GetMapping("/discounts/{id}")
     public Optional<DiscountEntity> oneDiscount(@PathVariable final Long id) {
-        final Optional<DiscountEntity> discount = discountService.findByIdDiscount(id);
+        final Optional<DiscountEntity> discount = this.discountService.findByIdDiscount(id);
         return Optional.ofNullable(discount.orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database")));
     }
 
@@ -131,8 +133,8 @@ public class DiscountController {
     })
     @PutMapping("/discounts/{id}")
     public Optional<DiscountEntity> updateDiscount(@PathVariable final Long id, @RequestBody final DiscountEntity discount) {
-        discountService.findByIdDiscount(id).orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database"));
-        return discountService.updateDiscountById(id, discount);
+        this.discountService.findByIdDiscount(id).orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database"));
+        return this.discountService.updateDiscountById(id, discount);
     }
 
     /**
@@ -149,8 +151,8 @@ public class DiscountController {
     })
     @DeleteMapping("/discounts/{id}")
     public void deleteDiscount(@PathVariable final Long id) {
-        discountService.findByIdDiscount(id).orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database"));
-        discountService.deleteDiscountById(id);
+        this.discountService.findByIdDiscount(id).orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database"));
+        this.discountService.deleteDiscountById(id);
     }
 
     /**
@@ -167,7 +169,7 @@ public class DiscountController {
     @GetMapping("/discounts/filter-by-city")
     public List<DiscountEntity> findLastByCity(@RequestParam(required = false) final String city) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByLocation(city).and(getLastAdded()));
-        return discountService.getDiscountsByCriteria(spec);
+        return this.discountService.getDiscountsByCriteria(spec);
     }
 
 
@@ -185,7 +187,7 @@ public class DiscountController {
     @GetMapping("/discounts/filter-by-category")
     public List<DiscountEntity> findLastByCategory(@RequestParam(required = false) final String category) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByCategory(category).and(getLastAdded()));
-        return discountService.getDiscountsByCriteria(spec);
+        return this.discountService.getDiscountsByCriteria(spec);
     }
 
     /**
@@ -202,7 +204,7 @@ public class DiscountController {
     @GetMapping("/discounts/filter-by-type")
     public List<DiscountEntity> findLastByType(@RequestParam(required = false) final String type) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByType(type).and(getLastAdded()));
-        return discountService.getDiscountsByCriteria(spec);
+        return this.discountService.getDiscountsByCriteria(spec);
     }
 
     /**
@@ -219,6 +221,6 @@ public class DiscountController {
     @GetMapping("/discounts/filter-by-size")
     public List<DiscountEntity> findLastBySize(@RequestParam(required = false) final String size) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getBySize(size).and(getLastAdded()));
-        return discountService.getDiscountsByCriteria(spec);
+        return this.discountService.getDiscountsByCriteria(spec);
     }
 }
