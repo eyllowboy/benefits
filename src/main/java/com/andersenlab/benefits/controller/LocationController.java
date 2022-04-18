@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,8 +38,7 @@ public class LocationController {
     /**
      * Create {@link LocationEntity} in the database.
      *
-     * @param country of the new location {@link LocationEntity#getCountry()}
-     * @param city    of the new location {@link LocationEntity#getCity()}
+     * @param location new {@link LocationEntity} to be added
      * @throws IllegalStateException if {@link LocationEntity} with these parameters already exists.
      */
     @Operation(summary = "This is to create new location")
@@ -51,13 +51,11 @@ public class LocationController {
                     content = @Content)
     })
     @PostMapping("/locations")
-    public ResponseEntity<LocationEntity> addLocation(
-            @RequestParam(value = "country") final String country,
-            @RequestParam(value = "city") final String city) {
-        locationService.findByCity(country, city).ifPresent(locationEntity -> {
-            throw new IllegalStateException("Location with city name '" + city + "' and country '" + country + "' already exists");
+    public ResponseEntity<LocationEntity> addLocation(@Valid @RequestBody final LocationEntity location) {
+        this.locationService.findByCity(location.getCountry(), location.getCity()).ifPresent(locationEntity -> {
+            throw new IllegalStateException("Location with city name '" + location.getCity() + "' and country '" + location.getCountry() + "' already exists");
         });
-        final LocationEntity savedLocationEntity = locationService.save(new LocationEntity(country, city));
+        final LocationEntity savedLocationEntity = this.locationService.save(location);
         return new ResponseEntity<>(savedLocationEntity, HttpStatus.CREATED);
     }
 
@@ -79,7 +77,7 @@ public class LocationController {
     })
     @GetMapping("/locations/{id}")
     public LocationEntity getLocationById(@PathVariable final Long id) {
-        return (locationService.findById(id)).orElseThrow(
+        return (this.locationService.findById(id)).orElseThrow(
                 () -> new IllegalStateException("Location with this id was not found in the database"));
     }
 
@@ -102,7 +100,7 @@ public class LocationController {
     })
     @GetMapping("/locations/{country}/{city}")
     public LocationEntity getLocationByName(@PathVariable final String country, @PathVariable final String city) {
-        return (locationService.findByCity(country, city)).orElseThrow(() ->
+        return (this.locationService.findByCity(country, city)).orElseThrow(() ->
                 new IllegalStateException("Location with city name '" + city + "' and country '" + country + "' was not found in the database"));
     }
 
@@ -123,9 +121,9 @@ public class LocationController {
     })
     @PutMapping("/locations")
     public void updateLocation(@RequestBody final LocationEntity location) {
-        locationService.findById(location.getId())
+        this.locationService.findById(location.getId())
                 .orElseThrow(() -> new IllegalStateException("Location with this id was not found in the database"));
-        locationService.updateLocationEntity(location.getId(), location.getCountry(), location.getCity());
+        this.locationService.updateLocationEntity(location.getId(), location.getCountry(), location.getCity());
     }
 
     /**
@@ -145,12 +143,12 @@ public class LocationController {
     })
     @DeleteMapping("/locations/{id}")
     public void deleteLocation(@PathVariable final Long id) {
-        locationService.findById(id).orElseThrow(() ->
+        this.locationService.findById(id).orElseThrow(() ->
                 new IllegalStateException("Location with id: '" + id + "' was not found in the database"));
-        final Optional<LocationEntity> locationEntity = locationService.findWithAssociatedDiscounts(id);
+        final Optional<LocationEntity> locationEntity = this.locationService.findWithAssociatedDiscounts(id);
         if (locationEntity.isPresent() && locationEntity.get().getDiscounts().size() > 0)
             throw new IllegalStateException("There is active discounts in this Location in database");
-        locationService.delete(id);
+        this.locationService.delete(id);
     }
 
     /**
@@ -169,7 +167,7 @@ public class LocationController {
     })
     @GetMapping(value = "/locations")
     public List<LocationEntity> getLocations() {
-        return locationService.findAll();
+        return this.locationService.findAll();
     }
 
     /**
@@ -188,7 +186,7 @@ public class LocationController {
     })
     @RequestMapping(method = RequestMethod.GET, value = "/locations/country")
     public List<Optional<LocationEntity>> findByCountry(@RequestParam final String country) {
-        return locationService.findByCountry(country);
+        return this.locationService.findByCountry(country);
     }
 
     /**
@@ -208,6 +206,6 @@ public class LocationController {
     @RequestMapping(method = RequestMethod.GET, value = "/locations/filter", params = {"country", "filterMask"})
     public List<Optional<LocationEntity>> findByFirstLetters(@RequestParam final String country,
                                                              @RequestParam final String filterMask) {
-        return locationService.findByFirstLetters(country, filterMask);
+        return this.locationService.findByFirstLetters(country, filterMask);
     }
 }

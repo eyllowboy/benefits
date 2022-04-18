@@ -9,8 +9,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,12 +39,12 @@ public class CompanyController {
     /**
      * Create {@link CompanyEntity} in the database.
      *
-     * @param companyEntity new company {@link CompanyEntity}
+     * @param companyEntity new {@link CompanyEntity} to be added
      * @throws IllegalStateException if {@link CompanyEntity} already had created.
      */
     @Operation(summary = "This method created the new company")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
+            @ApiResponse(responseCode = "201",
                     description = "Location has been created",
                     content = @Content),
             @ApiResponse(responseCode = "500",
@@ -49,10 +52,11 @@ public class CompanyController {
                     content = @Content)
     })
     @PostMapping("/companies")
-    public Optional<CompanyEntity> addCompany(@RequestBody final CompanyEntity companyEntity) {
-        companyService.findByIdCompany(companyEntity.getId()).ifPresent(company -> {
-            throw new IllegalStateException("The company with id: " + companyEntity.getId() + " already exists.");});
-        return companyService.createCompany(companyEntity);
+    public ResponseEntity<Optional<CompanyEntity>> addCompany(@Valid @RequestBody final CompanyEntity companyEntity) {
+        if (null != companyEntity.getId())
+            this.companyService.findByIdCompany(companyEntity.getId()).ifPresent(company -> {
+                throw new IllegalStateException("The company with id: " + companyEntity.getId() + " already exists.");});
+        return new ResponseEntity<>(this.companyService.createCompany(companyEntity), HttpStatus.CREATED);
     }
 
     /**
@@ -72,7 +76,7 @@ public class CompanyController {
     })
     @GetMapping("/companies/{id}")
     public CompanyEntity getCompanyById(@PathVariable final Long id) {
-        return (companyService.findByIdCompany(id))
+        return (this.companyService.findByIdCompany(id))
                 .orElseThrow(() -> new IllegalStateException("Company with this id was not found in the database."));
     }
 
@@ -92,7 +96,7 @@ public class CompanyController {
     })
     @GetMapping("/companies")
     public List<CompanyEntity> getAllCompany() {
-        return companyService.findAllCompany();
+        return this.companyService.findAllCompany();
     }
 
 
@@ -114,8 +118,8 @@ public class CompanyController {
     })
     @PutMapping("/companies/{id}")
     public Optional<CompanyEntity> updatedCompany(@PathVariable final Long id, @RequestBody final CompanyEntity company) {
-        companyService.findByIdCompany(id).orElseThrow(() -> new IllegalStateException("The company with id: " + id + " was not found in the database."));
-        return companyService.updateCompanyById(id, company);
+        this.companyService.findByIdCompany(id).orElseThrow(() -> new IllegalStateException("The company with id: " + id + " was not found in the database."));
+        return this.companyService.updateCompanyById(id, company);
     }
 
     /**
@@ -135,12 +139,10 @@ public class CompanyController {
     })
     @DeleteMapping("/companies/{id}")
     public void deleteCompanyById(@PathVariable final Long id) {
-        companyService.findByIdCompany(id).orElseThrow(() -> new IllegalStateException("The company with id: " + id + " was not found in the database."));
-        final Optional<CompanyEntity> companyEntity = companyService.findWithAssociatedDiscount(id);
+        this.companyService.findByIdCompany(id).orElseThrow(() -> new IllegalStateException("The company with id: " + id + " was not found in the database."));
+        final Optional<CompanyEntity> companyEntity = this.companyService.findWithAssociatedDiscount(id);
         if (companyEntity.isPresent() && companyEntity.get().getDiscounts().size() > 0)
             throw new IllegalStateException("There is active discounts in this Category in database");
-        companyService.deleteCompanyById(id);
+        this.companyService.deleteCompanyById(id);
     }
-
-
 }

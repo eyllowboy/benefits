@@ -2,11 +2,13 @@ package com.andersenlab.benefits.controller;
 
 import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.DiscountEntity;
-import com.andersenlab.benefits.domain.DiscountType;
 import com.andersenlab.benefits.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,20 +17,20 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.NestedServletException;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.Date;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -42,18 +44,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class CategoryControllerTest {
 
     private final MockMvc mockMvc;
-
-    private final LocationRepository locationRepository;
-
-    private final RoleRepository roleRepository;
-
-    private final UserRepository userRepository;
-
     private final DiscountRepository discountRepository;
-
-    private final CompanyRepository companyRepository;
-
     private final CategoryRepository categoryRepository;
+    private final ControllerTestUtils ctu;
+    private final ObjectMapper objectMapper;
 
     @Container
     public static final PostgreSQLContainer<?> postgreSQLContainer =
@@ -63,14 +57,16 @@ public class CategoryControllerTest {
                     .withPassword("ben0147");
 
     @Autowired
-    public CategoryControllerTest(MockMvc mockMvc, LocationRepository locationRepository, RoleRepository roleRepository, UserRepository userRepository, DiscountRepository discountRepository, CompanyRepository companyRepository, CategoryRepository categoryRepository) {
+    public CategoryControllerTest(final MockMvc mockMvc,
+                                  final DiscountRepository discountRepository,
+                                  final CategoryRepository categoryRepository,
+                                  final ControllerTestUtils ctu,
+                                  final ObjectMapper objectMapper) {
         this.mockMvc = mockMvc;
-        this.locationRepository = locationRepository;
-        this.roleRepository = roleRepository;
-        this.userRepository = userRepository;
         this.discountRepository = discountRepository;
-        this.companyRepository = companyRepository;
         this.categoryRepository = categoryRepository;
+        this.ctu = ctu;
+        this.objectMapper = objectMapper;
     }
 
 
@@ -81,12 +77,7 @@ public class CategoryControllerTest {
 
     @BeforeEach
     private void deleteAndSaveCategoryInContainer() {
-        this.discountRepository.deleteAll();
-        this.categoryRepository.deleteAll();
-        this.companyRepository.deleteAll();
-        this.userRepository.deleteAll();
-        this.locationRepository.deleteAll();
-        this.roleRepository.deleteAll();
+        this.ctu.clearTables();
         createAndSaveCategoryInContainer();
     }
 
@@ -94,34 +85,34 @@ public class CategoryControllerTest {
         final int size = 5;
         for (long i = 1; i <= size; i++) {
             CategoryEntity category = new CategoryEntity("Category" + i);
-            categoryRepository.save(category);
+            this.categoryRepository.save(category);
         }
     }
 
     @Test
     public void whenAddCategorySuccess() throws Exception {
         //given
-        final String title = "Разное";
+        final CategoryEntity category = new CategoryEntity("Разное");
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .post("/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("title", title)
+                        .content(this.objectMapper.writeValueAsString(category))
                         .with(csrf()))
                 .andDo(print())
                 // then
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$", notNullValue()))
-                .andExpect(jsonPath("$.title", is(title)));
+                .andExpect(jsonPath("$.title", is(category.getTitle())));
     }
 
     @Test
     public void whenGetCategoryByIdSuccess() throws Exception {
         //given
-        final Optional<CategoryEntity> categoryFromContainer = categoryRepository.findByTitle("Category2");
+        final Optional<CategoryEntity> categoryFromContainer = this.categoryRepository.findByTitle("Category2");
         //when
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/categories/{id}", categoryFromContainer.get().getId().longValue())
+                        .get("/categories/{id}", categoryFromContainer.get().getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with((csrf())))
                 .andDo(print())
@@ -148,9 +139,9 @@ public class CategoryControllerTest {
 
 
     @Test
-    public void whenGetCategoryByIdFailIdNotExists() throws Exception {
+    public void whenGetCategoryByIdFailIdNotExists() {
         //given
-        final CategoryEntity lastCategoryFromContainer = categoryRepository.findByTitle("Category5").get();
+        final CategoryEntity lastCategoryFromContainer = this.categoryRepository.findByTitle("Category5").get();
         // when
         NestedServletException NestedServletException = assertThrows(NestedServletException.class, () -> {
             this.mockMvc.perform(MockMvcRequestBuilders
@@ -165,49 +156,48 @@ public class CategoryControllerTest {
 
 
     @Test
-    public void whenAddCategoryFailCategoryExists() throws Exception {
+    public void whenAddCategoryFailCategoryExists() {
         // given
-        final String title = "Category3";
+        final CategoryEntity category = new CategoryEntity("Category3");
         // when
         NestedServletException NestedServletException = assertThrows(NestedServletException.class, () -> {
             this.mockMvc.perform(MockMvcRequestBuilders.post("/categories")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .param("title", title)
+                    .content(this.objectMapper.writeValueAsString(category))
                     .with(csrf()));
         });
         // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
-        assertEquals("Category with title '" + title + "' already exists", NestedServletException.getCause().getMessage());
+        assertEquals("Category with title '" + category.getTitle() + "' already exists", NestedServletException.getCause().getMessage());
     }
 
     @Test
     public void whenUpdateCategorySuccess() throws Exception {
         //given
-        final Optional<CategoryEntity> lastCategoryFromContainer = categoryRepository.findByTitle("Category5");
-        final CategoryEntity category = lastCategoryFromContainer.get();
+        final CategoryEntity category = this.categoryRepository.findByTitle("Category5").orElseThrow();
+//        this.categoryRepository.save(category);
         category.setTitle("UpdatedCategory");
-        categoryRepository.save(category);
-        final String categoryEntity = (new ObjectMapper()).writeValueAsString(category);
+
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .put("/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(categoryEntity)
+                        .content(this.objectMapper.writeValueAsString(category))
                         .with((csrf())))
                 .andDo(print())
-                // then
+        // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(category.getId().intValue())))
-                .andExpect(jsonPath("$.title", is(category.getTitle())));
+                .andExpect(jsonPath("$.title", is(this.categoryRepository.findById(category.getId()).orElseThrow().getTitle())));
     }
 
     @Test
     public void whenUpdateCategoryFailIdNotExists() throws Exception {
         // given
-        final CategoryEntity lastCategoryFromContainer = categoryRepository.findByTitle("Category5").get();
+        final CategoryEntity lastCategoryFromContainer = this.categoryRepository.findByTitle("Category5").get();
         final Long notExistId = lastCategoryFromContainer.getId() + 1;
         final CategoryEntity category = new CategoryEntity(notExistId, "Прочее");
-        final String categoryEntity = (new ObjectMapper()).writeValueAsString(category);
+        final String categoryEntity = (this.objectMapper).writeValueAsString(category);
         // when
         NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
             this.mockMvc.perform(MockMvcRequestBuilders.put("/categories")
@@ -223,7 +213,7 @@ public class CategoryControllerTest {
     @Test
     public void whenDeleteCategoryWithoutDiscountsSuccess() throws Exception {
         // given
-        final Optional<CategoryEntity> LastCategoryFromContainer = categoryRepository.findByTitle("Category5");
+        final Optional<CategoryEntity> LastCategoryFromContainer = this.categoryRepository.findByTitle("Category5");
         Long lastIdEntity = LastCategoryFromContainer.get().getId();
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
@@ -236,23 +226,14 @@ public class CategoryControllerTest {
     }
 
     @Test
-    public void whenDeleteCategoryFailHasActiveDiscounts() throws Exception {
+    public void whenDeleteCategoryFailHasActiveDiscounts() {
         //given
-        final CategoryEntity categoryWithActiveDiscount = new CategoryEntity("NewCategory");
-        final DiscountEntity discount = new DiscountEntity();
-        discount.setType("type");
-        discount.setDescription("descriptioin");
-        discount.setDiscount_condition("discount_condition");
-        discount.setSizeDiscount("10");
-        discount.setDiscount_type(DiscountType.DISCOUNT);
-        discount.setDateBegin(new Date());
-        discount.setDateFinish(new Date());
-        discount.setImageDiscount("imageDiscont");
-
-        var savedCategory = categoryRepository.save(categoryWithActiveDiscount);
+        final CategoryEntity savedCategory = this.categoryRepository.save(new CategoryEntity("NewCategory"));
+        final DiscountEntity discount = this.ctu.getDiscount(5);
         final Set<CategoryEntity> categoryEntitySet = Set.of(savedCategory);
         discount.setCategories(categoryEntitySet);
-        discountRepository.save(discount);
+        this.discountRepository.save(discount);
+
         // when
         NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
             this.mockMvc.perform(MockMvcRequestBuilders
@@ -267,9 +248,9 @@ public class CategoryControllerTest {
     }
 
     @Test
-    public void whenDeleteCategoryFailIdNotExists() throws Exception {
+    public void whenDeleteCategoryFailIdNotExists() {
         // given
-        final CategoryEntity lastCategoryFromContainer = categoryRepository.findByTitle("Category5").get();
+        final CategoryEntity lastCategoryFromContainer = this.categoryRepository.findByTitle("Category5").get();
         final Long lastIdEntity = lastCategoryFromContainer.getId();
         // when
         NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
@@ -281,5 +262,50 @@ public class CategoryControllerTest {
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
         assertEquals("Category with id: '" + (lastIdEntity + 1) + "' was not found in the database", nestedServletException.getCause().getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "    "})
+    public void whenAddCategoryWrongObligatoryFields(final String title) throws Exception {
+        final CategoryEntity category = new CategoryEntity(title);
+        final MvcResult result;
+
+        // when
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .post("/categories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(category))
+                        .with(csrf()))
+                .andReturn();
+
+        // then
+        assertEquals(400, result.getResponse().getStatus());
+        final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
+        assertTrue(errorResult.contains("must not be blank"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {" space at start", "space at end ", " two  spaces  inside", " three   spaces   inside"})
+    public void whenAddCategoryTrimFields(final String title) throws Exception {
+        final CategoryEntity category = new CategoryEntity(title);
+        final CategoryEntity postedCategory;
+        String postedTitle;
+        final MvcResult result;
+
+        //when
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .post("/categories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(category))
+                        .with(csrf()))
+                .andReturn();
+
+        // then
+        assertEquals(201, result.getResponse().getStatus());
+        postedCategory = this.ctu.getCategoryFromJson(new JSONObject(result.getResponse().getContentAsString()));
+        postedTitle = title.trim();
+        while (postedTitle.contains("  "))
+            postedTitle = postedTitle.replace("  ", " ");
+        assertEquals(postedTitle, postedCategory.getTitle());
     }
 }

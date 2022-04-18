@@ -27,21 +27,21 @@ public class CompanyEntity {
 
     @Schema(description = "Title Company", type = "string", minLength = 1, maxLength = 50)
     @NotBlank
-    @Column(name = "title", length = 50)
+    @Column(name = "title")
     private String title;
 
     @Schema(description = "Description company", type = "string", minLength = 1, maxLength = 1000)
     @NotBlank
-    @Column(name = "description", length = 1000)
+    @Column(name = "description")
     private String description;
 
     @Schema(description = "Address company", type = "string", minLength = 1, maxLength = 150)
-    @Column(name = "address", length = 150)
+    @Column(name = "address")
     private String address;
 
     @Schema(description = "Phone company", type = "string", minLength = 1, maxLength = 20)
     @NotBlank
-    @Column(name = "phone", length = 20)
+    @Column(name = "phone")
     private String phone;
 
     @Schema(description = "Link company", type = "string", minLength = 1)

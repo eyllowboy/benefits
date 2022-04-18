@@ -43,13 +43,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserEntity save(final UserEntity employee) {
-        return userRepository.save(employee);
+    public UserEntity save(final UserEntity user) {
+        ValidateUtils.validateEntityPost(user);
+        return userRepository.save(user);
     }
 
     @Override
     public void updateUserEntity(final Long id, final String login, final RoleEntity roleEntity, final LocationEntity location) {
-        userRepository.updateUserEntity(id, login, roleEntity, location);
+        final UserEntity user = new UserEntity(id, login, roleEntity, location);
+        ValidateUtils.validateEntityPatch(user);
+        userRepository.updateUserEntity(user.getId(), user.getLogin(), user.getRoleEntity(), user.getLocation());
     }
 
     @Override
