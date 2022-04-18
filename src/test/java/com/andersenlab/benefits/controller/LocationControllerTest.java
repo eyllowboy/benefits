@@ -182,6 +182,7 @@ public class LocationControllerTest {
         // given
         final String country = "Россия";
         final String city = "Тьмутаракань";
+
         // when
         final NestedServletException NestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders
