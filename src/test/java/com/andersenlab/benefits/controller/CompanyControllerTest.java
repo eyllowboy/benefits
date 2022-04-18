@@ -184,7 +184,7 @@ class CompanyControllerTest {
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
                 () -> this.mockMvc.perform(MockMvcRequestBuilders
-                        .put("/companies/{id}", notExistId)
+                        .patch("/companies/{id}", notExistId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(companyEntity)
                         .with(csrf())));
