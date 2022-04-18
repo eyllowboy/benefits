@@ -22,6 +22,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.Date;
 import java.util.Set;
+
+import static java.lang.Math.random;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -95,10 +97,12 @@ public class LocationControllerTest {
     }
 
     @Test
-    public void whenGetAllLocationsSuccess() throws Exception {
+    public void whenGetSomeSizeLocationsSuccess() throws Exception {
+        // given
+        final int rndSize = (int) (random() * (5 - 1) + 1);
         // when
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/locations?page=0&size=4")
+                        .get("/locations?page=0&size="+rndSize)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andDo(print())
@@ -106,7 +110,7 @@ public class LocationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.number", is(0)))
-                .andExpect(jsonPath("$.size", is(4)));
+                .andExpect(jsonPath("$.size", is(rndSize)));
     }
 
     @Test
@@ -115,7 +119,7 @@ public class LocationControllerTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/locations")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("country", "Country10")
+                        .param("country", "Country5")
                         .with(csrf()))
                 .andDo(print())
                 // then

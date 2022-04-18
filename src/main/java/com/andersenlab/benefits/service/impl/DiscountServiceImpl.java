@@ -73,7 +73,7 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
-    public List<DiscountEntity> getDiscountsByCriteria(final Specification<DiscountEntity> specificDiscountEntity) {
-        return discountRepository.findAll(specificDiscountEntity);
+    public Page<DiscountEntity> getDiscountsByCriteria(final Specification<DiscountEntity> specificDiscountEntity, final Pageable pageable) {
+        return discountRepository.findAll(specificDiscountEntity,pageable);
     }
 }

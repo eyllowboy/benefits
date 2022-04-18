@@ -1,15 +1,20 @@
 package com.andersenlab.benefits.controller;
 
+import com.andersenlab.benefits.domain.CompanyEntity;
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import com.andersenlab.benefits.repository.*;
+import com.andersenlab.benefits.support.RestResponsePage;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -40,16 +45,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithMockUser
 public class UserControllerTest {
 	private final MockMvc mockMvc;
+	private final ObjectMapper objectMapper;
 	private final RoleRepository roleRepository;
 	private final UserRepository userRepository;
 	private final ControllerTestUtils ctu;
 
 	@Autowired
 	public UserControllerTest(final MockMvc mockMvc,
+							  final ObjectMapper objectMapper,
 							  final RoleRepository roleRepository,
 							  final UserRepository userRepository,
 							  final ControllerTestUtils ctu) {
 		this.mockMvc = mockMvc;
+		this.objectMapper = objectMapper;
 		this.roleRepository = roleRepository;
 		this.userRepository = userRepository;
 		this.ctu = ctu;
@@ -73,19 +81,23 @@ public class UserControllerTest {
 	}
 
 	@Test
-	public void whenGetAllUsers() throws Exception {
+	public void whenGetSomeSizeAllUsers() throws Exception {
 		// given
-		final List<UserEntity> users = this.userRepository.saveAll(ctu.getUserList());
+		final int rndSize = (int) (random() * (5 - 1) + 1);
+		Page<UserEntity> foundUsers = userRepository.findAll(PageRequest.of(0, rndSize));
+		final MvcResult result;
 		// when
-		this.mockMvc.perform(MockMvcRequestBuilders
-					.get("/users?page=0&size=10")
+		result =this.mockMvc.perform(MockMvcRequestBuilders
+					.get("/users?page=0&size="+rndSize)
 					.with(csrf())
 					.contentType(MediaType.APPLICATION_JSON))
 					.andDo(print())
-				// then
-				.andExpect(jsonPath("$", notNullValue()))
-				.andExpect(jsonPath("$.number", is(0)))
-				.andExpect(jsonPath("$.size", is(10)));
+				.andReturn();
+		// then
+		final RestResponsePage<UserEntity> pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
+				new TypeReference<>() {});
+		assertEquals(200, result.getResponse().getStatus());
+		assertEquals(foundUsers, pageResult);
 	}
 
 	@Test

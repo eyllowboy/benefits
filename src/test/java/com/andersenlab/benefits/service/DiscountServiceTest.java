@@ -6,6 +6,7 @@ import com.andersenlab.benefits.service.impl.DiscountServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -206,6 +207,7 @@ class DiscountServiceTest {
         final int listLength = 10;
         final List<DiscountEntity> discountList = this.discountRepository.saveAll(getDiscountList(listLength));
         final DiscountEntity discount = discountList.get((int)(random() * (listLength - 1) + 1));
+        System.out.println(discountList.toString());
 
         //when
         Optional<DiscountEntity> foundDiscount = this.discountService.findByIdDiscount(discount.getId());
@@ -282,29 +284,34 @@ class DiscountServiceTest {
     public void whenFindWithCriteria() {
         // given
         final int listLength = 10;
-        this.discountRepository.saveAll(getDiscountList(listLength));
+        List<DiscountEntity> discountEntities = this.discountRepository.saveAll(getDiscountList(listLength));
+        Page<DiscountEntity> pageOfDiscounts = new PageImpl<>(discountEntities);
         final Specification<DiscountEntity> spec = Specification.where(
                 DiscountSpec.getByLocation("City").and(getLastAdded()));
 
         // when
-        final List<DiscountEntity> foundDiscounts = discountService.getDiscountsByCriteria(spec);
+        when(this.discountRepository.findAll(spec, PageRequest.of(0, 10))).thenReturn(pageOfDiscounts);
+        final Page<DiscountEntity> foundDiscounts = discountService.getDiscountsByCriteria(spec,PageRequest.of(0,10));
 
         // then
-        assertEquals(listLength, foundDiscounts.size());
+        assertEquals(pageOfDiscounts, foundDiscounts);
+        verify(this.discountRepository, times(1)).findAll(spec, PageRequest.of(0, 10));
     }
 
     @Test
     public void whenFindWithCriteriaEmptyResponse() {
-        // given
-        final int listLength = 10;
-        this.discountRepository.saveAll(getDiscountList(listLength));
+
+        List<DiscountEntity> listOfDiscount = List.of(new DiscountEntity());
+        Page<DiscountEntity> pageOfDiscounts = new PageImpl<>(listOfDiscount);
         final Specification<DiscountEntity> spec = Specification.where(
                 DiscountSpec.getByLocation("unknownCity").and(getLastAdded()));
 
         // when
-        final List<DiscountEntity> foundDiscounts = discountService.getDiscountsByCriteria(spec);
+        when(this.discountRepository.findAll(spec, PageRequest.of(0, 10))).thenReturn(pageOfDiscounts);
+        final Page<DiscountEntity> foundDiscounts = discountService.getDiscountsByCriteria(spec,PageRequest.of(0,10));
 
         // then
-        assertEquals(0, foundDiscounts.size());
+        assertEquals(1, foundDiscounts.getTotalElements());
+        verify(this.discountRepository, times(1)).findAll(spec,PageRequest.of(0, 10));
     }
 }

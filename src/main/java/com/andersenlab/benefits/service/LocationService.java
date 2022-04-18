@@ -2,6 +2,8 @@ package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.domain.LocationEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,7 +32,7 @@ public interface LocationService extends CrudService<LocationEntity> {
      * @param country name of country to get all locations, not null
      * @return list of {@link LocationEntity} corresponding given name of country, error if nothing found
      */
-    List<Optional<LocationEntity>> findByCountry(final String country);
+    Page<LocationEntity> findByCountry(final String country,final Pageable pageable);
 
     /***
      * Method to find all {@link LocationEntity} beginning with given letters in specified country
@@ -38,7 +40,7 @@ public interface LocationService extends CrudService<LocationEntity> {
      * @param filterMask case-insensitive beginning of {@link LocationEntity}'s name to search
      * @return list of {@link LocationEntity} corresponding given name of country
      */
-    List<Optional<LocationEntity>> findByFirstLetters(final String country, final String filterMask);
+    Page<LocationEntity> findByFirstLetters(final String country, final String filterMask, final Pageable pageable);
 
     /***
      * Method to update location in database

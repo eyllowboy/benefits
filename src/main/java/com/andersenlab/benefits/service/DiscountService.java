@@ -63,5 +63,5 @@ public interface DiscountService {
      *
      * @param specificDiscountEntity entity provide filtering data
      */
-    List<DiscountEntity> getDiscountsByCriteria(final Specification<DiscountEntity> specificDiscountEntity);
+    Page<DiscountEntity> getDiscountsByCriteria(final Specification<DiscountEntity> specificDiscountEntity, final Pageable pageable);
 }

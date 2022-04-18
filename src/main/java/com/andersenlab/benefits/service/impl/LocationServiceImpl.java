@@ -40,13 +40,13 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public List<Optional<LocationEntity>> findByCountry(final String country) {
-        return locationRepository.findByCountry(country);
+    public Page<LocationEntity> findByCountry(final String country, final Pageable pageable) {
+        return locationRepository.findByCountry(country,pageable);
     }
 
     @Override
-    public List<Optional<LocationEntity>> findByFirstLetters(final String country, final String filterMask) {
-        return locationRepository.findByFirstLetters(country, filterMask);
+    public Page<LocationEntity> findByFirstLetters(final String country, final String filterMask, final Pageable pageable) {
+        return locationRepository.findByFirstLetters(country, filterMask, pageable);
     }
 
     @Override

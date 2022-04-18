@@ -4,17 +4,22 @@ import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.domain.DiscountType;
 import com.andersenlab.benefits.repository.*;
+import com.andersenlab.benefits.support.RestResponsePage;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.NestedServletException;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -25,8 +30,10 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.lang.Math.random;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -42,6 +49,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class CategoryControllerTest {
 
     private final MockMvc mockMvc;
+
+    private final ObjectMapper objectMapper;
 
     private final LocationRepository locationRepository;
 
@@ -63,7 +72,11 @@ public class CategoryControllerTest {
                     .withPassword("ben0147");
 
     @Autowired
-    public CategoryControllerTest(MockMvc mockMvc, LocationRepository locationRepository, RoleRepository roleRepository, UserRepository userRepository, DiscountRepository discountRepository, CompanyRepository companyRepository, CategoryRepository categoryRepository) {
+    public CategoryControllerTest(ObjectMapper objectMapper, MockMvc mockMvc, LocationRepository locationRepository,
+                                  RoleRepository roleRepository, UserRepository userRepository,
+                                  DiscountRepository discountRepository, CompanyRepository companyRepository,
+                                  CategoryRepository categoryRepository) {
+        this.objectMapper = objectMapper;
         this.mockMvc = mockMvc;
         this.locationRepository = locationRepository;
         this.roleRepository = roleRepository;
@@ -134,18 +147,23 @@ public class CategoryControllerTest {
 
 
     @Test
-    public void whenGetAllCategoriesSuccess() throws Exception {
+    public void whenGetSomeSizeCategoriesSuccess() throws Exception {
+        // given
+        final int rndSize = (int) (random() * (5 - 1) + 1);
+        Page<CategoryEntity> foundCategory = categoryRepository.findAll(PageRequest.of(0, rndSize));
+        final MvcResult result;
         // when
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/categories?page=0&size=4")
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/categories?page=0&size=" + rndSize)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andDo(print())
-                //then
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", notNullValue()))
-                .andExpect(jsonPath("$.number", is(0)))
-                .andExpect(jsonPath("$.size", is(4)));
+                .andReturn();
+        // then
+        final RestResponsePage<CategoryEntity> pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
+                new TypeReference<>() {});
+        assertEquals(200, result.getResponse().getStatus());
+        assertEquals(foundCategory, pageResult);
     }
 
 

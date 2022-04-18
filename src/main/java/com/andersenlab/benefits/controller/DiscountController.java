@@ -165,9 +165,9 @@ public class DiscountController {
                     content = @Content)
     })
     @GetMapping("/discounts/filter-by-city")
-    public List<DiscountEntity> findLastByCity(@RequestParam(required = false) final String city) {
+    public Page<DiscountEntity> findLastByCity(@RequestParam(required = false) final String city, final Pageable pageable) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByLocation(city).and(getLastAdded()));
-        return discountService.getDiscountsByCriteria(spec);
+        return discountService.getDiscountsByCriteria(spec,pageable);
     }
 
 
@@ -183,9 +183,9 @@ public class DiscountController {
                     content = @Content)
     })
     @GetMapping("/discounts/filter-by-category")
-    public List<DiscountEntity> findLastByCategory(@RequestParam(required = false) final String category) {
+    public Page<DiscountEntity> findLastByCategory(@RequestParam(required = false) final String category, final Pageable pageable) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByCategory(category).and(getLastAdded()));
-        return discountService.getDiscountsByCriteria(spec);
+        return discountService.getDiscountsByCriteria(spec,pageable);
     }
 
     /**
@@ -200,9 +200,9 @@ public class DiscountController {
                     content = @Content)
     })
     @GetMapping("/discounts/filter-by-type")
-    public List<DiscountEntity> findLastByType(@RequestParam(required = false) final String type) {
+    public Page<DiscountEntity> findLastByType(@RequestParam(required = false) final String type, final Pageable pageable) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByType(type).and(getLastAdded()));
-        return discountService.getDiscountsByCriteria(spec);
+        return discountService.getDiscountsByCriteria(spec,pageable);
     }
 
     /**
@@ -217,8 +217,8 @@ public class DiscountController {
                     content = @Content)
     })
     @GetMapping("/discounts/filter-by-size")
-    public List<DiscountEntity> findLastBySize(@RequestParam(required = false) final String size) {
+    public Page<DiscountEntity> findLastBySize(@RequestParam(required = false) final String size,final Pageable pageable) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getBySize(size).and(getLastAdded()));
-        return discountService.getDiscountsByCriteria(spec);
+        return discountService.getDiscountsByCriteria(spec,pageable);
     }
 }
