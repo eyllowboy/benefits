@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -131,10 +132,14 @@ public class DiscountController {
                     description = "Discount has been updated",
                     content = @Content)
     })
-    @PutMapping("/discounts/{id}")
-    public Optional<DiscountEntity> updateDiscount(@PathVariable final Long id, @RequestBody final DiscountEntity discount) {
-        this.discountService.findByIdDiscount(id).orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database"));
-        return this.discountService.updateDiscountById(id, discount);
+    @PatchMapping("/discounts/{id}")
+    public ResponseEntity<DiscountEntity> updateDiscount(@PathVariable final Long id,
+                                                         @RequestBody final DiscountEntity discount) {
+        final DiscountEntity existingDiscount = this.discountService.findByIdDiscount(id).orElseThrow(() ->
+            new IllegalStateException("The discount with id: " + id + " was not found in the database"));
+        BeanUtils.copyProperties(discount, existingDiscount, "id");
+        this.discountService.updateDiscountById(id, existingDiscount);
+        return ResponseEntity.ok(this.discountService.updateDiscountById(id, existingDiscount).orElseThrow());
     }
 
     /**

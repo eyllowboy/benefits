@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -119,11 +120,14 @@ public class LocationController {
                     description = "Internal Server Error",
                     content = @Content)
     })
-    @PutMapping("/locations")
-    public void updateLocation(@RequestBody final LocationEntity location) {
-        this.locationService.findById(location.getId())
-                .orElseThrow(() -> new IllegalStateException("Location with this id was not found in the database"));
-        this.locationService.updateLocationEntity(location.getId(), location.getCountry(), location.getCity());
+    @PatchMapping("/locations/{id}")
+    public ResponseEntity<LocationEntity> updateLocation(@PathVariable final Long id,
+                                                         @RequestBody final LocationEntity location) {
+        final LocationEntity existingLocation = this.locationService.findById(id)
+            .orElseThrow(() -> new IllegalStateException("Location with this id was not found in the database"));
+        BeanUtils.copyProperties(location, existingLocation, "id");
+        this.locationService.updateLocationEntity(id, existingLocation.getCountry(), existingLocation.getCity());
+        return ResponseEntity.ok(existingLocation);
     }
 
     /**

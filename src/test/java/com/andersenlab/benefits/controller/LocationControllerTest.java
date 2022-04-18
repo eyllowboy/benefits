@@ -223,7 +223,7 @@ public class LocationControllerTest {
         final String locationEntity = new ObjectMapper().writeValueAsString(lastLocationFromContainer);
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .put("/locations")
+                        .patch("/locations/{id}", lastLocationFromContainer.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(locationEntity)
                         .with(csrf()))
@@ -241,7 +241,7 @@ public class LocationControllerTest {
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders
-                        .put("/locations")
+                        .patch("/locations/{id}", lastLocationFromContainer.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(locationEntity)
                         .with(csrf())));

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -94,29 +95,23 @@ public class UserController {
                     description = "Internal Server Error",
                     content = @Content)
     })
-    @PutMapping("/users")
-    public void updateUser(@RequestBody final UserEntity userEntity) {
-        final Optional<UserEntity> userEntityInDataBaseForUpdate = this.userService.findById(userEntity.getId());
-        userEntityInDataBaseForUpdate
-                .orElseThrow(() -> new IllegalStateException("User with this id was not found in the database"));
-
-        final Optional<RoleEntity> roleEntityInDataBase = this.roleService.findById(userEntity.getRoleEntity().getId());
-        roleEntityInDataBase
-                .orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
-
-        final Optional<UserEntity> userEntityWithSameLogin = this.userService.findByLogin(userEntity.getLogin());
-
-        if (userEntityWithSameLogin.isPresent()
-                && !userEntityWithSameLogin.get().getId().equals(userEntity.getId())) {
-            throw new IllegalStateException("User with such 'login' is already exists");
-        } else {
-            final Optional<LocationEntity> location = this.locationService.findById(userEntity.getLocation().getId());
-            location.orElseThrow(() -> new IllegalStateException("Location with this id was not found in the database"));
-            this.userService.updateUserEntity(userEntity.getId(),
-                    userEntity.getLogin(),
-                    roleEntityInDataBase.get(),
-                    location.get());
-        }
+    @PatchMapping("/users/{id}")
+    public ResponseEntity<UserEntity> updateUser(@PathVariable final Long id,
+                                                 @RequestBody final UserEntity userEntity) {
+        final UserEntity existingUser = this.userService.findById(userEntity.getId()).orElseThrow(() ->
+            new IllegalStateException("User with this id was not found in the database"));
+        this.roleService.findById(userEntity.getRoleEntity().getId()).orElseThrow(() ->
+            new IllegalStateException("Role with this id was not found in the database"));
+        this.userService.findByLogin(userEntity.getLogin()).ifPresent(foundUser -> {
+            throw new IllegalStateException("User with such 'login' is already exists");});
+        this.locationService.findById(userEntity.getLocation().getId()).orElseThrow(() ->
+            new IllegalStateException("Location with this id was not found in the database"));
+        BeanUtils.copyProperties(userEntity, existingUser, "id");
+        this.userService.updateUserEntity(id,
+                    existingUser.getLogin(),
+                    existingUser.getRoleEntity(),
+                    existingUser.getLocation());
+        return ResponseEntity.ok(existingUser);
     }
 
     /**

@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -76,21 +77,16 @@ public class RoleController {
                     description = "Role has been updated",
                     content = @Content)
     })
-    @PutMapping("/roles")
-    public void updateRole(@RequestBody final RoleEntity roleEntity) {
-        this.roleService.findById(roleEntity.getId())
-                .orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
-
-        final Optional<RoleEntity> roleEntityWithExistCode = this.roleService.findByCode(roleEntity.getCode());
-
-        if (roleEntityWithExistCode.isEmpty() ||
-                roleEntity.getId().equals(
-                        roleEntityWithExistCode.get().getId())) {
-            this.roleService.updateRoleEntity(roleEntity.getId(), roleEntity.getName(), roleEntity.getCode());
-
-        } else {
-            throw new IllegalStateException("Role with such 'code' is already exists");
-        }
+    @PatchMapping("/roles/{id}")
+    public ResponseEntity<RoleEntity> updateRole(@PathVariable final Long id,
+                                                 @RequestBody final RoleEntity roleEntity) {
+        final RoleEntity existingRole = this.roleService.findById(id)
+            .orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
+        this.roleService.findByCode(roleEntity.getCode()).ifPresent(foundRole -> {
+            throw new IllegalStateException("Role with such 'code' is already exists");});
+        BeanUtils.copyProperties(roleEntity, existingRole, "id");
+        this.roleService.updateRoleEntity(id, existingRole.getName(), existingRole.getCode());
+        return ResponseEntity.ok(existingRole);
     }
 
     /**
