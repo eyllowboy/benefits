@@ -7,6 +7,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -126,7 +128,7 @@ public class DiscountControllerTest {
     @Order(3)
     public void whenGetDiscountByIdFailNotExists() {
         // given
-        final long id = ctu.getRndEntityPos();
+        final long id = this.ctu.getRndEntityPos();
 
         // when
         NestedServletException NestedServletException = assertThrows(NestedServletException.class,
@@ -142,7 +144,7 @@ public class DiscountControllerTest {
     @Order(4)
     public void whenAddDiscountSuccess() throws Exception {
         // given
-        final DiscountEntity discount = ctu.getDiscount(ctu.getRndEntityPos());
+        final DiscountEntity discount = this.ctu.getDiscount(this.ctu.getRndEntityPos());
         final MvcResult result;
 
         // when
@@ -157,16 +159,16 @@ public class DiscountControllerTest {
         // then
         assertEquals(201, result.getResponse().getStatus());
         assertEquals(1, this.discountRepository.findAll().size());
-        assertTrue(ctu.isDiscountsEquals(
+        assertTrue(this.ctu.isDiscountsEquals(
                 discount,
-                ctu.getDiscountFromJson(new JSONObject(result.getResponse().getContentAsString()))));
+                this.ctu.getDiscountFromJson(new JSONObject(result.getResponse().getContentAsString()))));
     }
 
     @Test
     @Order(5)
     public void whenAddDiscountFailExists() {
         // given
-        final DiscountEntity discount = this.discountRepository.save(ctu.getDiscount(ctu.getRndEntityPos()));
+        final DiscountEntity discount = this.discountRepository.save(this.ctu.getDiscount(this.ctu.getRndEntityPos()));
 
         // when
         NestedServletException NestedServletException = assertThrows(NestedServletException.class,
@@ -186,13 +188,13 @@ public class DiscountControllerTest {
     @Order(6)
     public void whenUpdateDiscountSuccess() throws Exception {
         // given
-        final DiscountEntity discount = this.discountRepository.save(ctu.getDiscount(ctu.getRndEntityPos()));
+        final DiscountEntity discount = this.discountRepository.save(this.ctu.getDiscount(this.ctu.getRndEntityPos()));
         discount.setDescription("New Discount Description");
         final MvcResult result;
 
         // when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                        .put("/discounts/{id}", discount.getId())
+                        .patch("/discounts/{id}", discount.getId())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(discount)))
@@ -201,7 +203,7 @@ public class DiscountControllerTest {
 
         // then
         assertEquals(200, result.getResponse().getStatus());
-        assertTrue(ctu.isDiscountsEquals(
+        assertTrue(this.ctu.isDiscountsEquals(
                 discount,
                 this.discountRepository.findById(discount.getId()).orElseThrow()));
     }
@@ -210,14 +212,14 @@ public class DiscountControllerTest {
     @Order(7)
     public void whenUpdateDiscountFailIdNotExists() {
         // given
-        final DiscountEntity discount = this.discountRepository.save(ctu.getDiscount(ctu.getRndEntityPos()));
+        final DiscountEntity discount = this.discountRepository.save(this.ctu.getDiscount(this.ctu.getRndEntityPos()));
         discount.setDescription("New Discount Description");
         discount.setId(discount.getId() + 1);
 
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders
-                        .put("/discounts/{id}", discount.getId())
+                        .patch("/discounts/{id}", discount.getId())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(discount))));
@@ -232,8 +234,8 @@ public class DiscountControllerTest {
     @Order(8)
     public void whenDeleteDiscountSuccess() throws Exception {
         // given
-        final List<DiscountEntity> discounts = this.discountRepository.saveAll(ctu.getDiscountList());
-        final DiscountEntity discount = discounts.get(ctu.getRndEntityPos());
+        final List<DiscountEntity> discounts = this.discountRepository.saveAll(this.ctu.getDiscountList());
+        final DiscountEntity discount = discounts.get(this.ctu.getRndEntityPos());
         final MvcResult result;
 
         // when
@@ -254,7 +256,7 @@ public class DiscountControllerTest {
     @Order(9)
     public void whenDeleteDiscountFailIdNotExists() {
         // given
-        final List<DiscountEntity> discounts = this.discountRepository.saveAll(ctu.getDiscountList());
+        final List<DiscountEntity> discounts = this.discountRepository.saveAll(this.ctu.getDiscountList());
         final DiscountEntity lastDiscount = discounts.get(discounts.size() - 1);
 
         // when
@@ -274,8 +276,8 @@ public class DiscountControllerTest {
     @Order(10)
     void whenFindByCityAndDateSuccess() throws Exception {
         // given
-        final List<DiscountEntity> discounts = this.discountRepository.saveAll(ctu.getDiscountList());
-        final DiscountEntity discount = discounts.get(ctu.getRndEntityPos());
+        final List<DiscountEntity> discounts = this.discountRepository.saveAll(this.ctu.getDiscountList());
+        final DiscountEntity discount = discounts.get(this.ctu.getRndEntityPos());
         final String city = (discount.getArea().stream().findFirst().orElseThrow()).getCity();
         final MvcResult result;
 
@@ -300,8 +302,8 @@ public class DiscountControllerTest {
     @Order(11)
     void whenFindByCategoryAndDateSuccess() throws Exception {
         // given
-        final List<DiscountEntity> discounts = this.discountRepository.saveAll(ctu.getDiscountList());
-        final DiscountEntity discount = discounts.get(ctu.getRndEntityPos());
+        final List<DiscountEntity> discounts = this.discountRepository.saveAll(this.ctu.getDiscountList());
+        final DiscountEntity discount = discounts.get(this.ctu.getRndEntityPos());
         final String category = (discount.getCategories().stream().findFirst().orElseThrow()).getTitle();
         final MvcResult result;
 
@@ -325,8 +327,8 @@ public class DiscountControllerTest {
     @Order(12)
     void whenFindByTypeAndDateSuccess() throws Exception {
         // given
-        final List<DiscountEntity> discounts = this.discountRepository.saveAll(ctu.getDiscountList());
-        final DiscountEntity discount = discounts.get(ctu.getRndEntityPos());
+        final List<DiscountEntity> discounts = this.discountRepository.saveAll(this.ctu.getDiscountList());
+        final DiscountEntity discount = discounts.get(this.ctu.getRndEntityPos());
         final MvcResult result;
 
         //when
@@ -349,8 +351,8 @@ public class DiscountControllerTest {
     @Order(13)
     void whenFindBySizeDiscountSuccess() throws Exception {
         // given
-        final List<DiscountEntity> discounts = this.discountRepository.saveAll(ctu.getDiscountList());
-        final DiscountEntity discount = discounts.get(ctu.getRndEntityPos());
+        final List<DiscountEntity> discounts = this.discountRepository.saveAll(this.ctu.getDiscountList());
+        final DiscountEntity discount = discounts.get(this.ctu.getRndEntityPos());
         final MvcResult result;
 
         //when
@@ -373,7 +375,7 @@ public class DiscountControllerTest {
     @Order(14)
     void whenFindByCityAndDateEmptyResponse() throws Exception {
         // given
-        this.discountRepository.saveAll(ctu.getDiscountList());
+        this.discountRepository.saveAll(this.ctu.getDiscountList());
         final String city = "Unknown City";
         final MvcResult result;
 
@@ -397,7 +399,7 @@ public class DiscountControllerTest {
     @Order(15)
     void whenFindByCategoryAndDateEmptyResponse() throws Exception {
         // given
-        this.discountRepository.saveAll(ctu.getDiscountList());
+        this.discountRepository.saveAll(this.ctu.getDiscountList());
         final String category = "Unknown Category";
         final MvcResult result;
 
@@ -421,7 +423,7 @@ public class DiscountControllerTest {
     @Order(16)
     void whenFindByTypeAndDateEmptyResponse() throws Exception {
         // given
-        this.discountRepository.saveAll(ctu.getDiscountList());
+        this.discountRepository.saveAll(this.ctu.getDiscountList());
         String type = "Unknown Type";
         final MvcResult result;
 
@@ -445,7 +447,7 @@ public class DiscountControllerTest {
     @Order(17)
     void whenFindBySizeDiscountEmptyResponse() throws Exception {
         // given
-        this.discountRepository.saveAll(ctu.getDiscountList());
+        this.discountRepository.saveAll(this.ctu.getDiscountList());
         String discountSize = "Empty Discount Size";
         final MvcResult result;
 
@@ -463,5 +465,52 @@ public class DiscountControllerTest {
                 new TypeReference<>() {});
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, pageResult.getContent().size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "    "})
+    public void whenAddCategoryWrongObligatoryFields(final String description) throws Exception {
+        final DiscountEntity discount = this.ctu.getDiscount(this.ctu.getRndEntityPos());
+        discount.setDescription(description);
+        final MvcResult result;
+
+        // when
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .post("/discounts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(discount))
+                        .with(csrf()))
+                .andReturn();
+
+        // then
+        assertEquals(400, result.getResponse().getStatus());
+        final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
+        assertTrue(errorResult.contains("must not be blank"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {" space at start", "space at end ", " two  spaces  inside", " three   spaces   inside"})
+    public void whenAddCategoryTrimFields(final String description) throws Exception {
+        final DiscountEntity discount = this.ctu.getDiscount(this.ctu.getRndEntityPos());
+        discount.setDescription(description);
+        final DiscountEntity postedDiscount;
+        String postedDescription;
+        final MvcResult result;
+
+        //when
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .post("/discounts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(discount))
+                        .with(csrf()))
+                .andReturn();
+
+        // then
+        assertEquals(201, result.getResponse().getStatus());
+        postedDiscount = this.ctu.getDiscountFromJson(new JSONObject(result.getResponse().getContentAsString()));
+        postedDescription = description.trim();
+        while (postedDescription.contains("  "))
+            postedDescription = postedDescription.replace("  ", " ");
+        assertEquals(postedDescription, postedDiscount.getDescription());
     }
 }

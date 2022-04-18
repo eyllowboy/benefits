@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
 import java.util.List;
 import java.util.Optional;
@@ -77,28 +79,22 @@ public class RoleController {
                     description = "Role has been updated",
                     content = @Content)
     })
-    @PutMapping("/roles")
-    public void updateRole(@RequestBody final RoleEntity roleEntity) {
-        roleService.findById(roleEntity.getId())
-                .orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
-
-        final Optional<RoleEntity> roleEntityWithExistCode = roleService.findByCode(roleEntity.getCode());
-
-        if (roleEntityWithExistCode.isEmpty() ||
-                roleEntity.getId().equals(
-                        roleEntityWithExistCode.get().getId())) {
-            roleService.updateRoleEntity(roleEntity.getId(), roleEntity.getName(), roleEntity.getCode());
-
-        } else {
-            throw new IllegalStateException("Role with such 'code' is already exists");
-        }
+    @PatchMapping("/roles/{id}")
+    public ResponseEntity<RoleEntity> updateRole(@PathVariable final Long id,
+                                                 @RequestBody final RoleEntity roleEntity) {
+        final RoleEntity existingRole = this.roleService.findById(id)
+            .orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
+        this.roleService.findByCode(roleEntity.getCode()).ifPresent(foundRole -> {
+            throw new IllegalStateException("Role with such 'code' is already exists");});
+        BeanUtils.copyProperties(roleEntity, existingRole, "id");
+        this.roleService.updateRoleEntity(id, existingRole.getName(), existingRole.getCode());
+        return ResponseEntity.ok(existingRole);
     }
 
     /**
      * Create {@link RoleEntity} in the database.
      *
-     * @param name the {@link RoleEntity#getName()}
-     * @param code the {@link RoleEntity#getCode()}
+     * @param role new {@link RoleEntity} to be added
      * @throws IllegalStateException if {@link RoleEntity} with {@link RoleEntity#getCode()} field is already exists
      */
     @Operation(summary = "This is to create new role")
@@ -108,18 +104,11 @@ public class RoleController {
                     content = @Content)
     })
     @PostMapping("/roles")
-    public ResponseEntity<RoleEntity> addRole(
-            @RequestParam(value = "name") final String name,
-            @RequestParam(value = "code") final String code) {
-
-        roleService.findByCode(code)
-                .ifPresent(roleEntity -> {
-                    throw new IllegalStateException("Role with such 'code' is already exists");
-                });
-
-        final RoleEntity roleEntityToWrite = new RoleEntity(name, code);
-        final RoleEntity savedRoleEntity = roleService.save(roleEntityToWrite);
-
+    public ResponseEntity<RoleEntity> addRole(@Valid @RequestBody final RoleEntity role) {
+        this.roleService.findByCode(role.getCode()).ifPresent(roleEntity -> {
+                    throw new IllegalStateException("Role with such 'code' is already exists");}
+        );
+        final RoleEntity savedRoleEntity = this.roleService.save(role);
         return new ResponseEntity<>(savedRoleEntity, HttpStatus.CREATED);
     }
 
@@ -137,7 +126,7 @@ public class RoleController {
     })
     @GetMapping("/roles/{id}")
     public RoleEntity getRole(@PathVariable @DecimalMin("1") final Long id) {
-        final Optional<RoleEntity> roleEntity = roleService.findById(id);
+        final Optional<RoleEntity> roleEntity = this.roleService.findById(id);
 
         return roleEntity.orElseThrow(
                 () -> new IllegalStateException("Role with this id was not found in the database"));
@@ -157,11 +146,11 @@ public class RoleController {
     })
     @DeleteMapping("/roles/{id}")
     public void deleteRole(@PathVariable @DecimalMin("1") final Long id) {
-        roleService.findById(id).orElseThrow(() ->
+        this.roleService.findById(id).orElseThrow(() ->
                 new IllegalStateException("Role with this id was not found in the database"));
-        final Optional<RoleEntity> roleEntity = roleService.findWithAssociatedUsers(id);
+        final Optional<RoleEntity> roleEntity = this.roleService.findWithAssociatedUsers(id);
         if (roleEntity.isPresent() && roleEntity.get().getUsers().size() > 0)
                 throw new IllegalStateException("There is active users with this Role in database");
-        roleService.delete(id);
+        this.roleService.delete(id);
     }
 }

@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,8 +41,7 @@ public class LocationController {
     /**
      * Create {@link LocationEntity} in the database.
      *
-     * @param country of the new location {@link LocationEntity#getCountry()}
-     * @param city    of the new location {@link LocationEntity#getCity()}
+     * @param location new {@link LocationEntity} to be added
      * @throws IllegalStateException if {@link LocationEntity} with these parameters already exists.
      */
     @Operation(summary = "This is to create new location")
@@ -53,13 +54,11 @@ public class LocationController {
                     content = @Content)
     })
     @PostMapping("/locations")
-    public ResponseEntity<LocationEntity> addLocation(
-            @RequestParam(value = "country") final String country,
-            @RequestParam(value = "city") final String city) {
-        locationService.findByCity(country, city).ifPresent(locationEntity -> {
-            throw new IllegalStateException("Location with city name '" + city + "' and country '" + country + "' already exists");
+    public ResponseEntity<LocationEntity> addLocation(@Valid @RequestBody final LocationEntity location) {
+        this.locationService.findByCity(location.getCountry(), location.getCity()).ifPresent(locationEntity -> {
+            throw new IllegalStateException("Location with city name '" + location.getCity() + "' and country '" + location.getCountry() + "' already exists");
         });
-        final LocationEntity savedLocationEntity = locationService.save(new LocationEntity(country, city));
+        final LocationEntity savedLocationEntity = this.locationService.save(location);
         return new ResponseEntity<>(savedLocationEntity, HttpStatus.CREATED);
     }
 
@@ -81,7 +80,7 @@ public class LocationController {
     })
     @GetMapping("/locations/{id}")
     public LocationEntity getLocationById(@PathVariable final Long id) {
-        return (locationService.findById(id)).orElseThrow(
+        return (this.locationService.findById(id)).orElseThrow(
                 () -> new IllegalStateException("Location with this id was not found in the database"));
     }
 
@@ -104,7 +103,7 @@ public class LocationController {
     })
     @GetMapping("/locations/{country}/{city}")
     public LocationEntity getLocationByName(@PathVariable final String country, @PathVariable final String city) {
-        return (locationService.findByCity(country, city)).orElseThrow(() ->
+        return (this.locationService.findByCity(country, city)).orElseThrow(() ->
                 new IllegalStateException("Location with city name '" + city + "' and country '" + country + "' was not found in the database"));
     }
 
@@ -123,11 +122,14 @@ public class LocationController {
                     description = "Internal Server Error",
                     content = @Content)
     })
-    @PutMapping("/locations")
-    public void updateLocation(@RequestBody final LocationEntity location) {
-        locationService.findById(location.getId())
-                .orElseThrow(() -> new IllegalStateException("Location with this id was not found in the database"));
-        locationService.updateLocationEntity(location.getId(), location.getCountry(), location.getCity());
+    @PatchMapping("/locations/{id}")
+    public ResponseEntity<LocationEntity> updateLocation(@PathVariable final Long id,
+                                                         @RequestBody final LocationEntity location) {
+        final LocationEntity existingLocation = this.locationService.findById(id)
+            .orElseThrow(() -> new IllegalStateException("Location with this id was not found in the database"));
+        BeanUtils.copyProperties(location, existingLocation, "id");
+        this.locationService.updateLocationEntity(id, existingLocation.getCountry(), existingLocation.getCity());
+        return ResponseEntity.ok(existingLocation);
     }
 
     /**
@@ -147,12 +149,12 @@ public class LocationController {
     })
     @DeleteMapping("/locations/{id}")
     public void deleteLocation(@PathVariable final Long id) {
-        locationService.findById(id).orElseThrow(() ->
+        this.locationService.findById(id).orElseThrow(() ->
                 new IllegalStateException("Location with id: '" + id + "' was not found in the database"));
-        final Optional<LocationEntity> locationEntity = locationService.findWithAssociatedDiscounts(id);
+        final Optional<LocationEntity> locationEntity = this.locationService.findWithAssociatedDiscounts(id);
         if (locationEntity.isPresent() && locationEntity.get().getDiscounts().size() > 0)
             throw new IllegalStateException("There is active discounts in this Location in database");
-        locationService.delete(id);
+        this.locationService.delete(id);
     }
 
     /**

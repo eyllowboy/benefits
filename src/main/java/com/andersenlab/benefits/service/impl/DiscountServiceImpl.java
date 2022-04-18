@@ -36,7 +36,7 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public Optional<DiscountEntity> findByIdDiscount(final Long id) {
-        return discountRepository.findById(id);
+        return this.discountRepository.findById(id);
     }
 
     @Override
@@ -46,30 +46,19 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public Optional<DiscountEntity> createDiscount(final DiscountEntity discount) {
-        return Optional.of(discountRepository.save(discount));
+        ValidateUtils.validateEntityPost(discount);
+        return Optional.of(this.discountRepository.save(discount));
     }
 
     @Override
     public Optional<DiscountEntity> updateDiscountById(final Long id, final DiscountEntity newDiscount) {
-        discountRepository.findById(id).map(discount -> {
-            discount.setType(newDiscount.getType());
-            discount.setDescription(newDiscount.getDescription());
-            discount.setDateBegin(newDiscount.getDateBegin());
-            discount.setDateFinish(newDiscount.getDateFinish());
-            discount.setSizeDiscount(newDiscount.getSizeDiscount());
-            discount.setImageDiscount(newDiscount.getImageDiscount());
-            discount.setArea(newDiscount.getArea());
-            return discountRepository.save(discount);
-        }).orElseThrow(() -> {
-            return new RuntimeException("The problem with updates discount");
-        });
-
-        return Optional.of(newDiscount);
+        ValidateUtils.validateEntityPatch(newDiscount);
+        return Optional.of(this.discountRepository.save(newDiscount));
     }
 
     @Override
     public void deleteDiscountById(final Long id) {
-        discountRepository.deleteById(id);
+        this.discountRepository.deleteById(id);
     }
 
     @Override

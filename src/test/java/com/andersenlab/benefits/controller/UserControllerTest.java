@@ -1,7 +1,5 @@
 package com.andersenlab.benefits.controller;
 
-import com.andersenlab.benefits.domain.CompanyEntity;
-import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import com.andersenlab.benefits.repository.*;
@@ -10,6 +8,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,16 +28,15 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.lang.Math.random;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
 
 @SpringBootTest
 @Testcontainers
@@ -77,14 +76,14 @@ public class UserControllerTest {
 
 	@BeforeEach
 	public void clearData() {
-		ctu.clearTables();
+		this.ctu.clearTables();
 	}
 
 	@Test
 	public void whenGetSomeSizeAllUsers() throws Exception {
 		// given
 		final int rndSize = (int) (random() * (5 - 1) + 1);
-		Page<UserEntity> foundUsers = userRepository.findAll(PageRequest.of(0, rndSize));
+		final Page<UserEntity> foundUsers = userRepository.findAll(PageRequest.of(0, rndSize));
 		final MvcResult result;
 		// when
 		result =this.mockMvc.perform(MockMvcRequestBuilders
@@ -103,8 +102,8 @@ public class UserControllerTest {
 	@Test
 	public void whenGetUserByIdAndIdExists() throws Exception {
 		// given
-		final int userPos = ctu.getRndEntityPos();
-		final List<UserEntity> users = this.userRepository.saveAll(ctu.getUserList());
+		final int userPos = this.ctu.getRndEntityPos();
+		final List<UserEntity> users = this.userRepository.saveAll(this.ctu.getUserList());
 		final MvcResult result;
 
 		// when
@@ -117,7 +116,7 @@ public class UserControllerTest {
 
 		// then
 		assertEquals(200, result.getResponse().getStatus());
-		assertEquals(users.get(userPos), ctu.getUserFromJson(new JSONObject(result.getResponse().getContentAsString())));
+		assertEquals(users.get(userPos), this.ctu.getUserFromJson(new JSONObject(result.getResponse().getContentAsString())));
 	}
 
 	@Test
@@ -135,7 +134,7 @@ public class UserControllerTest {
 	@Test
 	public void whenAddUserIsSuccess() throws Exception {
 		// given
-		final UserEntity user = ctu.getUser(ctu.getRndEntityPos());
+		final UserEntity user = this.ctu.getUser(this.ctu.getRndEntityPos());
 		final MvcResult result;
 
 		// when
@@ -143,22 +142,18 @@ public class UserControllerTest {
 				.post("/users")
 				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
-				.param("login", user.getLogin())
-				.param("roleId", user.getRoleEntity().getId().toString())
-				.param("locationId", user.getLocation().getId().toString()))
-				.andDo(print())
+				.content(this.objectMapper.writeValueAsString(user)))
 				.andReturn();
 		// then
 		assertEquals(201, result.getResponse().getStatus());
 		assertEquals(1, this.userRepository.findAll().size());
-		assertEquals(user, ctu.getUserFromJson(new JSONObject(result.getResponse().getContentAsString())));
+		assertEquals(user, this.ctu.getUserFromJson(new JSONObject(result.getResponse().getContentAsString())));
 	}
 
 	@Test
 	public void whenAddUserAndLoginIsExists() {
 		// given
-		final int listLength = 10;
-		final UserEntity user = this.userRepository.save(ctu.getUser((int) (random() * (listLength - 1) + 1)));
+		final UserEntity user = this.userRepository.save(this.ctu.getUser(this.ctu.getRndEntityPos()));
 
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
@@ -166,10 +161,8 @@ public class UserControllerTest {
 						.post("/users")
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
-						.param("login", user.getLogin())
-						.param("roleId", user.getRoleEntity().getId().toString())
-						.param("locationId", user.getLocation().getId().toString())));
-		
+						.content(this.objectMapper.writeValueAsString(user))));
+
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("User with such 'login' is already exists",
@@ -179,8 +172,10 @@ public class UserControllerTest {
 	@Test
 	public void whenAddUserAndRoleIsNotExists() {
 		// given
-		final RoleEntity role = this.roleRepository.save(ctu.getRole(ctu.getRndEntityPos()));
-		final LocationEntity location = ctu.getLocation(ctu.getRndEntityPos());
+		final UserEntity user = this.ctu.getUser(this.ctu.getRndEntityPos());
+		final RoleEntity role = this.roleRepository.save(this.ctu.getRole(this.ctu.getRndEntityPos()));
+		role.setId(role.getId() + 1);
+		user.setRoleEntity(role);
 
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
@@ -188,10 +183,8 @@ public class UserControllerTest {
 						.post("/users")
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
-						.param("login", "userLogin")
-						.param("roleId", Long.toString(role.getId() + 1))
-						.param("locationId", Long.toString(location.getId()))));
-		
+						.content(this.objectMapper.writeValueAsString(user))));
+
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("Role with this id was not found in the database",
@@ -201,18 +194,18 @@ public class UserControllerTest {
 	@Test
 	public void whenUpdateUserWithNewLoginAndRoleIdIsExists() throws Exception {
 		// given
-		final Long id = this.userRepository.save(ctu.getUser(ctu.getRndEntityPos())).getId();
-		final UserEntity user = ctu.getUser(ctu.getRndEntityPos());
+		final Long id = this.userRepository.save(this.ctu.getUser(this.ctu.getRndEntityPos())).getId();
+		final UserEntity user = this.ctu.getUser(this.ctu.getRndEntityPos());
 		user.setId(id);
 		user.setLogin("newUserLogin");
 		final MvcResult result;
 
 		// when
 		result = this.mockMvc.perform(MockMvcRequestBuilders
-				.put("/users")
+				.patch("/users/{id}", user.getId())
 				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(new ObjectMapper().writeValueAsString(user)))
+				.content(this.objectMapper.writeValueAsString(user)))
 				.andDo(print())
 				.andReturn();
 		// then
@@ -224,17 +217,17 @@ public class UserControllerTest {
 	@Test
 	public void whenUpdateUserAndLoginIsExists() {
 		// given
-		final List<UserEntity> users = this.userRepository.saveAll(ctu.getUserList());
+		final List<UserEntity> users = this.userRepository.saveAll(this.ctu.getUserList());
 		final UserEntity userSetLoginTo = users.get(users.size() - 1);
 		userSetLoginTo.setLogin(users.get(0).getLogin());
 
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> this.mockMvc.perform(MockMvcRequestBuilders
-						.put("/users")
+						.patch("/users/{id}", userSetLoginTo.getId())
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(new ObjectMapper().writeValueAsString(userSetLoginTo))));
+						.content(this.objectMapper.writeValueAsString(userSetLoginTo))));
 		
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
@@ -245,18 +238,18 @@ public class UserControllerTest {
 	@Test
 	public void whenUpdateUserAndRoleIsNotExists() {
 		// given
-		final UserEntity user = this.userRepository.save(ctu.getUser(ctu.getRndEntityPos()));
-		final RoleEntity role = ctu.getRole(Long.MAX_VALUE);
+		final UserEntity user = this.userRepository.save(this.ctu.getUser(this.ctu.getRndEntityPos()));
+		final RoleEntity role = this.ctu.getRole(Long.MAX_VALUE);
 		role.setId(Long.MAX_VALUE);
 		user.setRoleEntity(role);
 
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> this.mockMvc.perform(MockMvcRequestBuilders
-						.put("/users")
+						.patch("/users/{id}", user.getId())
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(new ObjectMapper().writeValueAsString(user))));
+						.content(this.objectMapper.writeValueAsString(user))));
 		
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
@@ -267,16 +260,16 @@ public class UserControllerTest {
 	@Test
 	public void whenUpdateUserAndIdNotExists() {
 		// given
-		final UserEntity user = this.userRepository.saveAll(ctu.getUserList()).get(0);
+		final UserEntity user = this.userRepository.saveAll(this.ctu.getUserList()).get(0);
 		user.setId(Long.MAX_VALUE);
 		
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> this.mockMvc.perform(MockMvcRequestBuilders
-						.put("/users")
+						.patch("/users/{id}", user.getId())
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(new ObjectMapper().writeValueAsString(user))));
+						.content(this.objectMapper.writeValueAsString(user))));
 		
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
@@ -287,8 +280,8 @@ public class UserControllerTest {
 	@Test
 	public void whenDeleteUserIsSuccess() throws Exception {
 		// given
-		final List<UserEntity> users = this.userRepository.saveAll(ctu.getUserList());
-		final UserEntity userForDelete = users.get(ctu.getRndEntityPos());
+		final List<UserEntity> users = this.userRepository.saveAll(this.ctu.getUserList());
+		final UserEntity userForDelete = users.get(this.ctu.getRndEntityPos());
 		final MvcResult result;
 
 		// when
@@ -317,5 +310,52 @@ public class UserControllerTest {
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("User with this id was not found in the database",
 				nestedServletException.getCause().getMessage());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"", " ", "    "})
+	public void whenAddUserWrongObligatoryFields(final String login) throws Exception {
+		final UserEntity user = this.ctu.getUser(this.ctu.getRndEntityPos());
+		user.setLogin(login);
+		final MvcResult result;
+
+		// when
+		result = this.mockMvc.perform(MockMvcRequestBuilders
+						.post("/users")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(this.objectMapper.writeValueAsString(user))
+						.with(csrf()))
+				.andReturn();
+
+		// then
+		assertEquals(400, result.getResponse().getStatus());
+		final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
+		assertTrue(errorResult.contains("must not be blank"));
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {" space at start", "space at end ", " two  spaces  inside", " three   spaces   inside"})
+	public void whenAddRoleTrimFields(final String login) throws Exception {
+		final UserEntity user = this.ctu.getUser(this.ctu.getRndEntityPos());
+		user.setLogin(login);
+		final UserEntity postedUser;
+		String postedLogin;
+		final MvcResult result;
+
+		//when
+		result = this.mockMvc.perform(MockMvcRequestBuilders
+						.post("/users")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(this.objectMapper.writeValueAsString(user))
+						.with(csrf()))
+				.andReturn();
+
+		// then
+		assertEquals(201, result.getResponse().getStatus());
+		postedUser = this.ctu.getUserFromJson(new JSONObject(result.getResponse().getContentAsString()));
+		postedLogin = login.trim();
+		while (postedLogin.contains("  "))
+			postedLogin = postedLogin.replace("  ", " ");
+		assertEquals(postedLogin, postedUser.getLogin());
 	}
 }

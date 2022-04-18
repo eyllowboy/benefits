@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +25,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
@@ -68,7 +71,7 @@ public class RoleControllerTest {
 
 	@BeforeEach
 	public void clearData() {
-		ctu.clearTables();
+		this.ctu.clearTables();
 	}
 
 	@Test
@@ -93,8 +96,8 @@ public class RoleControllerTest {
 	@Test
 	public void whenGetRoleByIdSuccess() throws Exception {
 		// given
-		final int rolePos = ctu.getRndEntityPos();
-		final List<RoleEntity> roles = this.roleRepository.saveAll(ctu.getRoleList());
+		final int rolePos = this.ctu.getRndEntityPos();
+		final List<RoleEntity> roles = this.roleRepository.saveAll(this.ctu.getRoleList());
 		final MvcResult result;
 
 		// when
@@ -107,7 +110,7 @@ public class RoleControllerTest {
 
 		// then
 		assertEquals(200, result.getResponse().getStatus());
-		assertEquals(roles.get(rolePos), ctu.getRoleFromJson(new JSONObject(result.getResponse().getContentAsString())));
+		assertEquals(roles.get(rolePos), this.ctu.getRoleFromJson(new JSONObject(result.getResponse().getContentAsString())));
 	}
 	
 	@Test
@@ -125,7 +128,7 @@ public class RoleControllerTest {
 	@Test
 	public void whenAddRoleSuccess() throws Exception {
 		// given
-		final RoleEntity role = ctu.getRole(ctu.getRndEntityPos());
+		final RoleEntity role = this.ctu.getRole(this.ctu.getRndEntityPos());
 		final MvcResult result;
 
 		// when
@@ -133,21 +136,19 @@ public class RoleControllerTest {
 						.post("/roles")
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
-						.param("name", role.getName())
-						.param("code", role.getCode()))
-				.andDo(print())
+						.content(new ObjectMapper().writeValueAsString(role)))
 				.andReturn();
 
-		// thfen
+		// then
 		assertEquals(201, result.getResponse().getStatus());
 		assertEquals(1, this.roleRepository.findAll().size());
-		assertEquals(role, ctu.getRoleFromJson(new JSONObject(result.getResponse().getContentAsString())));
+		assertEquals(role, this.ctu.getRoleFromJson(new JSONObject(result.getResponse().getContentAsString())));
 	}
 	
 	@Test
 	public void whenAddRoleAndCodeIsExists() {
 		// given
-		final RoleEntity role = this.roleRepository.save(ctu.getRole(ctu.getRndEntityPos()));
+		final RoleEntity role = this.roleRepository.save(this.ctu.getRole(this.ctu.getRndEntityPos()));
 
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
@@ -155,9 +156,8 @@ public class RoleControllerTest {
 						.post("/roles")
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
-						.param("name", role.getName())
-						.param("code", role.getCode())));
-		
+						.content(new ObjectMapper().writeValueAsString(role))));
+
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("Role with such 'code' is already exists",
@@ -167,15 +167,15 @@ public class RoleControllerTest {
 	@Test
 	public void whenUpdateRoleWithNewNameAndCodeIsSuccess() throws Exception {
 		// given
-		final List<RoleEntity> roles = this.roleRepository.saveAll(ctu.getRoleList());
-		final RoleEntity role = roles.get(ctu.getRndEntityPos());
+		final List<RoleEntity> roles = this.roleRepository.saveAll(this.ctu.getRoleList());
+		final RoleEntity role = roles.get(this.ctu.getRndEntityPos());
 		role.setName("newRoleName");
 		role.setCode("newRoleCode");
 		final MvcResult result;
 
 		// when
 		result = this.mockMvc.perform(MockMvcRequestBuilders
-				.put("/roles")
+				.patch("/roles/{id}", role.getId())
 				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(role)))
@@ -190,14 +190,14 @@ public class RoleControllerTest {
 	@Test
 	public void whenUpdateRoleAndCodeIsExists() {
 		// given
-		final List<RoleEntity> roles = this.roleRepository.saveAll(ctu.getRoleList());
+		final List<RoleEntity> roles = this.roleRepository.saveAll(this.ctu.getRoleList());
 		final RoleEntity role = roles.get(roles.size() - 1);
 		role.setCode(roles.get(0).getCode());
 
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> this.mockMvc.perform(MockMvcRequestBuilders
-						.put("/roles")
+						.patch("/roles/{id}", role.getId())
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(new ObjectMapper().writeValueAsString(role))));
@@ -211,13 +211,13 @@ public class RoleControllerTest {
 	@Test
 	public void whenUpdateRoleAndIdNotExists() {
 		// given
-		final RoleEntity role = this.roleRepository.saveAll(ctu.getRoleList()).get(0);
+		final RoleEntity role = this.roleRepository.saveAll(this.ctu.getRoleList()).get(0);
 		role.setId(0L);
 
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> this.mockMvc.perform(MockMvcRequestBuilders
-						.put("/roles")
+						.patch("/roles/{id}", role.getId())
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(new ObjectMapper().writeValueAsString(role))));
@@ -231,7 +231,7 @@ public class RoleControllerTest {
 	@Test
 	public void whenDeleteRoleAndIdNotExists() {
 		// given
-		final RoleEntity role = this.roleRepository.saveAll(ctu.getRoleList()).get(0);
+		final RoleEntity role = this.roleRepository.saveAll(this.ctu.getRoleList()).get(0);
 		role.setId(0L);
 
 		// when
@@ -249,8 +249,8 @@ public class RoleControllerTest {
 	@Test
 	public void whenDeleteRoleWithoutUsersSuccess() throws Exception {
 		// given
-		final List<RoleEntity> roles = this.roleRepository.saveAll(ctu.getRoleList());
-		final RoleEntity role = roles.get(ctu.getRndEntityPos());
+		final List<RoleEntity> roles = this.roleRepository.saveAll(this.ctu.getRoleList());
+		final RoleEntity role = roles.get(this.ctu.getRndEntityPos());
 		final MvcResult result;
 
 		// when
@@ -270,10 +270,10 @@ public class RoleControllerTest {
 	@Test
 	public void whenDeleteRoleFailHasActiveUsers() {
 		// given
-		final int pos = ctu.getRndEntityPos();
-		final List<RoleEntity> roles = this.roleRepository.saveAll(ctu.getRoleList());
+		final int pos = this.ctu.getRndEntityPos();
+		final List<RoleEntity> roles = this.roleRepository.saveAll(this.ctu.getRoleList());
 		final RoleEntity role = roles.get(pos);
-		final UserEntity user = ctu.getUser(pos);
+		final UserEntity user = this.ctu.getUser(pos);
 		user.setRoleEntity(this.roleRepository.findById(role.getId()).orElseThrow());
 		this.userRepository.save(user);
 
@@ -287,5 +287,50 @@ public class RoleControllerTest {
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("There is active users with this Role in database",
 				nestedServletException.getCause().getMessage());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"", " ", "    "})
+	public void whenAddRoleWrongObligatoryFields(final String name) throws Exception {
+		final RoleEntity role = new RoleEntity(name, "someCode");
+		final MvcResult result;
+
+		// when
+		result = this.mockMvc.perform(MockMvcRequestBuilders
+						.post("/roles")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(new ObjectMapper().writeValueAsString(role))
+						.with(csrf()))
+				.andReturn();
+
+		// then
+		assertEquals(400, result.getResponse().getStatus());
+		final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
+		assertTrue(errorResult.contains("must not be blank"));
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {" space at start", "space at end ", " two  spaces  inside", " three   spaces   inside"})
+	public void whenAddRoleTrimFields(final String name) throws Exception {
+		final RoleEntity role = new RoleEntity(name, "someCode");
+		final RoleEntity postedRole;
+		String postedName;
+		final MvcResult result;
+
+		//when
+		result = this.mockMvc.perform(MockMvcRequestBuilders
+						.post("/roles")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(new ObjectMapper().writeValueAsString(role))
+						.with(csrf()))
+				.andReturn();
+
+		// then
+		assertEquals(201, result.getResponse().getStatus());
+		postedRole = this.ctu.getRoleFromJson(new JSONObject(result.getResponse().getContentAsString()));
+		postedName = name.trim();
+		while (postedName.contains("  "))
+			postedName = postedName.replace("  ", " ");
+		assertEquals(postedName, postedRole.getName());
 	}
 }

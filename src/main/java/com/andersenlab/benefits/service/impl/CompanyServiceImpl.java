@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,37 +37,28 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public Optional<CompanyEntity> findByIdCompany(final Long id) {
-        return companyRepository.findById(id);
+        return this.companyRepository.findById(id);
     }
 
     @Override
     public Optional<CompanyEntity> createCompany(final CompanyEntity company) {
-        return Optional.of(companyRepository.save(company));
+        ValidateUtils.validateEntityPost(company);
+        return Optional.of(this.companyRepository.save(company));
     }
 
     @Override
     public Optional<CompanyEntity> updateCompanyById(final Long id, final CompanyEntity newCompany) {
-        companyRepository.findById(id).map(company -> {
-            company.setTitle(newCompany.getTitle());
-            company.setDescription(newCompany.getDescription());
-            company.setAddress(newCompany.getAddress());
-            company.setPhone(newCompany.getPhone());
-            company.setLink(newCompany.getLink());
-            return companyRepository.save(company);
-        }).orElseThrow(() -> {
-            return new RuntimeException("The problem with updates company");
-        });
-        return Optional.of(newCompany);
+        ValidateUtils.validateEntityPatch(newCompany);
+        return Optional.of(this.companyRepository.save(newCompany));
     }
 
     @Override
     public void deleteCompanyById(final Long id) {
-        companyRepository.deleteById(id);
+        this.companyRepository.deleteById(id);
     }
 
     @Override
     public Optional<CompanyEntity> findWithAssociatedDiscount(final Long id) {
-        return companyRepository.findWithAssociatedDiscounts(id);
+        return this.companyRepository.findWithAssociatedDiscounts(id);
     }
-
 }

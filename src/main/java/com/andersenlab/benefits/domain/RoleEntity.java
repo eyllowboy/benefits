@@ -6,7 +6,6 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import java.util.Objects;
 import java.util.Set;
 
 @Schema(name = "Role", description = "Role entity")
@@ -14,12 +13,13 @@ import java.util.Set;
 @Table(name = "roles")
 @Getter
 @Setter
-@ToString
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoleEntity {
 
     @Schema(description = "Identifier", type = "int64", minimum = "1")
+    @EqualsAndHashCode.Exclude
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "role_id_seq")
     @SequenceGenerator(name = "role_id_seq", sequenceName = "role_id", allocationSize = 1)
@@ -35,6 +35,7 @@ public class RoleEntity {
     @Column
     private String code;
 
+    @EqualsAndHashCode.Exclude
     @JsonIgnore
     @OneToMany(mappedBy = "roleEntity", fetch = FetchType.LAZY)
     private Set<UserEntity> users;
@@ -51,15 +52,11 @@ public class RoleEntity {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final RoleEntity that = (RoleEntity) o;
-        return name.equals(that.name) && code.equals(that.code);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, code);
+    public String toString() {
+        return "RoleEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", code='" + code + '\'' +
+                '}';
     }
 }

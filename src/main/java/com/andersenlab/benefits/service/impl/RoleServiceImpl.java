@@ -44,12 +44,15 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleEntity save(final RoleEntity role) {
+        ValidateUtils.validateEntityPost(role);
         return roleRepository.save(role);
     }
 
     @Override
     public void updateRoleEntity(final Long id, final String name, final String code) {
-        roleRepository.updateRoleEntity(id, name, code);
+        final RoleEntity role = new RoleEntity(id, name, code);
+        ValidateUtils.validateEntityPatch(role);
+        roleRepository.updateRoleEntity(role.getId(), role.getName(), role.getCode());
     }
 
     @Override

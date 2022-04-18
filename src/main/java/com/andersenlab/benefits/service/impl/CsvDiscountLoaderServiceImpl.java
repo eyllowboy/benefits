@@ -167,7 +167,7 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 		discountEntity.setImageDiscount(row.get(suitableHeader.get("image")));
 		discountEntity.setArea(locations);
 		discountEntity.setCategories(categories);
-		discountEntity.setCompany_id(companyEntity);
+		discountEntity.setCompany(companyEntity);
 		return discountEntity;
 	}
 
@@ -187,12 +187,12 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 						discount1.getDiscount_condition().equals(discount2.getDiscount_condition()) &&
 						discount1.getSizeDiscount().equals(discount2.getSizeDiscount()) &&
 						discount1.getImageDiscount().equals(discount2.getImageDiscount()) &&
-						equalCompanies(discount1.getCompany_id(), discount2.getCompany_id())
+						equalCompanies(discount1.getCompany(), discount2.getCompany())
 				));
 	}
 
 	@Transactional(rollbackFor = {DataIntegrityViolationException.class, IllegalStateException.class})
-	private String putRowToTables (final Map<String, String> row) {
+	public String putRowToTables (final Map<String, String> row) {
 		try {
 			CompanyEntity companyEntity = getCompany(row);
 			if (null == companyEntity.getId())
@@ -201,8 +201,8 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 			List<DiscountEntity> discounts = discountRepository.findAll();
 			DiscountEntity newDiscount = getDiscount(row, companyEntity);
 			discounts.stream().filter(discount ->
-							null != discount.getCompany_id().getId() &&
-									discount.getCompany_id().getId().equals(companyId) &&
+							null != discount.getCompany().getId() &&
+									discount.getCompany().getId().equals(companyId) &&
 									equalDiscounts(discount, newDiscount))
 					.findFirst().ifPresent(found -> {throw new IllegalStateException("SKIP already exists");});
 			this.discountRepository.save(newDiscount);

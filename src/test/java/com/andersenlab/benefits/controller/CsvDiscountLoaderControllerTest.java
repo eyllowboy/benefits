@@ -99,11 +99,11 @@ public class CsvDiscountLoaderControllerTest {
         final List<CompanyEntity> companies = this.companyRepository.findAll();
         discounts.forEach(discount -> {
             CompanyEntity company = companies.stream().filter(item ->
-                    item.getTitle().equals(discount.getCompany_id().getTitle())).findFirst()
-                        .orElse(discount.getCompany_id());
+                    item.getTitle().equals(discount.getCompany().getTitle())).findFirst()
+                        .orElse(discount.getCompany());
             if (null == company.getId())
                 this.companyRepository.save(company);
-            discount.setCompany_id(company);
+            discount.setCompany(company);
             result.add(discount.getId() + ": SKIP already exists");
         });
         this.discountRepository.saveAll(discounts);

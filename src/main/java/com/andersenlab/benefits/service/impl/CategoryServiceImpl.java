@@ -28,15 +28,16 @@ public class CategoryServiceImpl implements CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    @Override
     public Optional<CategoryEntity> findByTitle(final String title) {
-        return categoryRepository.findByTitle(title);
+        return this.categoryRepository.findByTitle(title);
     }
 
     @Override
     @Transactional
     public void updateCategoryEntity(final Long id, final String title) {
-        categoryRepository.updateCategoryEntity(id, title);
+        final CategoryEntity validatedCategory = new CategoryEntity(id, title);
+        ValidateUtils.validateEntityPatch(validatedCategory);
+        this.categoryRepository.updateCategoryEntity(validatedCategory.getId(), validatedCategory.getTitle());
     }
 
     @Override
@@ -46,22 +47,23 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Optional<CategoryEntity> findById(final Long id) {
-        return categoryRepository.findById(id);
+        return this.categoryRepository.findById(id);
     }
 
     @Override
     public CategoryEntity save(final CategoryEntity entity) {
-        return categoryRepository.save(entity);
+        ValidateUtils.validateEntityPost(entity);
+        return this.categoryRepository.save(entity);
     }
 
     @Override
     public void delete(final Long id) {
-        categoryRepository.deleteById(id);
+        this.categoryRepository.deleteById(id);
     }
 
     @Override
     @Transactional
     public Optional<CategoryEntity> findWithAssociatedDiscounts(final Long id) {
-        return categoryRepository.findWithAssociatedDiscounts(id);
+        return this.categoryRepository.findWithAssociatedDiscounts(id);
     }
 }

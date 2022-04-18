@@ -8,8 +8,11 @@ import com.andersenlab.benefits.repository.*;
 import com.andersenlab.benefits.support.RestResponsePage;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,10 +29,10 @@ import org.springframework.web.util.NestedServletException;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import java.util.Date;
-
 import static java.lang.Math.random;
+import java.util.Objects;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -46,20 +49,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CompanyControllerTest {
 
     private final ObjectMapper objectMapper;
-
     private final MockMvc mockMvc;
-
-    private final LocationRepository locationRepository;
-
-    private  final RoleRepository roleRepository;
-
-    private final UserRepository userRepository;
-
-    private  final DiscountRepository discountRepository;
-
+    private final DiscountRepository discountRepository;
     private final CompanyRepository companyRepository;
-
-    private  final CategoryRepository categoryRepository;
+    private final ControllerTestUtils ctu;
 
     @Container
     public static final PostgreSQLContainer<?> postgreSQLContainer =
@@ -69,15 +62,16 @@ class CompanyControllerTest {
                     .withPassword("ben0147");
 
     @Autowired
-    CompanyControllerTest(ObjectMapper objectMapper, MockMvc mockMvc, LocationRepository locationRepository, RoleRepository roleRepository, UserRepository userRepository, DiscountRepository discountRepository, CompanyRepository companyRepository, CategoryRepository categoryRepository) {
+    CompanyControllerTest(final ObjectMapper objectMapper,
+                          final MockMvc mockMvc,
+                          final DiscountRepository discountRepository,
+                          final CompanyRepository companyRepository,
+                          final ControllerTestUtils ctu) {
         this.objectMapper = objectMapper;
         this.mockMvc = mockMvc;
-        this.locationRepository = locationRepository;
-        this.roleRepository = roleRepository;
-        this.userRepository = userRepository;
         this.discountRepository = discountRepository;
         this.companyRepository = companyRepository;
-        this.categoryRepository = categoryRepository;
+        this.ctu = ctu;
     }
 
     @DynamicPropertySource
@@ -87,12 +81,7 @@ class CompanyControllerTest {
 
     @BeforeEach
     private void deleteAndSaveCompanyInContainer() {
-        this.discountRepository.deleteAll();
-        this.categoryRepository.deleteAll();
-        this.companyRepository.deleteAll();
-        this.userRepository.deleteAll();
-        this.locationRepository.deleteAll();
-        this.roleRepository.deleteAll();
+        this.ctu.clearTables();
         createAndSaveCompanyInContainer();
     }
 
@@ -100,7 +89,7 @@ class CompanyControllerTest {
         final int size = 5;
         for (long i = 1; i <= size; i++) {
             CompanyEntity company = new CompanyEntity("title" + i, "description" + i, "address" + i, "phone" + i, "title" + i);
-            companyRepository.save(company);
+            this.companyRepository.save(company);
         }
     }
 
@@ -111,12 +100,12 @@ class CompanyControllerTest {
         // when
         this.mockMvc.perform(
                         post("/companies")
-                                .content(objectMapper.writeValueAsString(company))
+                                .content(this.objectMapper.writeValueAsString(company))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .with(csrf()))
                 .andDo(print())
                 // then
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.id", isA(Number.class)))
                 .andExpect(jsonPath("$.title", is("company6")));
@@ -127,7 +116,7 @@ class CompanyControllerTest {
         // given
         final String companyTitle = "title6";
         final CompanyEntity company = new CompanyEntity(companyTitle, "description6", "address6", "phone6", "title6");
-        final CompanyEntity saveEntity = companyRepository.save(company);
+        final CompanyEntity saveEntity = this.companyRepository.save(company);
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/companies/{id}", saveEntity.getId())
@@ -145,7 +134,7 @@ class CompanyControllerTest {
     void whenGetSomeSizeCompanyIsOk() throws Exception {
         // given
         final int rndSize = (int) (random() * (5 - 1) + 1);
-        Page<CompanyEntity> foundCompany = companyRepository.findAll(PageRequest.of(0, rndSize));
+        final Page<CompanyEntity> foundCompany = companyRepository.findAll(PageRequest.of(0, rndSize));
         final MvcResult result;
         //when
         result =this.mockMvc.perform(MockMvcRequestBuilders
@@ -165,7 +154,7 @@ class CompanyControllerTest {
     void whenGetCompanyWithIncorrectId() {
         //given
         final CompanyEntity company = new CompanyEntity("title6", "description6", "address6", "phone6", "title6");
-        final CompanyEntity saveEntity = companyRepository.save(company);
+        final CompanyEntity saveEntity = this.companyRepository.save(company);
         final long notExistId = saveEntity.getId() + 1;
         //when
         NestedServletException NestedServletException = assertThrows(NestedServletException.class,
@@ -181,12 +170,12 @@ class CompanyControllerTest {
     void whenUpdatedCompanyPositiveScenario() throws Exception {
         //given
         final CompanyEntity company = new CompanyEntity("title6", "description6", "address6", "phone6", "title6");
-        final CompanyEntity saveEntity = companyRepository.save(company);
+        final CompanyEntity saveEntity = this.companyRepository.save(company);
         final CompanyEntity updateCompany = new CompanyEntity(saveEntity.getId(), "company22", "description22", "address22", "8911-11-11", "link22");
-        final String companyEntity = new ObjectMapper().writeValueAsString(updateCompany);
+        final String companyEntity = this.objectMapper.writeValueAsString(updateCompany);
         //when
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .put("/companies/{id}", saveEntity.getId())
+                        .patch("/companies/{id}", saveEntity.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(companyEntity)
                         .with(csrf()))
@@ -199,14 +188,14 @@ class CompanyControllerTest {
     void whenUpdatedCompanyNegativeScenario() throws Exception {
         // when
         final CompanyEntity company = new CompanyEntity("title6", "description6", "address6", "phone6", "title6");
-        final CompanyEntity saveEntity = companyRepository.save(company);
+        final CompanyEntity saveEntity = this.companyRepository.save(company);
         final long notExistId = saveEntity.getId() + 1;
         final CompanyEntity updatedCompany = new CompanyEntity(notExistId, "company9", "description9", "address9", "8911-11-11", "link9");
-        final String companyEntity = new ObjectMapper().writeValueAsString(updatedCompany);
+        final String companyEntity = this.objectMapper.writeValueAsString(updatedCompany);
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
-                () -> mockMvc.perform(MockMvcRequestBuilders
-                        .put("/companies/{id}", notExistId)
+                () -> this.mockMvc.perform(MockMvcRequestBuilders
+                        .patch("/companies/{id}", notExistId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(companyEntity)
                         .with(csrf())));
@@ -219,7 +208,7 @@ class CompanyControllerTest {
     public void whenDeletePositiveScenarioWithoutDiscount() throws Exception {
         // given
         final CompanyEntity company = new CompanyEntity("title6", "description6", "address6", "phone6", "title6");
-        final CompanyEntity saveEntity = companyRepository.save(company);
+        final CompanyEntity saveEntity = this.companyRepository.save(company);
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .delete("/companies/{id}", saveEntity.getId())
@@ -246,23 +235,14 @@ class CompanyControllerTest {
     @Test
     public void whenDeleteCompanyFailHasActiveDiscounts() {
         // given
-        final CompanyEntity companyWithActiveDiscount = new CompanyEntity("title6", "description6", "address6", "phone6", "title6");
-        final DiscountEntity discount = new DiscountEntity();
-        discount.setType("type");
-        discount.setDescription("description");
-        discount.setDiscount_condition("discount_condition");
-        discount.setSizeDiscount("10");
-        discount.setDiscount_type(DiscountType.DISCOUNT);
-        discount.setDateBegin(new Date());
-        discount.setDateFinish(new Date());
-        discount.setImageDiscount("imageDiscount");
-        var savedCompany = companyRepository.save(companyWithActiveDiscount);
-        discount.setCompany_id(savedCompany);
-        discountRepository.save(discount);
-        final Long id = savedCompany.getId();
+        final CompanyEntity companyWithActiveDiscount = this.companyRepository.save(this.ctu.getCompany(6));
+        final DiscountEntity discount = this.ctu.getDiscount(this.ctu.getRndEntityPos());
+        discount.setCompany(companyWithActiveDiscount);
+        this.discountRepository.save(discount);
+        final Long id = companyWithActiveDiscount.getId();
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
-                mockMvc.perform(MockMvcRequestBuilders
+                this.mockMvc.perform(MockMvcRequestBuilders
                         .delete("/companies/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf())));
@@ -270,5 +250,50 @@ class CompanyControllerTest {
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
         assertEquals("There is active discounts in this Category in database",
                 nestedServletException.getCause().getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "    "})
+    public void whenAddCompanyWrongObligatoryFields(final String title) throws Exception {
+        final CompanyEntity company = new CompanyEntity(title, "description6", "address6", "phone6", "link6");
+        final MvcResult result;
+
+        // when
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                    .post("/companies")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(this.objectMapper.writeValueAsString(company))
+                    .with(csrf()))
+                .andReturn();
+
+        // then*
+        assertEquals(400, result.getResponse().getStatus());
+        final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
+        assertTrue(errorResult.contains("must not be blank"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {" space at start", "space at end ", " two  spaces  inside", " three   spaces   inside"})
+    public void whenAddCompanyTrimFields(final String title) throws Exception {
+        final CompanyEntity company = new CompanyEntity(title, "description6", "address6", "phone6", "link6");
+        final CompanyEntity postedCompany;
+        String postedTitle;
+        final MvcResult result;
+
+        //when
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .post("/companies")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(company))
+                        .with(csrf()))
+                .andReturn();
+
+        // then
+        assertEquals(201, result.getResponse().getStatus());
+        postedCompany = this.ctu.getCompanyFromJson(new JSONObject(result.getResponse().getContentAsString()));
+        postedTitle = title.trim();
+        while (postedTitle.contains("  "))
+            postedTitle = postedTitle.replace("  ", " ");
+        assertEquals(postedTitle, postedCompany.getTitle());
     }
 }

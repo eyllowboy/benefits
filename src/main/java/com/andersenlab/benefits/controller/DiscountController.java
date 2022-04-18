@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -72,13 +74,12 @@ public class DiscountController {
     @GetMapping("/discounts")
     public Page<DiscountEntity> allDiscount(final Pageable pageable) {
         return discountService.findAllDiscounts(pageable);
-
     }
 
     /**
      * Create {@link DiscountEntity} in the database.
      *
-     * @param newDiscount of the entity {@link DiscountEntity}
+     * @param newDiscount new {@link DiscountEntity} to be added
      * @throws IllegalStateException if {@link DiscountEntity} with this id was not saved in the database.
      */
     @Operation(summary = "This is create the new discount.")
@@ -88,11 +89,12 @@ public class DiscountController {
                     content = @Content)
     })
     @PostMapping("/discounts")
-    public ResponseEntity<DiscountEntity> newDiscount(@RequestBody final DiscountEntity newDiscount) {
-        discountService.findByIdDiscount(newDiscount.getId()).ifPresent(discount -> {
-            throw new IllegalStateException("The discount with id: " +
+    public ResponseEntity<DiscountEntity> newDiscount(@Valid @RequestBody final DiscountEntity newDiscount) {
+        if (null != newDiscount.getId())
+            this.discountService.findByIdDiscount(newDiscount.getId()).ifPresent(discount -> {
+                throw new IllegalStateException("The discount with id: " +
                     newDiscount.getId() + " already saved in the database");});
-        final DiscountEntity savedDiscount = discountService.createDiscount(newDiscount)
+        final DiscountEntity savedDiscount = this.discountService.createDiscount(newDiscount)
                 .orElseThrow(() -> new IllegalStateException("The discount with id: " +
                         newDiscount.getId() + " was not saved in the database"));
         return new ResponseEntity<>(savedDiscount, HttpStatus.CREATED);
@@ -112,7 +114,7 @@ public class DiscountController {
     })
     @GetMapping("/discounts/{id}")
     public Optional<DiscountEntity> oneDiscount(@PathVariable final Long id) {
-        final Optional<DiscountEntity> discount = discountService.findByIdDiscount(id);
+        final Optional<DiscountEntity> discount = this.discountService.findByIdDiscount(id);
         return Optional.ofNullable(discount.orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database")));
     }
 
@@ -129,10 +131,14 @@ public class DiscountController {
                     description = "Discount has been updated",
                     content = @Content)
     })
-    @PutMapping("/discounts/{id}")
-    public Optional<DiscountEntity> updateDiscount(@PathVariable final Long id, @RequestBody final DiscountEntity discount) {
-        discountService.findByIdDiscount(id).orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database"));
-        return discountService.updateDiscountById(id, discount);
+    @PatchMapping("/discounts/{id}")
+    public ResponseEntity<DiscountEntity> updateDiscount(@PathVariable final Long id,
+                                                         @RequestBody final DiscountEntity discount) {
+        final DiscountEntity existingDiscount = this.discountService.findByIdDiscount(id).orElseThrow(() ->
+            new IllegalStateException("The discount with id: " + id + " was not found in the database"));
+        BeanUtils.copyProperties(discount, existingDiscount, "id");
+        this.discountService.updateDiscountById(id, existingDiscount);
+        return ResponseEntity.ok(this.discountService.updateDiscountById(id, existingDiscount).orElseThrow());
     }
 
     /**
@@ -149,8 +155,8 @@ public class DiscountController {
     })
     @DeleteMapping("/discounts/{id}")
     public void deleteDiscount(@PathVariable final Long id) {
-        discountService.findByIdDiscount(id).orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database"));
-        discountService.deleteDiscountById(id);
+        this.discountService.findByIdDiscount(id).orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database"));
+        this.discountService.deleteDiscountById(id);
     }
 
     /**

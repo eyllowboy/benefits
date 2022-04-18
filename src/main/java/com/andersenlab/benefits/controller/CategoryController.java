@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +40,7 @@ public class CategoryController {
     /**
      * Create {@link CategoryEntity} in the database.
      *
-     * @param title of the new category {@link CategoryEntity#getTitle()}
+     * @param category new {@link CategoryEntity} to be added
      * @throws IllegalStateException if {@link CategoryEntity} with these parameters already exists.
      */
     @Operation(summary = "This is to create new category")
@@ -51,11 +53,11 @@ public class CategoryController {
                     content = @Content)
     })
     @PostMapping("/categories")
-    public ResponseEntity<CategoryEntity> addCategory(@RequestParam(value = "title") final String title) {
-        categoryService.findByTitle(title).ifPresent(categoryEntity -> {
-            throw new IllegalStateException("Category with title '" + title + "' already exists");
+    public ResponseEntity<CategoryEntity> addCategory(@Valid @RequestBody final CategoryEntity category) {
+        this.categoryService.findByTitle(category.getTitle()).ifPresent(categoryEntity -> {
+            throw new IllegalStateException("Category with title '" + category.getTitle() + "' already exists");
         });
-        final CategoryEntity savedCategoryEntity = categoryService.save(new CategoryEntity(title));
+        final CategoryEntity savedCategoryEntity = this.categoryService.save(category);
         return new ResponseEntity<>(savedCategoryEntity, HttpStatus.CREATED);
     }
 
@@ -96,12 +98,14 @@ public class CategoryController {
                     description = "Internal Server Error",
                     content = @Content)
     })
-    @PutMapping("/categories")
-    public ResponseEntity<CategoryEntity> updateCategory(@RequestBody final CategoryEntity category) {
-        CategoryEntity updatedCategory = categoryService.findById(category.getId())
+    @PatchMapping("/categories/{id}")
+    public ResponseEntity<CategoryEntity> updateCategory(@PathVariable final Long id,
+                                                         @RequestBody final CategoryEntity category) {
+        CategoryEntity existingCategory = this.categoryService.findById(id)
                 .orElseThrow(() -> new IllegalStateException("Category with this id was not found in the database"));
-        categoryService.updateCategoryEntity(category.getId(), category.getTitle());
-        return ResponseEntity.ok(updatedCategory);
+        BeanUtils.copyProperties(category, existingCategory, "id");
+        this.categoryService.updateCategoryEntity(existingCategory.getId(), existingCategory.getTitle());
+        return ResponseEntity.ok(existingCategory);
     }
 
     /**
@@ -121,12 +125,12 @@ public class CategoryController {
     })
     @DeleteMapping("/categories/{id}")
     public void deleteCategory(@PathVariable final Long id) {
-        categoryService.findById(id).orElseThrow(() ->
+        this.categoryService.findById(id).orElseThrow(() ->
                 new IllegalStateException("Category with id: '" + id + "' was not found in the database"));
-        final Optional<CategoryEntity> categoryEntity = categoryService.findWithAssociatedDiscounts(id);
+        final Optional<CategoryEntity> categoryEntity = this.categoryService.findWithAssociatedDiscounts(id);
         if (categoryEntity.isPresent() && categoryEntity.get().getDiscounts().size() > 0)
             throw new IllegalStateException("There is active discounts in this Category in database");
-        categoryService.delete(id);
+        this.categoryService.delete(id);
     }
 
     /**
