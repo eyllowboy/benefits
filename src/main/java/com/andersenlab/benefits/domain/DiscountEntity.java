@@ -7,8 +7,8 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.*;
-
+import java.util.Date;
+import java.util.Set;
 
 @Schema(name = "Discount", description = "Discount entity")
 @Entity
@@ -31,22 +31,22 @@ public class DiscountEntity {
 
     @Schema(description = " Type of company or service", type = "string", minLength = 1, maxLength = 50)
     @NotBlank
-    @Column(name = "type", length = 50)
+    @Column(name = "type")
     private String type;
 
-    @Schema(description = "Description of discount", type = "string", minLength = 1, maxLength = 2000)
+    @Schema(description = "Description entities", type = "string", minLength = 1, maxLength = 2000)
     @NotBlank
-    @Column(name = "description", length = 2000)
+    @Column(name = "description")
     private String description;
 
     @Schema(description = "Discount condition", type = "string", minLength = 1, maxLength = 500)
     @NotBlank
-    @Column(name = "discount_condition", length = 500)
+    @Column(name = "discount_condition")
     private String discount_condition;
 
     @Schema(description = "Size of discount", type = "string", minLength = 1, maxLength = 100)
     @NotBlank
-    @Column(name = "size", length = 100)
+    @Column(name = "size")
     private String sizeDiscount;
 
     @Schema(description = "Type of discount", type = "enum", maxLength = 10)
@@ -69,7 +69,7 @@ public class DiscountEntity {
 
     @Schema(description = "Image of discount", type = "picture, png", maxLength = 300)
     @NotBlank
-    @Column(name = "image", length = 300)
+    @Column(name = "image")
     private String imageDiscount;
 
     @Schema(description = "Location of discount", type = "collection of entities")

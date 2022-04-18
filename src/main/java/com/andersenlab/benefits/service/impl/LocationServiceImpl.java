@@ -29,48 +29,51 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public Optional<LocationEntity> findByCity(final String country, final String city) {
-        return locationRepository.findByCity(country, city);
+        return this.locationRepository.findByCity(country, city);
     }
 
     @Override
     public List<LocationEntity> findAll() {
-        return locationRepository.findAll();
+        return this.locationRepository.findAll();
     }
 
     @Override
     public List<Optional<LocationEntity>> findByCountry(final String country) {
-        return locationRepository.findByCountry(country);
+        return this.locationRepository.findByCountry(country);
     }
 
     @Override
     public List<Optional<LocationEntity>> findByFirstLetters(final String country, final String filterMask) {
-        return locationRepository.findByFirstLetters(country, filterMask);
+        return this.locationRepository.findByFirstLetters(country, filterMask);
     }
 
     @Override
     @Transactional
     public void updateLocationEntity(final Long id, final String country, final String city) {
-        locationRepository.updateLocationEntity(id, country, city);
+        final LocationEntity location = new LocationEntity(id, country, city);
+        ValidateUtils.validateEntityPatch(location);
+        this.locationRepository.updateLocationEntity(location.getId(), location.getCountry(), location.getCity());
     }
 
     @Override
     public Optional<LocationEntity> findById(final Long id) {
-        return locationRepository.findById(id);
+        return this.locationRepository.findById(id);
     }
 
     @Override
     public LocationEntity save(final LocationEntity entity) {
-        return locationRepository.save(entity);
+        ValidateUtils.validateEntityPost(entity);
+        return this.locationRepository.save(entity);
     }
 
     @Override
     public void delete(final Long id) {
-        locationRepository.deleteById(id);
+        this.locationRepository.deleteById(id);
     }
 
     @Override
     @Transactional
     public Optional<LocationEntity> findWithAssociatedDiscounts(final Long id) {
-        return locationRepository.findWithAssociatedDiscounts(id);
+        return this.locationRepository.findWithAssociatedDiscounts(id);
     }
 }

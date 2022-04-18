@@ -5,6 +5,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 @Schema(name = "User", description = "User entity")
@@ -30,6 +31,7 @@ public class UserEntity {
     private String login;
 
     @Schema(description = "Role", type = "RoleEntity")
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "role_id")
     private RoleEntity roleEntity;
