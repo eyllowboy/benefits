@@ -181,7 +181,7 @@ public class DiscountControllerTest {
 
         // when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                        .put("/discounts/{id}", discount.getId())
+                        .patch("/discounts/{id}", discount.getId())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(discount)))
@@ -206,7 +206,7 @@ public class DiscountControllerTest {
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders
-                        .put("/discounts/{id}", discount.getId())
+                        .patch("/discounts/{id}", discount.getId())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(discount))));

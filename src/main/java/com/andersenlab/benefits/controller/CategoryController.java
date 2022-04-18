@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -95,13 +96,14 @@ public class CategoryController {
                     description = "Internal Server Error",
                     content = @Content)
     })
-    @PutMapping("/categories")
-    public ResponseEntity<CategoryEntity> updateCategory(@RequestBody final CategoryEntity category) {
-        CategoryEntity updatedCategory = this.categoryService.findById(category.getId())
+    @PatchMapping("/categories/{id}")
+    public ResponseEntity<CategoryEntity> updateCategory(@PathVariable final Long id,
+                                                         @RequestBody final CategoryEntity category) {
+        CategoryEntity existingCategory = this.categoryService.findById(id)
                 .orElseThrow(() -> new IllegalStateException("Category with this id was not found in the database"));
-        updatedCategory.setTitle(category.getTitle());
-        this.categoryService.updateCategoryEntity(updatedCategory.getId(), updatedCategory.getTitle());
-        return ResponseEntity.ok(updatedCategory);
+        BeanUtils.copyProperties(category, existingCategory, "id");
+        this.categoryService.updateCategoryEntity(existingCategory.getId(), existingCategory.getTitle());
+        return ResponseEntity.ok(existingCategory);
     }
 
     /**

@@ -174,7 +174,7 @@ public class RoleControllerTest {
 
 		// when
 		result = this.mockMvc.perform(MockMvcRequestBuilders
-				.put("/roles")
+				.patch("/roles/{id}", role.getId())
 				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(role)))
@@ -196,7 +196,7 @@ public class RoleControllerTest {
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> this.mockMvc.perform(MockMvcRequestBuilders
-						.put("/roles")
+						.patch("/roles/{id}", role.getId())
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(new ObjectMapper().writeValueAsString(role))));
@@ -216,7 +216,7 @@ public class RoleControllerTest {
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> this.mockMvc.perform(MockMvcRequestBuilders
-						.put("/roles")
+						.patch("/roles/{id}", role.getId())
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(new ObjectMapper().writeValueAsString(role))));

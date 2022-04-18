@@ -198,7 +198,7 @@ public class UserControllerTest {
 
 		// when
 		result = this.mockMvc.perform(MockMvcRequestBuilders
-				.put("/users")
+				.patch("/users/{id}", user.getId())
 				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(this.objectMapper.writeValueAsString(user)))
@@ -220,7 +220,7 @@ public class UserControllerTest {
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> this.mockMvc.perform(MockMvcRequestBuilders
-						.put("/users")
+						.patch("/users/{id}", userSetLoginTo.getId())
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(this.objectMapper.writeValueAsString(userSetLoginTo))));
@@ -242,7 +242,7 @@ public class UserControllerTest {
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> this.mockMvc.perform(MockMvcRequestBuilders
-						.put("/users")
+						.patch("/users/{id}", user.getId())
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(this.objectMapper.writeValueAsString(user))));
@@ -262,7 +262,7 @@ public class UserControllerTest {
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> this.mockMvc.perform(MockMvcRequestBuilders
-						.put("/users")
+						.patch("/users/{id}", user.getId())
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(this.objectMapper.writeValueAsString(user))));

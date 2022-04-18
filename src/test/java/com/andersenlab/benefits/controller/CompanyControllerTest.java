@@ -164,7 +164,7 @@ class CompanyControllerTest {
         final String companyEntity = this.objectMapper.writeValueAsString(updateCompany);
         //when
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .put("/companies/{id}", saveEntity.getId())
+                        .patch("/companies/{id}", saveEntity.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(companyEntity)
                         .with(csrf()))
