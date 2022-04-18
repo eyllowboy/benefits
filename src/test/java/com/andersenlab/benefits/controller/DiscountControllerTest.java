@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -64,14 +65,14 @@ public class DiscountControllerTest {
 
     @BeforeEach
     public void clearData() {
-        ctu.clearTables();
+        this.ctu.clearTables();
     }
 
     @Test
     @Order(1)
     public void whenGetAllDiscountsSuccess() throws Exception {
         // given
-        final List<DiscountEntity> discounts = this.discountRepository.saveAll(ctu.getDiscountList());
+        final List<DiscountEntity> discounts = this.discountRepository.saveAll(this.ctu.getDiscountList());
         final MvcResult result;
         final List<DiscountEntity> discountsResult;
 
@@ -85,7 +86,7 @@ public class DiscountControllerTest {
 
         // then
         assertEquals(200, result.getResponse().getStatus());
-        discountsResult = ctu.getDiscountsFromJson(result.getResponse().getContentAsString());
+        discountsResult = this.ctu.getDiscountsFromJson(result.getResponse().getContentAsString());
         discountsResult.forEach(item -> assertTrue(discounts.contains(item)));
     }
 
@@ -93,8 +94,8 @@ public class DiscountControllerTest {
     @Order(2)
     public void whenGetDiscountByIdSuccess() throws Exception {
         // given
-        final int discountPos = ctu.getRndEntityPos();
-        final List<DiscountEntity> discounts = this.discountRepository.saveAll(ctu.getDiscountList());
+        final int discountPos = this.ctu.getRndEntityPos();
+        final List<DiscountEntity> discounts = this.discountRepository.saveAll(this.ctu.getDiscountList());
         final MvcResult result;
 
         // when
@@ -106,9 +107,9 @@ public class DiscountControllerTest {
                 .andReturn();
         // then
         assertEquals(200, result.getResponse().getStatus());
-        assertTrue(ctu.isDiscountsEquals(
+        assertTrue(this.ctu.isDiscountsEquals(
                 discounts.get(discountPos),
-                ctu.getDiscountFromJson(new JSONObject(result.getResponse().getContentAsString()))));
+                this.ctu.getDiscountFromJson(new JSONObject(result.getResponse().getContentAsString()))));
     }
 
     @Test
@@ -440,6 +441,40 @@ public class DiscountControllerTest {
         // then
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, this.ctu.getDiscountsFromJson(result.getResponse().getContentAsString()).size());
+    }
+
+    @ParameterizedTest
+    @Order(19)
+    @CsvSource({
+            "Category1, Size1",
+            "Category2, Size2",
+            "Category3, Size3",
+            "Category4, Size4"
+    })
+    void whenFindSimilar(final String title, final String size) throws Exception {
+        // given
+        this.discountRepository.saveAll(this.ctu.getDiscountList());
+        final MvcResult result;
+
+        //when
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/discounts/filter-similar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("category", title)
+                        .param("sizeDiscount", size)
+                        .param("limit", "3")
+                        .with(csrf()))
+                .andDo(print())
+                .andReturn();
+
+        // then
+        assertEquals(200, result.getResponse().getStatus());
+        final List<DiscountEntity> foundDiscounts = this.ctu.getDiscountsFromJson(result.getResponse().getContentAsString());
+        foundDiscounts.forEach(discount ->
+                assertTrue(discount.getCategories().stream().anyMatch(category ->
+                        category.getTitle().contains(title))
+                        && (discount.getSizeDiscount().contains(size)
+                        || size.contains(discount.getSizeDiscount()))));
     }
 
     @ParameterizedTest

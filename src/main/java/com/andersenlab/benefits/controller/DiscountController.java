@@ -228,4 +228,27 @@ public class DiscountController {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getBySize(size).and(getLastAdded()));
         return this.discountService.getDiscountsByCriteria(spec);
     }
+
+    /**
+     * Find similar {@link DiscountEntity}'s based on "category" and "size of discount"
+     *
+     * @param category string with category name in which to search
+     * @param sizeDiscount string which must be contained in {@link DiscountEntity}'s size or vice versa
+     * @param city is name of City where to search (optional) if certain location needed
+     * @param limit number of {@link DiscountEntity} to return
+     * @return List of {@link DiscountEntity} suitable to search conditions
+     */
+    @Operation(summary = "This is method to find discounts in the same \"Category\" and with similar size of discount")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Discounts are filtered",
+                    content = @Content)
+    })
+    @GetMapping("/discounts/filter-similar")
+    public List<DiscountEntity> findSimilar(@RequestParam final String category,
+                                            @RequestParam final String sizeDiscount,
+                                            @RequestParam(required = false) final String city,
+                                            @RequestParam(required = false, defaultValue = "3") final Integer limit) {
+        return discountService.getSimilarDiscounts(category, sizeDiscount, city, limit);
+    }
 }
