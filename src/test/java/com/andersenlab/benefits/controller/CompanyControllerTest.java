@@ -183,7 +183,7 @@ class CompanyControllerTest {
         final String companyEntity = this.objectMapper.writeValueAsString(updatedCompany);
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
-                () -> mockMvc.perform(MockMvcRequestBuilders
+                () -> this.mockMvc.perform(MockMvcRequestBuilders
                         .put("/companies/{id}", notExistId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(companyEntity)
@@ -224,23 +224,14 @@ class CompanyControllerTest {
     @Test
     public void whenDeleteCompanyFailHasActiveDiscounts() {
         // given
-        final CompanyEntity companyWithActiveDiscount = new CompanyEntity("title6", "description6", "address6", "phone6", "title6");
-        final DiscountEntity discount = new DiscountEntity();
-        discount.setType("type");
-        discount.setDescription("description");
-        discount.setDiscount_condition("discount_condition");
-        discount.setSizeDiscount("10");
-        discount.setDiscount_type(DiscountType.DISCOUNT);
-        discount.setDateBegin(new Date());
-        discount.setDateFinish(new Date());
-        discount.setImageDiscount("imageDiscount");
-        var savedCompany = companyRepository.save(companyWithActiveDiscount);
-        discount.setCompany(savedCompany);
-        discountRepository.save(discount);
-        final Long id = savedCompany.getId();
+        final CompanyEntity companyWithActiveDiscount = this.companyRepository.save(this.ctu.getCompany(6));
+        final DiscountEntity discount = this.ctu.getDiscount(this.ctu.getRndEntityPos());
+        discount.setCompany(companyWithActiveDiscount);
+        this.discountRepository.save(discount);
+        final Long id = companyWithActiveDiscount.getId();
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
-                mockMvc.perform(MockMvcRequestBuilders
+                this.mockMvc.perform(MockMvcRequestBuilders
                         .delete("/companies/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf())));
@@ -264,7 +255,7 @@ class CompanyControllerTest {
                     .with(csrf()))
                 .andReturn();
 
-        // then
+        // then*
         assertEquals(400, result.getResponse().getStatus());
         final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
         assertTrue(errorResult.contains("must not be blank"));
