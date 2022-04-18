@@ -5,7 +5,6 @@ import com.andersenlab.benefits.repository.CompanyRepository;
 import com.andersenlab.benefits.service.CompanyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,9 +52,7 @@ public class CompanyServiceImpl implements CompanyService {
             company.setPhone(newCompany.getPhone());
             company.setLink(newCompany.getLink());
             return companyRepository.save(company);
-        }).orElseThrow(() -> {
-            return new RuntimeException("The problem with updates company");
-        });
+        }).orElseThrow(() -> new RuntimeException("The problem with updates company"));
         return Optional.of(newCompany);
     }
 

@@ -78,14 +78,14 @@ public class CsvDiscountLoaderServiceTest {
 
         when(this.discountRepository.save(any())).thenAnswer(invocation -> {
             DiscountEntity discount = invocation.getArgument(0);
-            discount.setCompany_id(saveItem(this.companies, discount.getCompany_id(), ServiceTestUtils::isCompaniesEquals));
+            discount.setCompany(saveItem(this.companies, discount.getCompany(), ServiceTestUtils::isCompaniesEquals));
             return saveItem(this.discounts, discount, ServiceTestUtils::isDiscountsEquals);
         });
         when(this.discountRepository.saveAll(any())).thenAnswer(invocation -> {
             List<DiscountEntity> items = invocation.getArgument(0);
             List<DiscountEntity> result = new ArrayList<>();
             items.forEach(item -> {
-                item.setCompany_id(saveItem(this.companies, item.getCompany_id(), ServiceTestUtils::isCompaniesEquals));
+                item.setCompany(saveItem(this.companies, item.getCompany(), ServiceTestUtils::isCompaniesEquals));
                 result.add(saveItem(this.discounts, item, ServiceTestUtils::isDiscountsEquals));
             });
             saveDiscountsParameters(this.discounts);
