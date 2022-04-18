@@ -85,13 +85,13 @@ public class DiscountServiceImpl implements DiscountService {
                                                     final Integer limit) {
         final Specification<DiscountEntity> specificationCategory = DiscountSpec.getByCategory(category);
         final Specification<DiscountEntity> specificationFinal;
-        if (city != null) {
+        if (Objects.isNull(city)) {
+            specificationFinal = Specification.where(specificationCategory);
+        } else {
             specificationFinal = Specification.where(specificationCategory
                     .and(DiscountSpec.getByLocation(city)));
-        } else {
-            specificationFinal = Specification.where(specificationCategory);
         }
-        List<DiscountEntity> discounts = this.discountRepository.findAll(specificationFinal);
+        final List<DiscountEntity> discounts = this.discountRepository.findAll(specificationFinal);
         return discounts.stream().filter(discount ->
                 (discount.getSizeDiscount().contains(sizeDiscount)
                         || sizeDiscount.contains(discount.getSizeDiscount()))).limit(limit).toList();
