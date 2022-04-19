@@ -29,39 +29,39 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Page<RoleEntity> findAll(final Pageable pageable) {
-        return roleRepository.findAll(pageable);
+        return this.roleRepository.findAll(pageable);
     }
 
     @Override
     public Optional<RoleEntity> findById(final Long id) {
-        return roleRepository.findById(id);
+        return this.roleRepository.findById(id);
     }
 
     @Override
     public Optional<RoleEntity> findByCode(final String code) {
-        return roleRepository.findByCode(code);
+        return this.roleRepository.findByCode(code);
     }
 
     @Override
     public RoleEntity save(final RoleEntity role) {
         ValidateUtils.validateEntityPost(role);
-        return roleRepository.save(role);
+        return this.roleRepository.save(role);
     }
 
     @Override
     public void updateRoleEntity(final Long id, final String name, final String code) {
         final RoleEntity role = new RoleEntity(id, name, code);
         ValidateUtils.validateEntityPatch(role);
-        roleRepository.updateRoleEntity(role.getId(), role.getName(), role.getCode());
+        this.roleRepository.updateRoleEntity(role.getId(), role.getName(), role.getCode());
     }
 
     @Override
     public void delete(final Long id) {
-        roleRepository.deleteById(id);
+        this.roleRepository.deleteById(id);
     }
 
     @Override
     public Optional<RoleEntity> findWithAssociatedUsers(final Long id) {
-        return roleRepository.findWithAssociatedUsers(id);
+        return this.roleRepository.findWithAssociatedUsers(id);
     }
 }

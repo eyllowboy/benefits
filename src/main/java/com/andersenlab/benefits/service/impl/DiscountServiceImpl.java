@@ -42,7 +42,7 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public Page<DiscountEntity> findAllDiscounts(final Pageable pageable) {
-        return discountRepository.findAll(pageable);
+        return this.discountRepository.findAll(pageable);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public Page<DiscountEntity> getDiscountsByCriteria(final Specification<DiscountEntity> specificDiscountEntity, final Pageable pageable) {
-        return discountRepository.findAll(specificDiscountEntity,pageable);
+        return this.discountRepository.findAll(specificDiscountEntity,pageable);
     }
 
     @Override

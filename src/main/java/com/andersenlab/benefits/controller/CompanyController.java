@@ -99,7 +99,7 @@ public class CompanyController {
     })
     @GetMapping("/companies")
     public Page<CompanyEntity> getAllCompany(final Pageable pageable) {
-        return companyService.findAllCompany(pageable);
+        return this.companyService.findAllCompany(pageable);
     }
 
 

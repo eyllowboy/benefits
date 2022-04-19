@@ -73,7 +73,7 @@ public class UserController {
     })
     @GetMapping("/users")
     public Page<UserEntity> getUsers(final Pageable pageable) {
-        return userService.findAll(pageable);
+        return this.userService.findAll(pageable);
     }
 
     /**

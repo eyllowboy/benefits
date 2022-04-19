@@ -31,34 +31,34 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserEntity> findAll(final Pageable pageable) {
-        return userRepository.findAll(pageable);
+        return this.userRepository.findAll(pageable);
     }
 
     @Override
     public Optional<UserEntity> findById(final Long id) {
-        return userRepository.findById(id);
+        return this.userRepository.findById(id);
     }
 
     @Override
     public Optional<UserEntity> findByLogin(final String login) {
-        return userRepository.findByLogin(login);
+        return this.userRepository.findByLogin(login);
     }
 
     @Override
     public UserEntity save(final UserEntity user) {
         ValidateUtils.validateEntityPost(user);
-        return userRepository.save(user);
+        return this.userRepository.save(user);
     }
 
     @Override
     public void updateUserEntity(final Long id, final String login, final RoleEntity roleEntity, final LocationEntity location) {
         final UserEntity user = new UserEntity(id, login, roleEntity, location);
         ValidateUtils.validateEntityPatch(user);
-        userRepository.updateUserEntity(user.getId(), user.getLogin(), user.getRoleEntity(), user.getLocation());
+        this.userRepository.updateUserEntity(user.getId(), user.getLogin(), user.getRoleEntity(), user.getLocation());
     }
 
     @Override
     public void delete(final Long id) {
-        userRepository.deleteById(id);
+        this.userRepository.deleteById(id);
     }
 }

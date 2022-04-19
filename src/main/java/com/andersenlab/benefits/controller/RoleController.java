@@ -60,7 +60,7 @@ public class RoleController {
     })
     @GetMapping("/roles")
     public Page<RoleEntity> getRoles(final Pageable pageable) {
-        return roleService.findAll(pageable);
+        return this.roleService.findAll(pageable);
     }
 
     /**

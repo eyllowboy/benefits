@@ -73,7 +73,7 @@ public class DiscountController {
     })
     @GetMapping("/discounts")
     public Page<DiscountEntity> allDiscount(final Pageable pageable) {
-        return discountService.findAllDiscounts(pageable);
+        return this.discountService.findAllDiscounts(pageable);
     }
 
     /**
@@ -173,7 +173,7 @@ public class DiscountController {
     @GetMapping("/discounts/filter-by-city")
     public Page<DiscountEntity> findLastByCity(@RequestParam(required = false) final String city, final Pageable pageable) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByLocation(city).and(getLastAdded()));
-        return discountService.getDiscountsByCriteria(spec,pageable);
+        return this.discountService.getDiscountsByCriteria(spec,pageable);
     }
 
 
@@ -191,7 +191,7 @@ public class DiscountController {
     @GetMapping("/discounts/filter-by-category")
     public Page<DiscountEntity> findLastByCategory(@RequestParam(required = false) final String category, final Pageable pageable) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByCategory(category).and(getLastAdded()));
-        return discountService.getDiscountsByCriteria(spec,pageable);
+        return this.discountService.getDiscountsByCriteria(spec,pageable);
     }
 
     /**
@@ -208,7 +208,7 @@ public class DiscountController {
     @GetMapping("/discounts/filter-by-type")
     public Page<DiscountEntity> findLastByType(@RequestParam(required = false) final String type, final Pageable pageable) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByType(type).and(getLastAdded()));
-        return discountService.getDiscountsByCriteria(spec,pageable);
+        return this.discountService.getDiscountsByCriteria(spec,pageable);
     }
 
     /**
@@ -225,7 +225,7 @@ public class DiscountController {
     @GetMapping("/discounts/filter-by-size")
     public Page<DiscountEntity> findLastBySize(@RequestParam(required = false) final String size,final Pageable pageable) {
         Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getBySize(size).and(getLastAdded()));
-        return discountService.getDiscountsByCriteria(spec,pageable);
+        return this.discountService.getDiscountsByCriteria(spec,pageable);
     }
 
     /**
@@ -248,6 +248,6 @@ public class DiscountController {
                                             @RequestParam final String sizeDiscount,
                                             @RequestParam(required = false) final String city,
                                             @RequestParam(required = false, defaultValue = "3") final Integer limit) {
-        return discountService.getSimilarDiscounts(category, sizeDiscount, city, limit);
+        return this.discountService.getSimilarDiscounts(category, sizeDiscount, city, limit);
     }
 }

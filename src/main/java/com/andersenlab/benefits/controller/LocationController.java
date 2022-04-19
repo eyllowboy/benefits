@@ -173,7 +173,7 @@ public class LocationController {
     })
     @GetMapping(value = "/locations")
     public Page<LocationEntity> getLocations(final Pageable pageable) {
-        return locationService.findAll(pageable);
+        return this.locationService.findAll(pageable);
     }
 
     /**
@@ -192,7 +192,7 @@ public class LocationController {
     })
     @RequestMapping(method = RequestMethod.GET, value = "/locations/country")
     public Page<LocationEntity> findByCountry(@RequestParam final String country,final Pageable pageable) {
-        return locationService.findByCountry(country,pageable);
+        return this.locationService.findByCountry(country,pageable);
     }
 
     /**
@@ -213,6 +213,6 @@ public class LocationController {
     public Page<LocationEntity> findByFirstLetters(@RequestParam final String country,
                                                              @RequestParam final String filterMask,
                                                              final Pageable pageable) {
-        return locationService.findByFirstLetters(country, filterMask,pageable);
+        return this.locationService.findByFirstLetters(country, filterMask,pageable);
     }
 }

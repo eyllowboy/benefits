@@ -32,7 +32,7 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public Page<CompanyEntity> findAllCompany(final Pageable pageable) {
-        return companyRepository.findAll(pageable);
+        return this.companyRepository.findAll(pageable);
     }
 
     @Override

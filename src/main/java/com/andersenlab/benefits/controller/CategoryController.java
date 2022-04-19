@@ -79,7 +79,7 @@ public class CategoryController {
     })
     @GetMapping("/categories/{id}")
     public CategoryEntity getCategoryById(@PathVariable final Long id) {
-        return (categoryService.findById(id)).orElseThrow(
+        return (this.categoryService.findById(id)).orElseThrow(
                 () -> new IllegalStateException("Category with this id was not found in the database"));
     }
 
@@ -149,6 +149,6 @@ public class CategoryController {
     })
     @GetMapping(value = "/categories")
     public Page<CategoryEntity> getCategories(final Pageable pageable) {
-        return categoryService.findAll(pageable);
+        return this.categoryService.findAll(pageable);
     }
 }
