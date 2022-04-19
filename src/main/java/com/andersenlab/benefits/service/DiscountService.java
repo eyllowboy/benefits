@@ -64,4 +64,18 @@ public interface DiscountService {
      * @param specificDiscountEntity entity provide filtering data
      */
     Page<DiscountEntity> getDiscountsByCriteria(final Specification<DiscountEntity> specificDiscountEntity, final Pageable pageable);
+
+    /**
+     * Method allows search similar discounts.
+     *
+     * @param category string with category name in which to search
+     * @param sizeDiscount string which must be contained in {@link DiscountEntity}'s size or vice versa
+     * @param city is name of City where to search (optional) if certain location needed
+     * @param limit number of {@link DiscountEntity} to return
+     * @return List of {@link DiscountEntity} suitable to search conditions
+     */
+    List<DiscountEntity> getSimilarDiscounts(final String category,
+                                             final String sizeDiscount,
+                                             final String city,
+                                             final Integer limit);
 }

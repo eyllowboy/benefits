@@ -2,6 +2,7 @@ package com.andersenlab.benefits.service.impl;
 
 import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.repository.DiscountRepository;
+import com.andersenlab.benefits.repository.DiscountSpec;
 import com.andersenlab.benefits.service.DiscountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -64,5 +65,24 @@ public class DiscountServiceImpl implements DiscountService {
     @Override
     public Page<DiscountEntity> getDiscountsByCriteria(final Specification<DiscountEntity> specificDiscountEntity, final Pageable pageable) {
         return discountRepository.findAll(specificDiscountEntity,pageable);
+    }
+
+    @Override
+    public List<DiscountEntity> getSimilarDiscounts(final String category,
+                                                    final String sizeDiscount,
+                                                    final String city,
+                                                    final Integer limit) {
+        final Specification<DiscountEntity> specificationCategory = DiscountSpec.getByCategory(category);
+        final Specification<DiscountEntity> specificationFinal;
+        if (Objects.isNull(city)) {
+            specificationFinal = Specification.where(specificationCategory);
+        } else {
+            specificationFinal = Specification.where(specificationCategory
+                    .and(DiscountSpec.getByLocation(city)));
+        }
+        final List<DiscountEntity> discounts = this.discountRepository.findAll(specificationFinal);
+        return discounts.stream().filter(discount ->
+                (discount.getSizeDiscount().contains(sizeDiscount)
+                        || sizeDiscount.contains(discount.getSizeDiscount()))).limit(limit).toList();
     }
 }
