@@ -101,7 +101,7 @@ public class CsvDiscountLoaderControllerTest {
             CompanyEntity company = companies.stream().filter(item ->
                     item.getTitle().equals(discount.getCompany().getTitle())).findFirst()
                         .orElse(discount.getCompany());
-            if (null == company.getId())
+            if (Objects.isNull(company.getId()))
                 this.companyRepository.save(company);
             discount.setCompany(company);
             result.add(discount.getId() + ": SKIP already exists");

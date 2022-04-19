@@ -84,9 +84,9 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 							splittedLine[0] + ": Number of delimited fields does not match header");
 				}
 			}
-		} catch (IllegalStateException ex) {
+		} catch (final IllegalStateException ex) {
 			throw new IllegalStateException("Headers titles not suitable");
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			throw new IllegalStateException("Check uploaded file is correct", ex);
 		}
 		return response;
@@ -95,16 +95,16 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 	@Transactional(rollbackFor = {DataIntegrityViolationException.class, IllegalStateException.class})
 	public String putRowToTables (final Map<String, String> row) {
 		try {
-			CompanyEntity companyEntity = getCompany(row);
-			if (null == companyEntity.getId()) {
+			final CompanyEntity companyEntity = getCompany(row);
+			if (Objects.isNull(companyEntity.getId())) {
 				validateCompany(companyEntity);
-				companyEntity = this.companyRepository.save(companyEntity);
+				companyEntity.setId(this.companyRepository.save(companyEntity).getId());
 			}
 			final long companyId = companyEntity.getId();
 			final List<DiscountEntity> discounts = this.discountRepository.findAll();
 			final DiscountEntity newDiscount = getDiscount(row, companyEntity);
 			discounts.stream().filter(discount ->
-							null != discount.getCompany().getId() &&
+								!Objects.isNull(discount.getCompany().getId()) &&
 									discount.getCompany().getId().equals(companyId) &&
 									equalDiscounts(discount, newDiscount))
 					.findFirst().ifPresent(found -> {throw new IllegalStateException("SKIP already exists");});

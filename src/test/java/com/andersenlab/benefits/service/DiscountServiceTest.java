@@ -98,7 +98,7 @@ class DiscountServiceTest {
 
     private boolean isDiscountsEquals(final DiscountEntity discount1, final DiscountEntity discount2) {
         if (discount1 == discount2) return true;
-        if (null == discount1 || discount1.getClass() != discount2.getClass()) {
+        if (Objects.isNull(discount1) || discount1.getClass() != discount2.getClass()) {
             return false;
         }
         return (
@@ -128,7 +128,7 @@ class DiscountServiceTest {
             try {
                 Method setId = Arrays.stream(item.getClass().getMethods()).filter(method ->
                         Objects.equals(method.getName(), "setId")).findFirst().orElse(null);
-                if (null != setId)
+                if (!Objects.isNull(setId))
                     setId.invoke(item, (long) collection.size());
             } catch (InvocationTargetException | IllegalAccessException ex) {
                 return result;

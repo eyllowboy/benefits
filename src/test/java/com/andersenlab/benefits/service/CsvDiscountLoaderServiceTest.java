@@ -73,7 +73,7 @@ public class CsvDiscountLoaderServiceTest {
         when(this.categoryRepository.findByTitle(any())).thenAnswer(invocation -> {
             CategoryEntity result = this.categories.stream().filter(category ->
                     Objects.equals(category.getTitle(), invocation.getArgument(0))).findFirst().orElse(null);
-            return result != null ? Optional.of(result) : Optional.empty();
+            return !Objects.isNull(result) ? Optional.of(result) : Optional.empty();
         });
 
         when(this.discountRepository.save(any())).thenAnswer(invocation -> {
