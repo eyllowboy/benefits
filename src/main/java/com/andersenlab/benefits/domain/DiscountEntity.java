@@ -7,6 +7,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.Set;
 
@@ -30,21 +31,25 @@ public class DiscountEntity {
     private Long id;
 
     @Schema(description = " Type of company or service", type = "string", minLength = 1, maxLength = 50)
+    @Size(min = 1, max = 50, message = "Type of company or service must be between 1 and 50 characters")
     @NotBlank
     @Column(name = "type")
     private String type;
 
-    @Schema(description = "Description entities", type = "string", minLength = 1, maxLength = 2000)
+    @Schema(description = "Discount description", type = "string", minLength = 1, maxLength = 2000)
+    @Size(min = 1, max = 2000, message = "Discount description must be between 1 and 2000 characters")
     @NotBlank
     @Column(name = "description")
     private String description;
 
     @Schema(description = "Discount condition", type = "string", minLength = 1, maxLength = 500)
+    @Size(min = 1, max = 500, message = "Discount condition must be between 3 and 20 characters")
     @NotBlank
     @Column(name = "discount_condition")
     private String discount_condition;
 
     @Schema(description = "Size of discount", type = "string", minLength = 1, maxLength = 100)
+    @Size(min = 1, max = 100, message = "Size of discount must be between 1 and 100 characters")
     @NotBlank
     @Column(name = "size")
     private String sizeDiscount;
@@ -97,4 +102,3 @@ public class DiscountEntity {
     @JoinColumn(name = "company_id")
     private CompanyEntity company;
 }
-

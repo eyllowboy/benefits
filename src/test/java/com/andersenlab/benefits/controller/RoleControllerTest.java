@@ -1,6 +1,6 @@
 package com.andersenlab.benefits.controller;
 
-import com.andersenlab.benefits.domain.CategoryEntity;
+import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import com.andersenlab.benefits.repository.*;
@@ -42,16 +42,19 @@ public class RoleControllerTest {
 	private final MockMvc mockMvc;
 	private final RoleRepository roleRepository;
 	private final UserRepository userRepository;
+	private final ObjectMapper objectMapper;
 	private final ControllerTestUtils ctu;
 
 	@Autowired
 	public RoleControllerTest(final MockMvc mockMvc,
 							  final UserRepository userRepository,
 							  final RoleRepository roleRepository,
+							  final ObjectMapper objectMapper,
 							  final ControllerTestUtils ctu) {
 		this.mockMvc = mockMvc;
 		this.userRepository = userRepository;
 		this.roleRepository = roleRepository;
+		this.objectMapper = objectMapper;
 		this.ctu = ctu;
 	}
 	@Container
@@ -135,7 +138,7 @@ public class RoleControllerTest {
 						.post("/roles")
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(new ObjectMapper().writeValueAsString(role)))
+						.content(this.objectMapper.writeValueAsString(role)))
 				.andReturn();
 
 		// then
@@ -155,7 +158,7 @@ public class RoleControllerTest {
 						.post("/roles")
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(new ObjectMapper().writeValueAsString(role))));
+						.content(this.objectMapper.writeValueAsString(role))));
 
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
@@ -177,7 +180,7 @@ public class RoleControllerTest {
 				.patch("/roles/{id}", role.getId())
 				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(new ObjectMapper().writeValueAsString(role)))
+				.content(this.objectMapper.writeValueAsString(role)))
 				.andDo(print())
 				.andReturn();
 
@@ -199,7 +202,7 @@ public class RoleControllerTest {
 						.patch("/roles/{id}", role.getId())
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(new ObjectMapper().writeValueAsString(role))));
+						.content(this.objectMapper.writeValueAsString(role))));
 		
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
@@ -219,7 +222,7 @@ public class RoleControllerTest {
 						.patch("/roles/{id}", role.getId())
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(new ObjectMapper().writeValueAsString(role))));
+						.content(this.objectMapper.writeValueAsString(role))));
 		
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
@@ -298,7 +301,7 @@ public class RoleControllerTest {
 		result = this.mockMvc.perform(MockMvcRequestBuilders
 						.post("/roles")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(new ObjectMapper().writeValueAsString(role))
+						.content(this.objectMapper.writeValueAsString(role))
 						.with(csrf()))
 				.andReturn();
 
@@ -320,7 +323,7 @@ public class RoleControllerTest {
 		result = this.mockMvc.perform(MockMvcRequestBuilders
 						.post("/roles")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(new ObjectMapper().writeValueAsString(role))
+						.content(this.objectMapper.writeValueAsString(role))
 						.with(csrf()))
 				.andReturn();
 
@@ -331,5 +334,28 @@ public class RoleControllerTest {
 		while (postedName.contains("  "))
 			postedName = postedName.replace("  ", " ");
 		assertEquals(postedName, postedRole.getName());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"0", "150"})
+	public void whenAddRoleWrongFieldSize(final Integer stringSize) throws Exception {
+		// given
+		final String fieldValue = "a".repeat(stringSize);
+		final RoleEntity role = this.ctu.getRole(this.ctu.getRndEntityPos());
+		role.setName(fieldValue);
+		final MvcResult result;
+
+		// when
+		result = this.mockMvc.perform(MockMvcRequestBuilders
+						.post("/roles")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(this.objectMapper.writeValueAsString(role))
+						.with(csrf()))
+				.andReturn();
+
+		// then
+		assertEquals(400, result.getResponse().getStatus());
+		final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
+		assertTrue(errorResult.contains("must be between"));
 	}
 }
