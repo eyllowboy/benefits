@@ -96,7 +96,7 @@ public class LocationControllerTest {
     public void whenGetSomeSizeLocationsSuccess() throws Exception {
         // given
         final int rndSize = (int) (random() * (5 - 1) + 1);
-        final Page<LocationEntity> foundCompany = locationRepository.findAll(PageRequest.of(0, rndSize));
+        final Page<LocationEntity> foundCompany = this.locationRepository.findAll(PageRequest.of(0, rndSize));
         final MvcResult result;
         // when
         result=mockMvc.perform(MockMvcRequestBuilders
@@ -107,7 +107,7 @@ public class LocationControllerTest {
                 // then
                 .andReturn();
         // then
-        final RestResponsePage<LocationEntity> pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
+        final RestResponsePage<LocationEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<>() {});
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(foundCompany, pageResult);

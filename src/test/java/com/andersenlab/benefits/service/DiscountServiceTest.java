@@ -275,8 +275,8 @@ class DiscountServiceTest {
         this.discountService.deleteDiscountById(discountToDelete.getId());
 
         //then
-        assertEquals(listLength - 1, discountRepository.findAll().size());
-        assertEquals(Optional.empty(), discountRepository.findById(discountToDelete.getId()));
+        assertEquals(listLength - 1, this.discountRepository.findAll().size());
+        assertEquals(Optional.empty(), this.discountRepository.findById(discountToDelete.getId()));
         verify(this.discountRepository, times(1)).deleteById(discountToDelete.getId());
     }
 
@@ -291,7 +291,7 @@ class DiscountServiceTest {
 
         // when
         when(this.discountRepository.findAll(spec, PageRequest.of(0, 10))).thenReturn(pageOfDiscounts);
-        final Page<DiscountEntity> foundDiscounts = discountService.getDiscountsByCriteria(spec,PageRequest.of(0,10));
+        final Page<DiscountEntity> foundDiscounts = this.discountService.getDiscountsByCriteria(spec,PageRequest.of(0,10));
 
         // then
         assertEquals(pageOfDiscounts, foundDiscounts);
@@ -308,7 +308,7 @@ class DiscountServiceTest {
 
         // when
         when(this.discountRepository.findAll(spec, PageRequest.of(0, 10))).thenReturn(pageOfDiscounts);
-        final Page<DiscountEntity> foundDiscounts = discountService.getDiscountsByCriteria(spec,PageRequest.of(0,10));
+        final Page<DiscountEntity> foundDiscounts = this.discountService.getDiscountsByCriteria(spec,PageRequest.of(0,10));
 
         // then
         assertEquals(1, foundDiscounts.getTotalElements());

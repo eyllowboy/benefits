@@ -144,7 +144,7 @@ class CompanyControllerTest {
                 .andDo(print())
                 .andReturn();
         // then
-        final RestResponsePage<CompanyEntity> pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
+        final RestResponsePage<CompanyEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<>() {});
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(foundCompany, pageResult);

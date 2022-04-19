@@ -135,7 +135,7 @@ public class CategoryControllerTest {
     public void whenGetSomeSizeCategoriesSuccess() throws Exception {
         // given
         final int rndSize = (int) (random() * (5 - 1) + 1);
-        final Page<CategoryEntity> foundCategory = categoryRepository.findAll(PageRequest.of(0, rndSize));
+        final Page<CategoryEntity> foundCategory = this.categoryRepository.findAll(PageRequest.of(0, rndSize));
         final MvcResult result;
         // when
         result = this.mockMvc.perform(MockMvcRequestBuilders
@@ -189,7 +189,6 @@ public class CategoryControllerTest {
     public void whenUpdateCategorySuccess() throws Exception {
         //given
         final CategoryEntity category = this.categoryRepository.findByTitle("Category5").orElseThrow();
-//        this.categoryRepository.save(category);
         category.setTitle("UpdatedCategory");
 
         // when

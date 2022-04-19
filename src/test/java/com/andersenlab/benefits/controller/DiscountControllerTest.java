@@ -96,7 +96,7 @@ public class DiscountControllerTest {
 
         // then
 
-        final RestResponsePage<DiscountEntity> pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
+        final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<>() {});
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(rndSize, pageResult.getContent().size());
@@ -292,7 +292,7 @@ public class DiscountControllerTest {
 
         // then
         assertEquals(200, result.getResponse().getStatus());
-        final RestResponsePage<DiscountEntity> pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
+        final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<>() {});
         pageResult.getContent().forEach(item ->assertTrue(item.getArea().stream()
                 .anyMatch(areaCity ->areaCity.getCity().equals(city))));
@@ -317,7 +317,7 @@ public class DiscountControllerTest {
                 .andReturn();
 
         // then
-        final RestResponsePage<DiscountEntity> pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
+        final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<>() {});
         pageResult.getContent().forEach(item ->assertTrue(item.getCategories().stream()
                 .anyMatch(areaCategory ->areaCategory.getTitle().equals(category))));
@@ -342,7 +342,7 @@ public class DiscountControllerTest {
 
         // then
         assertEquals(200, result.getResponse().getStatus());
-        final RestResponsePage<DiscountEntity> pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
+        final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<>() {});
         pageResult.getContent().forEach(item ->assertEquals(item.getType(), discount.getType()));
     }
@@ -366,7 +366,7 @@ public class DiscountControllerTest {
 
         // then
         assertEquals(200, result.getResponse().getStatus());
-        final RestResponsePage<DiscountEntity> pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
+        final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<>() {});
         pageResult.getContent().forEach(item ->assertEquals(item.getSizeDiscount(), discount.getSizeDiscount()));
     }
@@ -389,7 +389,7 @@ public class DiscountControllerTest {
                 .andReturn();
 
         // then
-        final RestResponsePage<DiscountEntity> pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
+        final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<>() {});
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, pageResult.getContent().size());
@@ -413,7 +413,7 @@ public class DiscountControllerTest {
                 .andReturn();
 
         // then
-        final RestResponsePage<DiscountEntity> pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
+        final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<>() {});
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, pageResult.getContent().size());
@@ -437,7 +437,7 @@ public class DiscountControllerTest {
                 .andReturn();
 
         // then
-        final RestResponsePage<DiscountEntity> pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
+        final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<>() {});
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, pageResult.getContent().size());
@@ -461,7 +461,7 @@ public class DiscountControllerTest {
                 .andReturn();
 
         // then
-        final RestResponsePage<DiscountEntity> pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
+        final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<>() {});
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, pageResult.getContent().size());

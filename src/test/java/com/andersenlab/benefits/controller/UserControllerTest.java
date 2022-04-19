@@ -83,7 +83,7 @@ public class UserControllerTest {
 	public void whenGetSomeSizeAllUsers() throws Exception {
 		// given
 		final int rndSize = (int) (random() * (5 - 1) + 1);
-		final Page<UserEntity> foundUsers = userRepository.findAll(PageRequest.of(0, rndSize));
+		final Page<UserEntity> foundUsers = this.userRepository.findAll(PageRequest.of(0, rndSize));
 		final MvcResult result;
 		// when
 		result =this.mockMvc.perform(MockMvcRequestBuilders
@@ -93,7 +93,7 @@ public class UserControllerTest {
 					.andDo(print())
 				.andReturn();
 		// then
-		final RestResponsePage<UserEntity> pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
+		final RestResponsePage<UserEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
 				new TypeReference<>() {});
 		assertEquals(200, result.getResponse().getStatus());
 		assertEquals(foundUsers, pageResult);
