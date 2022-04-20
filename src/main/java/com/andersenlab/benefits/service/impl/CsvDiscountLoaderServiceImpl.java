@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.*;
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -69,32 +70,58 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 	public List<String> loadDiscountsFromCsv(final MultipartFile file, final String delimiter) {
 		final List<String> response = new ArrayList<>();
 		try {
-			InputStreamReader isr = new InputStreamReader(file.getInputStream());
+			final InputStreamReader isr = new InputStreamReader(file.getInputStream());
 			try (BufferedReader input = new BufferedReader(isr)) {
 				String line = input.readLine();
-				header.clear();
-				header.addAll(Arrays.stream(line.split(delimiter)).toList());
+				this.header.clear();
+				this.header.addAll(Arrays.stream(line.split(delimiter)).toList());
 				checkHeadersSuitable();
 				while (input.ready() && !line.isEmpty()) {
 					line = input.readLine();
-					String[] splittedLine = line.split(delimiter);
+					final String[] splittedLine = line.split(delimiter);
 					response.add(splittedLine.length == this.header.size() ?
 							putRowToTables(parseLine(splittedLine)) :
 							splittedLine[0] + ": Number of delimited fields does not match header");
 				}
 			}
-		} catch (IllegalStateException ex) {
+		} catch (final IllegalStateException ex) {
 			throw new IllegalStateException("Headers titles not suitable");
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			throw new IllegalStateException("Check uploaded file is correct", ex);
 		}
 		return response;
 	}
 
+	@Transactional(rollbackFor = {DataIntegrityViolationException.class, IllegalStateException.class})
+	public String putRowToTables (final Map<String, String> row) {
+		try {
+			final CompanyEntity companyEntity = getCompany(row);
+			if (Objects.isNull(companyEntity.getId())) {
+				validateCompany(companyEntity);
+				companyEntity.setId(this.companyRepository.save(companyEntity).getId());
+			}
+			final long companyId = companyEntity.getId();
+			final List<DiscountEntity> discounts = this.discountRepository.findAll();
+			final DiscountEntity newDiscount = getDiscount(row, companyEntity);
+			discounts.stream().filter(discount ->
+								!Objects.isNull(discount.getCompany().getId()) &&
+									discount.getCompany().getId().equals(companyId) &&
+									equalDiscounts(discount, newDiscount))
+					.findFirst().ifPresent(found -> {throw new IllegalStateException("SKIP already exists");});
+			validateDiscount(newDiscount);
+			this.discountRepository.save(newDiscount);
+			return (row.get(this.suitableHeader.get("id")) + ": OK");
+		} catch (final IllegalStateException ex) {
+			return (row.get(this.suitableHeader.get("id")) + ": " + ex.getMessage());
+		} catch (final DataIntegrityViolationException ex) {
+			return (row.get(this.suitableHeader.get("id")) + ": " + ex.getCause().getCause());
+		}
+	}
+
 	private Date getDate(final String date, final boolean isStartDate) {
 		try {
 			return (new SimpleDateFormat("dd.MM.yyyy")).parse(date);
-		} catch (ParseException e) {
+		} catch (final ParseException e) {
 			return Date.from(isStartDate ?
 					LocalDate.now().with(firstDayOfYear()).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant() :
 					LocalDate.now().plus(100L, ChronoUnit.YEARS).with(lastDayOfYear()).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
@@ -102,18 +129,18 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 	}
 
 	private void checkHeadersSuitable() throws IOException, IllegalStateException {
-		if (header.size() == 0)
+		if (this.header.size() == 0)
 			throw new IOException();
-		Iterator<String> headerIterator = header.iterator();
-		suitableHeader.forEach((key, value) -> {
+		final Iterator<String> headerIterator = this.header.iterator();
+		this.suitableHeader.forEach((key, value) -> {
 			if (!headerIterator.next().equals(value))
 				throw new IllegalStateException();
 		});
 	}
 
 	private Map<String, String> parseLine(final String[] splittedLine) {
-		Map<String, String> result = new LinkedHashMap<>(header.size() * 2);
-		Iterator<String> headerTitle = suitableHeader.values().iterator();
+		final Map<String, String> result = new LinkedHashMap<>(this.header.size() * 2);
+		final Iterator<String> headerTitle = this.suitableHeader.values().iterator();
 		Arrays.stream(splittedLine).forEach(item -> result.put(headerTitle.next(), item));
 		return result;
 	}
@@ -124,19 +151,19 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 
 	private CompanyEntity getCompany(final Map<String, String> row) {
 		return this.companyRepository.findAll().stream().filter(company ->
-						company.getTitle().equals(row.get(suitableHeader.get("companyTitle")))).findFirst()
+						company.getTitle().equals(row.get(this.suitableHeader.get("companyTitle")))).findFirst()
 				.orElse(new CompanyEntity(
-						row.get(suitableHeader.get("companyTitle")),
-						row.get(suitableHeader.get("companyDescription")),
-						row.get(suitableHeader.get("companyAddress")),
-						row.get(suitableHeader.get("companyPhone")),
-						row.get(suitableHeader.get("links"))));
+						row.get(this.suitableHeader.get("companyTitle")),
+						row.get(this.suitableHeader.get("companyDescription")),
+						row.get(this.suitableHeader.get("companyAddress")),
+						row.get(this.suitableHeader.get("companyPhone")),
+						row.get(this.suitableHeader.get("links"))));
 	}
 
 	private Set<LocationEntity> getLocation(final Map<String, String> row) throws IllegalStateException {
-		List<LocationEntity> locations = this.locationRepository.findAll();
-		List<String> searchedCities = splitMultilineValue(row.get(suitableHeader.get("location")));
-		Set<LocationEntity> result  = new LinkedHashSet<>();
+		final List<LocationEntity> locations = this.locationRepository.findAll();
+		final List<String> searchedCities = splitMultilineValue(row.get(this.suitableHeader.get("location")));
+		final Set<LocationEntity> result  = new LinkedHashSet<>();
 		searchedCities.forEach(city -> result.add(locations.stream().filter(location ->
 				location.getCity().equals(city)).findFirst().orElseThrow(() ->
 				new IllegalStateException("City " + city + " was not found in database"))));
@@ -144,9 +171,9 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 	}
 
 	private Set<CategoryEntity> getCategory(final Map<String, String> row) {
-		List<CategoryEntity> categories = this.categoryRepository.findAll();
-		List<String> searchedCategories = splitMultilineValue(row.get(suitableHeader.get("category")));
-		Set<CategoryEntity> result = new LinkedHashSet<>();
+		final List<CategoryEntity> categories = this.categoryRepository.findAll();
+		final List<String> searchedCategories = splitMultilineValue(row.get(this.suitableHeader.get("category")));
+		final Set<CategoryEntity> result = new LinkedHashSet<>();
 		searchedCategories.forEach(title -> result.add(categories.stream().filter(category ->
 				category.getTitle().equals(title)).findFirst().orElseThrow(() ->
 				new IllegalStateException("Category " + title + " was not found in database"))));
@@ -154,17 +181,17 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 	}
 
 	private DiscountEntity getDiscount(final Map<String, String> row, final CompanyEntity companyEntity) throws IllegalStateException {
-		Set<LocationEntity> locations = getLocation(row);
-		Set<CategoryEntity> categories = getCategory(row);
-		DiscountEntity discountEntity = new DiscountEntity();
-		discountEntity.setType(row.get(suitableHeader.get("type")));
-		discountEntity.setDescription(row.get(suitableHeader.get("discountDescription")));
-		discountEntity.setDiscount_condition(row.get(suitableHeader.get("discountCondition")));
-		discountEntity.setSizeDiscount(row.get(suitableHeader.get("discountSize")));
-		discountEntity.setDiscount_type(DiscountType.valueOf(row.get(suitableHeader.get("discountType"))));
-		discountEntity.setDateBegin(getDate(row.get(suitableHeader.get("startDate")), true));
-		discountEntity.setDateFinish(getDate(row.get(suitableHeader.get("endDate")), false));
-		discountEntity.setImageDiscount(row.get(suitableHeader.get("image")));
+		final Set<LocationEntity> locations = getLocation(row);
+		final Set<CategoryEntity> categories = getCategory(row);
+		final DiscountEntity discountEntity = new DiscountEntity();
+		discountEntity.setType(row.get(this.suitableHeader.get("type")));
+		discountEntity.setDescription(row.get(this.suitableHeader.get("discountDescription")));
+		discountEntity.setDiscount_condition(row.get(this.suitableHeader.get("discountCondition")));
+		discountEntity.setSizeDiscount(row.get(this.suitableHeader.get("discountSize")));
+		discountEntity.setDiscount_type(DiscountType.valueOf(row.get(this.suitableHeader.get("discountType"))));
+		discountEntity.setDateBegin(getDate(row.get(this.suitableHeader.get("startDate")), true));
+		discountEntity.setDateFinish(getDate(row.get(this.suitableHeader.get("endDate")), false));
+		discountEntity.setImageDiscount(row.get(this.suitableHeader.get("image")));
 		discountEntity.setArea(locations);
 		discountEntity.setCategories(categories);
 		discountEntity.setCompany(companyEntity);
@@ -191,26 +218,22 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 				));
 	}
 
-	@Transactional(rollbackFor = {DataIntegrityViolationException.class, IllegalStateException.class})
-	public String putRowToTables (final Map<String, String> row) {
-		try {
-			CompanyEntity companyEntity = getCompany(row);
-			if (null == companyEntity.getId())
-				companyEntity = this.companyRepository.save(companyEntity);
-			final long companyId = companyEntity.getId();
-			List<DiscountEntity> discounts = discountRepository.findAll();
-			DiscountEntity newDiscount = getDiscount(row, companyEntity);
-			discounts.stream().filter(discount ->
-							null != discount.getCompany().getId() &&
-									discount.getCompany().getId().equals(companyId) &&
-									equalDiscounts(discount, newDiscount))
-					.findFirst().ifPresent(found -> {throw new IllegalStateException("SKIP already exists");});
-			this.discountRepository.save(newDiscount);
-			return (row.get(suitableHeader.get("id")) + ": OK");
-		} catch (IllegalStateException ex) {
-			return (row.get(suitableHeader.get("id")) + ": " + ex.getMessage());
-		} catch (DataIntegrityViolationException ex) {
-			return (row.get(suitableHeader.get("id")) + ": " + ex.getCause().getCause());
+	public void validateDiscount(@Valid final DiscountEntity discount) {
+		try (ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory()) {
+			final Validator validator = validatorFactory.usingContext().getValidator();
+			final Set<ConstraintViolation<DiscountEntity>> constrains = validator.validate(discount);
+			if (constrains.size() > 0)
+				throw new IllegalStateException(constrains.iterator().next().getMessage());
 		}
 	}
+
+	public void validateCompany(@Valid final CompanyEntity company) {
+		try (ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory()) {
+			final Validator validator = validatorFactory.usingContext().getValidator();
+			final Set<ConstraintViolation<CompanyEntity>> constrains = validator.validate(company);
+			if (constrains.size() > 0)
+				throw new IllegalStateException(constrains.iterator().next().getMessage());
+		}
+	}
+
 }

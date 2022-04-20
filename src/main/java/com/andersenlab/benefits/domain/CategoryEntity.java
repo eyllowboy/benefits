@@ -6,6 +6,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.Set;
 
 @Schema(name = "Category", description = "Category entity")
@@ -26,6 +27,7 @@ public class CategoryEntity {
     private Long id;
 
     @Schema(description = "Category title", type = "string", minLength = 3, maxLength = 20)
+    @Size(min = 3, max = 50, message = "Title must be between 3 and 20 characters")
     @NotBlank
     @Column
     private String title;

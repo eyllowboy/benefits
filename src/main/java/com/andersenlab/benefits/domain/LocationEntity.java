@@ -7,6 +7,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.Set;
 
 @Schema(name = "Location", description = "Location entity")
@@ -27,11 +28,13 @@ public class LocationEntity {
     private Long id;
 
     @Schema(description = "Location country", type = "string", minLength = 1, maxLength = 15)
+    @Size(min = 1, max = 15, message = "Country must be between 1 and 15 characters")
     @NotBlank
     @Column
     private String country;
 
     @Schema(description = "Location city", type = "string", minLength = 1, maxLength = 25)
+    @Size(min = 1, max = 25, message = "City must be between 1 and 25 characters")
     @NotBlank
     @Column
     private String city;

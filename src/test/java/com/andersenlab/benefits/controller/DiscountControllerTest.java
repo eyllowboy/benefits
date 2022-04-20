@@ -504,6 +504,7 @@ public class DiscountControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "    "})
     public void whenAddCategoryWrongObligatoryFields(final String description) throws Exception {
+        // given
         final DiscountEntity discount = this.ctu.getDiscount(this.ctu.getRndEntityPos());
         discount.setDescription(description);
         final MvcResult result;
@@ -525,6 +526,7 @@ public class DiscountControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {" space at start", "space at end ", " two  spaces  inside", " three   spaces   inside"})
     public void whenAddCategoryTrimFields(final String description) throws Exception {
+        // given
         final DiscountEntity discount = this.ctu.getDiscount(this.ctu.getRndEntityPos());
         discount.setDescription(description);
         final DiscountEntity postedDiscount;
@@ -546,5 +548,28 @@ public class DiscountControllerTest {
         while (postedDescription.contains("  "))
             postedDescription = postedDescription.replace("  ", " ");
         assertEquals(postedDescription, postedDiscount.getDescription());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"0", "150"})
+    public void whenAddDiscountWrongFieldSize(final Integer stringSize) throws Exception {
+        // given
+        final String fieldValue = "a".repeat(stringSize);
+        final DiscountEntity discount = this.ctu.getDiscount(this.ctu.getRndEntityPos());
+        discount.setSizeDiscount(fieldValue);
+        final MvcResult result;
+
+        // when
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .post("/discounts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(discount))
+                        .with(csrf()))
+                .andReturn();
+
+        // then
+        assertEquals(400, result.getResponse().getStatus());
+        final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
+        assertTrue(errorResult.contains("must be between"));
     }
 }

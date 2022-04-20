@@ -63,14 +63,14 @@ public class CsvDiscountLoaderControllerTest {
 
     @BeforeEach
     public void clearData() {
-        ctu.clearTables();
+        this.ctu.clearTables();
     }
 
     @Test
     public void whenLoadCsvSuccess() throws Exception {
         // given
-        final List<DiscountEntity> discounts = ctu.getDiscountList();
-        final MockMultipartFile csvData = ctu.newMockMultipartFile(discounts);
+        final List<DiscountEntity> discounts = this.ctu.getDiscountList();
+        final MockMultipartFile csvData = this.ctu.newMockMultipartFile(discounts);
         final List<String> result = new ArrayList<>();
         discounts.forEach(discount -> result.add(discount.getId() + ": OK"));
         final List<DiscountEntity> discountsAfterUpload;
@@ -88,26 +88,26 @@ public class CsvDiscountLoaderControllerTest {
         discountsAfterUpload = this.discountRepository.findAll();
         assertEquals(discounts.size(), discountsAfterUpload.size());
         for (int i = 0; i < discounts.size(); i++)
-            assertTrue(ctu.isDiscountsEquals(discounts.get(i), discountsAfterUpload.get(i)));
+            assertTrue(this.ctu.isDiscountsEquals(discounts.get(i), discountsAfterUpload.get(i)));
     }
 
     @Test
     public void whenLoadCsvDiscountExists() throws Exception {
         // given
-        final List<DiscountEntity> discounts = ctu.getDiscountList();
+        final List<DiscountEntity> discounts = this.ctu.getDiscountList();
         final List<String> result = new ArrayList<>();
         final List<CompanyEntity> companies = this.companyRepository.findAll();
         discounts.forEach(discount -> {
             CompanyEntity company = companies.stream().filter(item ->
                     item.getTitle().equals(discount.getCompany().getTitle())).findFirst()
                         .orElse(discount.getCompany());
-            if (null == company.getId())
+            if (Objects.isNull(company.getId()))
                 this.companyRepository.save(company);
             discount.setCompany(company);
             result.add(discount.getId() + ": SKIP already exists");
         });
         this.discountRepository.saveAll(discounts);
-        final MockMultipartFile csvData = ctu.newMockMultipartFile(discounts);
+        final MockMultipartFile csvData = this.ctu.newMockMultipartFile(discounts);
 
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
@@ -125,12 +125,12 @@ public class CsvDiscountLoaderControllerTest {
     @Test
     public void whenLoadCsvWithDiscountDuplicate() throws Exception {
         // given
-        final List<DiscountEntity> discounts = ctu.getDiscountList();
+        final List<DiscountEntity> discounts = this.ctu.getDiscountList();
         final List<String> result = new ArrayList<>();
         discounts.forEach(discount -> result.add(discount.getId() + ": OK"));
         discounts.add(discounts.get(discounts.size() - 1));
         result.add((discounts.size() - 1) + ": SKIP already exists");
-        final MockMultipartFile csvData = ctu.newMockMultipartFile(discounts);
+        final MockMultipartFile csvData = this.ctu.newMockMultipartFile(discounts);
         final List<DiscountEntity> discountsAfterUpload;
 
         // when
@@ -146,16 +146,16 @@ public class CsvDiscountLoaderControllerTest {
         discountsAfterUpload = this.discountRepository.findAll();
         assertEquals(discounts.size() - 1, discountsAfterUpload.size());
         for (int i = 0; i < discounts.size() - 1; i++)
-            assertTrue(ctu.isDiscountsEquals(discounts.get(i), discountsAfterUpload.get(i)));
+            assertTrue(this.ctu.isDiscountsEquals(discounts.get(i), discountsAfterUpload.get(i)));
     }
 
     @Test
     public void whenLoadCsvFailLocationNotFound() throws Exception {
         // given
-        final List<DiscountEntity> discounts = ctu.getDiscountList();
+        final List<DiscountEntity> discounts = this.ctu.getDiscountList();
         final Set<LocationEntity> locationToEdit = discounts.get(0).getArea();
         locationToEdit.iterator().next().setCity("Brest");
-        final MockMultipartFile csvData = ctu.newMockMultipartFile(discounts);
+        final MockMultipartFile csvData = this.ctu.newMockMultipartFile(discounts);
 
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
@@ -171,9 +171,9 @@ public class CsvDiscountLoaderControllerTest {
     @Test
     public void whenLoadCsvFailLongField() throws Exception {
         // given
-        final List<DiscountEntity> discounts = ctu.getDiscountList();
-        discounts.get(0).setType("01234567890123456789012345678901234567890123456789012345678901234567890123456789");
-        final MockMultipartFile csvData = ctu.newMockMultipartFile(discounts);
+        final List<DiscountEntity> discounts = this.ctu.getDiscountList();
+        discounts.get(0).setType("a".repeat(51));
+        final MockMultipartFile csvData = this.ctu.newMockMultipartFile(discounts);
 
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
@@ -181,16 +181,17 @@ public class CsvDiscountLoaderControllerTest {
             .file(csvData)
             .with(csrf()))
             .andDo(print())
+
         // then
-            .andExpect(jsonPath("$[0]", is("1: org.postgresql.util.PSQLException: ERROR: value too long for type character varying(50)")));
+            .andExpect(jsonPath("$[0]", is("1: Type of company or service must be between 1 and 50 characters")));
     }
 
     @Test
     public void whenLoadCsvFailIncorrectNumberOfDelimitedFields() throws Exception {
         // given
-        final List<DiscountEntity> discounts = ctu.getDiscountList();
+        final List<DiscountEntity> discounts = this.ctu.getDiscountList();
         discounts.get(0).setType("0123456789;0123456789");
-        final MockMultipartFile csvData = ctu.newMockMultipartFile(discounts);
+        final MockMultipartFile csvData = this.ctu.newMockMultipartFile(discounts);
 
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
@@ -205,8 +206,8 @@ public class CsvDiscountLoaderControllerTest {
     @Test
     public void whenLoadCsvFailIncorrectFilename() throws Exception {
         // given
-        final List<DiscountEntity> discounts = ctu.getDiscountList();
-        final MockMultipartFile csvData = ctu.newMockMultipartFile(discounts);
+        final List<DiscountEntity> discounts = this.ctu.getDiscountList();
+        final MockMultipartFile csvData = this.ctu.newMockMultipartFile(discounts);
         final MockMultipartFile incorrectCsvFile = new MockMultipartFile(
                 csvData.getName(),
                 "incorrect.filename.txt",

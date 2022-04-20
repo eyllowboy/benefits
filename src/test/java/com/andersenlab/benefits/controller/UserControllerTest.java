@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.controller;
 
+import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import com.andersenlab.benefits.repository.*;
@@ -332,7 +333,7 @@ public class UserControllerTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = {" space at start", "space at end ", " two  spaces  inside", " three   spaces   inside"})
+	@ValueSource(strings = {" space at start", "space at end ", " two  spaces  inside", " three   spaces "})
 	public void whenAddRoleTrimFields(final String login) throws Exception {
 		final UserEntity user = this.ctu.getUser(this.ctu.getRndEntityPos());
 		user.setLogin(login);
@@ -355,5 +356,28 @@ public class UserControllerTest {
 		while (postedLogin.contains("  "))
 			postedLogin = postedLogin.replace("  ", " ");
 		assertEquals(postedLogin, postedUser.getLogin());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"0", "150"})
+	public void whenAddUserWrongFieldSize(final Integer stringSize) throws Exception {
+		// given
+		final String fieldValue = "a".repeat(stringSize);
+		final UserEntity user = this.ctu.getUser(this.ctu.getRndEntityPos());
+		user.setLogin(fieldValue);
+		final MvcResult result;
+
+		// when
+		result = this.mockMvc.perform(MockMvcRequestBuilders
+						.post("/users")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(this.objectMapper.writeValueAsString(user))
+						.with(csrf()))
+				.andReturn();
+
+		// then
+		assertEquals(400, result.getResponse().getStatus());
+		final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
+		assertTrue(errorResult.contains("must be between"));
 	}
 }

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -56,7 +57,7 @@ public class CompanyController {
     })
     @PostMapping("/companies")
     public ResponseEntity<Optional<CompanyEntity>> addCompany(@Valid @RequestBody final CompanyEntity companyEntity) {
-        if (null != companyEntity.getId())
+        if (!Objects.isNull(companyEntity.getId()))
             this.companyService.findByIdCompany(companyEntity.getId()).ifPresent(company -> {
                 throw new IllegalStateException("The company with id: " + companyEntity.getId() + " already exists.");});
         return new ResponseEntity<>(this.companyService.createCompany(companyEntity), HttpStatus.CREATED);

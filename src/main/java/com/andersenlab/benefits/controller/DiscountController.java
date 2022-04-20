@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.andersenlab.benefits.repository.DiscountSpec.getLastAdded;
@@ -90,7 +91,7 @@ public class DiscountController {
     })
     @PostMapping("/discounts")
     public ResponseEntity<DiscountEntity> newDiscount(@Valid @RequestBody final DiscountEntity newDiscount) {
-        if (null != newDiscount.getId())
+        if (!Objects.isNull(newDiscount.getId()))
             this.discountService.findByIdDiscount(newDiscount.getId()).ifPresent(discount -> {
                 throw new IllegalStateException("The discount with id: " +
                     newDiscount.getId() + " already saved in the database");});

@@ -6,6 +6,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @Schema(name = "Company", description = "Company entity")
@@ -25,26 +26,31 @@ public class CompanyEntity {
     @SequenceGenerator(name = "company_id_seq", sequenceName = "company_id", allocationSize = 1)
     private Long id;
 
-    @Schema(description = "Title Company", type = "string", minLength = 1, maxLength = 50)
+    @Schema(description = "Title of company", type = "string", minLength = 1, maxLength = 50)
+    @Size(min = 1, max = 50, message = "Title of company must be between 1 and 50 characters")
     @NotBlank
     @Column(name = "title")
     private String title;
 
-    @Schema(description = "Description company", type = "string", minLength = 1, maxLength = 1000)
+    @Schema(description = "Description of company", type = "string", minLength = 1, maxLength = 1000)
+    @Size(min = 1, max = 1000, message = "Description of company must be between 3 and 20 characters")
     @NotBlank
     @Column(name = "description")
     private String description;
 
-    @Schema(description = "Address company", type = "string", minLength = 1, maxLength = 150)
+    @Schema(description = "Address of company", type = "string", minLength = 1, maxLength = 150)
+    @Size(min = 1, max = 150, message = "Address of company must be between 1 and 150 characters")
     @Column(name = "address")
     private String address;
 
-    @Schema(description = "Phone company", type = "string", minLength = 1, maxLength = 20)
+    @Schema(description = "Phone of company", type = "string", minLength = 1, maxLength = 20)
+    @Size(min = 1, max = 20, message = "Phone of company must be between 1 and 20 characters")
     @NotBlank
     @Column(name = "phone")
     private String phone;
 
-    @Schema(description = "Link company", type = "string", minLength = 1)
+    @Schema(description = "Link company", type = "string", minLength = 1, maxLength = 150)
+    @Size(min = 1, max = 150, message = "Link company must be between 1 and 150 characters")
     @NotBlank
     @Column(name = "link")
     private String link;

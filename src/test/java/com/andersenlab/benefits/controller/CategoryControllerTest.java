@@ -281,6 +281,7 @@ public class CategoryControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "    "})
     public void whenAddCategoryWrongObligatoryFields(final String title) throws Exception {
+        // given
         final CategoryEntity category = new CategoryEntity(title);
         final MvcResult result;
 
@@ -301,6 +302,7 @@ public class CategoryControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {" space at start", "space at end ", " two  spaces  inside", " three   spaces   inside"})
     public void whenAddCategoryTrimFields(final String title) throws Exception {
+        // given
         final CategoryEntity category = new CategoryEntity(title);
         final CategoryEntity postedCategory;
         String postedTitle;
@@ -321,5 +323,27 @@ public class CategoryControllerTest {
         while (postedTitle.contains("  "))
             postedTitle = postedTitle.replace("  ", " ");
         assertEquals(postedTitle, postedCategory.getTitle());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"2", "150"})
+    public void whenAddCategoryWrongFieldSize(final Integer stringSize) throws Exception {
+        // given
+        final String fieldValue = "a".repeat(stringSize);
+        final CategoryEntity category = new CategoryEntity(fieldValue);
+        final MvcResult result;
+
+        // when
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .post("/categories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(category))
+                        .with(csrf()))
+                .andReturn();
+
+        // then
+        assertEquals(400, result.getResponse().getStatus());
+        final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
+        assertTrue(errorResult.contains("must be between"));
     }
 }

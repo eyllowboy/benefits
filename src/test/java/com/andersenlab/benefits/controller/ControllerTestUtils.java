@@ -74,7 +74,7 @@ public class ControllerTestUtils {
         for (long i = 1; i <= size; i++) {
             CategoryEntity category = this.categoryRepository.findByTitle("Category" + i)
                     .orElse(new CategoryEntity("Category" + i));
-            if (null == category.getId())
+            if (Objects.isNull(category.getId()))
                 this.categoryRepository.save(category);
             result.add(category);
         }
@@ -85,7 +85,7 @@ public class ControllerTestUtils {
         final LocationEntity location = this.locationRepository.findAll().stream()
                 .filter(item -> item.getCity().equals("someCity" + num)).findFirst()
                 .orElse(new LocationEntity("SomeCountry", "someCity" + num));
-        if (null == location.getId())
+        if (Objects.isNull(location.getId()))
             this.locationRepository.save(location);
         return location;
     }
@@ -113,7 +113,7 @@ public class ControllerTestUtils {
     public UserEntity getUser(final long num) {
         return (this.userRepository.findByLogin("userLogin" + num).orElseGet(() -> {
             UserEntity newUser = new UserEntity("userLogin" + num, getRole(num), getLocation(num));
-            if (null == newUser.getRoleEntity().getId())
+            if (Objects.isNull(newUser.getRoleEntity().getId()))
                 this.roleRepository.save(newUser.getRoleEntity());
             return newUser;
         }));
@@ -198,7 +198,7 @@ public class ControllerTestUtils {
         if (discount1 == discount2) {
             return true;
         }
-        if (null == discount1 || discount1.getClass() != discount2.getClass()) {
+        if (Objects.isNull(discount1) || discount1.getClass() != discount2.getClass()) {
             return false;
         }
         return (

@@ -45,8 +45,8 @@ public class ValidateUtils {
         final NotBlank nb = field.getAnnotation(NotBlank.class);
         final NotNull nn = field.getAnnotation(NotNull.class);
         final NotEmpty ne = field.getAnnotation(NotEmpty.class);
-        if ((nb != null && (value == null || Objects.equals(value, "")))
-                || ((nn != null || ne != null) && value == null))
+        if ((!Objects.isNull(nb) && (Objects.isNull(value) || Objects.equals(value, "")))
+                || ((!Objects.isNull(nn) || !Objects.isNull(ne)) && Objects.isNull(value)))
             throw new IllegalStateException(errNoData(entityName, field.getName()));
     }
 
