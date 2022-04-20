@@ -68,7 +68,7 @@ public class UserControllerTest {
 					.withDatabaseName("benefits")
 					.withUsername("benefits")
 					.withPassword("ben0147");
-	
+
 	@DynamicPropertySource
 	static void postgreSQLProperties(final DynamicPropertyRegistry registry) {
 		registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
@@ -124,7 +124,7 @@ public class UserControllerTest {
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> this.mockMvc.perform(get("/users/{id}", Long.MAX_VALUE).with(csrf())));
-		
+
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("User with this id was not found in the database",
@@ -192,27 +192,25 @@ public class UserControllerTest {
 	}
 
 	@Test
-	public void whenUpdateUserWithNewLoginAndRoleIdIsExists() throws Exception {
-		// given
-		final Long id = this.userRepository.save(this.ctu.getUser(this.ctu.getRndEntityPos())).getId();
-		final UserEntity user = this.ctu.getUser(this.ctu.getRndEntityPos());
-		user.setId(id);
-		user.setLogin("newUserLogin");
-		final MvcResult result;
+    public void whenUpdateUserWithNewLoginAndRoleIdIsExists() throws Exception {
+        // given
+        final UserEntity user = this.userRepository.save(this.ctu.getUser(this.ctu.getRndEntityPos()));
+        user.setLogin("newUserLogin");
+        final MvcResult result;
 
-		// when
-		result = this.mockMvc.perform(MockMvcRequestBuilders
-				.patch("/users/{id}", user.getId())
-				.with(csrf())
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(this.objectMapper.writeValueAsString(user)))
-				.andDo(print())
-				.andReturn();
-		// then
-		assertEquals(200, result.getResponse().getStatus());
-		assertEquals(1, this.userRepository.findAll().size());
-		assertEquals(user, this.userRepository.findById(id).orElseThrow());
-	}
+        // when
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .patch("/users/{id}", user.getId())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(user)))
+                .andDo(print())
+                .andReturn();
+        // then
+        assertEquals(200, result.getResponse().getStatus());
+        assertEquals(1, this.userRepository.findAll().size());
+        assertEquals(user, this.userRepository.findById(user.getId()).orElseThrow());
+    }
 
 	@Test
 	public void whenUpdateUserAndLoginIsExists() {
@@ -228,7 +226,7 @@ public class UserControllerTest {
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(this.objectMapper.writeValueAsString(userSetLoginTo))));
-		
+
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("User with such 'login' is already exists",
@@ -250,7 +248,7 @@ public class UserControllerTest {
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(this.objectMapper.writeValueAsString(user))));
-		
+
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("Role with this id was not found in the database",
@@ -262,7 +260,7 @@ public class UserControllerTest {
 		// given
 		final UserEntity user = this.userRepository.saveAll(this.ctu.getUserList()).get(0);
 		user.setId(Long.MAX_VALUE);
-		
+
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> this.mockMvc.perform(MockMvcRequestBuilders
@@ -270,7 +268,7 @@ public class UserControllerTest {
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(this.objectMapper.writeValueAsString(user))));
-		
+
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("User with this id was not found in the database",
@@ -305,7 +303,7 @@ public class UserControllerTest {
 				() -> this.mockMvc.perform(MockMvcRequestBuilders
 					.delete("/users/{id}", Long.MAX_VALUE)
 					.with(csrf())));
-		
+
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("User with this id was not found in the database",
