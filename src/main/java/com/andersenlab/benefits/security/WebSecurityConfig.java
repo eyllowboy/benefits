@@ -55,38 +55,38 @@ public class WebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/roles").hasRole("ADMIN")
                 .antMatchers(HttpMethod.GET, "/roles/**").hasRole("ADMIN")
                 .antMatchers(HttpMethod.POST, "/roles").hasRole("ADMIN")
-                .antMatchers(HttpMethod.PUT, "/roles").hasRole("ADMIN")
+                .antMatchers(HttpMethod.PATCH, "/roles").hasRole("ADMIN")
                 .antMatchers(HttpMethod.DELETE, "/roles/**").hasRole("ADMIN")
                 // users
                 .antMatchers(HttpMethod.GET, "/users").hasAnyRole("ADMIN", "MODERATOR")
                 .antMatchers(HttpMethod.GET, "/users/**").hasAnyRole("ADMIN", "MODERATOR", "USER")
                 .antMatchers(HttpMethod.POST, "/users").hasAnyRole("ADMIN", "MODERATOR")
-                .antMatchers(HttpMethod.PUT, "/users").hasAnyRole("ADMIN", "MODERATOR")
+                .antMatchers(HttpMethod.PATCH, "/users").hasAnyRole("ADMIN", "MODERATOR")
                 .antMatchers(HttpMethod.DELETE, "/users/**").hasAnyRole("ADMIN", "MODERATOR")
                 // discounts
                 .antMatchers(HttpMethod.GET, "/discounts").hasAnyRole("ADMIN", "MODERATOR", "USER")
-                .antMatchers(HttpMethod.GET, "/discount/**").hasAnyRole("ADMIN", "MODERATOR", "USER")
-                .antMatchers(HttpMethod.POST, "/discount").hasAnyRole("MODERATOR")
-                .antMatchers(HttpMethod.PUT, "/discount/**").hasAnyRole("MODERATOR")
-                .antMatchers(HttpMethod.DELETE, "/discount/**").hasAnyRole("MODERATOR")
+                .antMatchers(HttpMethod.GET, "/discounts/**").hasAnyRole("ADMIN", "MODERATOR", "USER")
+                .antMatchers(HttpMethod.POST, "/discounts").hasAnyRole("MODERATOR")
+                .antMatchers(HttpMethod.PATCH, "/discounts/**").hasAnyRole("MODERATOR")
+                .antMatchers(HttpMethod.DELETE, "/discounts/**").hasAnyRole("MODERATOR")
 
                 // categories
                 .antMatchers(HttpMethod.GET, "/categories").hasAnyRole("ADMIN", "MODERATOR", "USER")
                 .antMatchers(HttpMethod.GET, "/categories/**").hasAnyRole("ADMIN", "MODERATOR", "USER")
                 .antMatchers(HttpMethod.POST, "/categories").hasAnyRole("ADMIN")
-                .antMatchers(HttpMethod.PUT, "/categories/**").hasAnyRole("ADMIN")
+                .antMatchers(HttpMethod.PATCH, "/categories/**").hasAnyRole("ADMIN")
                 .antMatchers(HttpMethod.DELETE, "/categories/**").hasAnyRole("ADMIN")
                 // locations
                 .antMatchers(HttpMethod.GET, "/locations").hasAnyRole("ADMIN", "MODERATOR", "USER")
                 .antMatchers(HttpMethod.GET, "/locations/**").hasAnyRole("ADMIN", "MODERATOR", "USER")
                 .antMatchers(HttpMethod.POST, "/locations").hasAnyRole("ADMIN")
-                .antMatchers(HttpMethod.PUT, "/locations/**").hasAnyRole("ADMIN")
+                .antMatchers(HttpMethod.PATCH, "/locations/**").hasAnyRole("ADMIN")
                 .antMatchers(HttpMethod.DELETE, "/locations/**").hasAnyRole("ADMIN")
                 // companies
                 .antMatchers(HttpMethod.GET, "/companies").hasAnyRole("ADMIN", "MODERATOR", "USER")
                 .antMatchers(HttpMethod.GET, "/companies/**").hasAnyRole("ADMIN", "MODERATOR", "USER")
                 .antMatchers(HttpMethod.POST, "/companies").hasAnyRole("MODERATOR")
-                .antMatchers(HttpMethod.PUT, "/companies/**").hasAnyRole("MODERATOR")
+                .antMatchers(HttpMethod.PATCH, "/companies/**").hasAnyRole("MODERATOR")
                 .antMatchers(HttpMethod.DELETE, "/companies/**").hasAnyRole("MODERATOR")
 
                 // swagger
