@@ -22,7 +22,7 @@ import org.springframework.web.util.NestedServletException;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import java.util.Date;
+
 import java.util.Objects;
 import java.util.Set;
 import static org.hamcrest.Matchers.is;
@@ -43,6 +43,7 @@ public class LocationControllerTest {
     private final MockMvc mockMvc;
     private final LocationRepository locationRepository;
     private final DiscountRepository discountRepository;
+    private final ObjectMapper objectMapper;
     private final ControllerTestUtils ctu;
 
     @Container
@@ -56,10 +57,12 @@ public class LocationControllerTest {
     public LocationControllerTest(final MockMvc mockMvc,
                                   final LocationRepository locationRepository,
                                   final DiscountRepository discountRepository,
+                                  final ObjectMapper objectMapper,
                                   final ControllerTestUtils ctu) {
         this.mockMvc = mockMvc;
         this.locationRepository = locationRepository;
         this.discountRepository = discountRepository;
+        this.objectMapper = objectMapper;
         this.ctu = ctu;
     }
 
@@ -186,7 +189,7 @@ public class LocationControllerTest {
         this.mockMvc.perform(MockMvcRequestBuilders
                         .post("/locations")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(location))
+                        .content(this.objectMapper.writeValueAsString(location))
                         .with(csrf()))
                 .andDo(print())
                 // then
@@ -206,7 +209,7 @@ public class LocationControllerTest {
                 this.mockMvc.perform(MockMvcRequestBuilders
                         .post("/locations")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(location))
+                        .content(this.objectMapper.writeValueAsString(location))
                         .with(csrf())));
 
         // then
@@ -220,7 +223,7 @@ public class LocationControllerTest {
         // given
         final LocationEntity lastLocationFromContainer = this.locationRepository.findByCity("Country5", "City5").get();
         lastLocationFromContainer.setCountry("Россия");
-        final String locationEntity = new ObjectMapper().writeValueAsString(lastLocationFromContainer);
+        final String locationEntity = this.objectMapper.writeValueAsString(lastLocationFromContainer);
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .patch("/locations/{id}", lastLocationFromContainer.getId())
@@ -237,7 +240,7 @@ public class LocationControllerTest {
         // given
         final LocationEntity lastLocationFromContainer = this.locationRepository.findByCity("Country5", "City5").get();
         lastLocationFromContainer.setId(lastLocationFromContainer.getId()+1);
-        final String locationEntity = new ObjectMapper().writeValueAsString(lastLocationFromContainer);
+        final String locationEntity = this.objectMapper.writeValueAsString(lastLocationFromContainer);
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders
@@ -328,7 +331,7 @@ public class LocationControllerTest {
         result = this.mockMvc.perform(MockMvcRequestBuilders
                         .post("/locations")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(location))
+                        .content(this.objectMapper.writeValueAsString(location))
                         .with(csrf()))
                 .andReturn();
 
@@ -351,7 +354,7 @@ public class LocationControllerTest {
         result = this.mockMvc.perform(MockMvcRequestBuilders
                         .post("/locations")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(location))
+                        .content(this.objectMapper.writeValueAsString(location))
                         .with(csrf()))
                 .andReturn();
 
@@ -362,5 +365,28 @@ public class LocationControllerTest {
         while (postedCity.contains("  "))
             postedCity = postedCity.replace("  ", " ");
         assertEquals(postedCity, postedLocation.getCity());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"0", "150"})
+    public void whenAddLocationWrongFieldSize(final Integer stringSize) throws Exception {
+        // given
+        final String fieldValue = "a".repeat(stringSize);
+        final LocationEntity location = this.ctu.getLocation(this.ctu.getRndEntityPos());
+        location.setCountry(fieldValue);
+        final MvcResult result;
+
+        // when
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .post("/locations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(location))
+                        .with(csrf()))
+                .andReturn();
+
+        // then
+        assertEquals(400, result.getResponse().getStatus());
+        final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
+        assertTrue(errorResult.contains("must be between"));
     }
 }

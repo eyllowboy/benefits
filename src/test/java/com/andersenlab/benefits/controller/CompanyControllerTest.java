@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.controller;
 
+import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.CompanyEntity;
 import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.domain.DiscountType;
@@ -244,6 +245,7 @@ class CompanyControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "    "})
     public void whenAddCompanyWrongObligatoryFields(final String title) throws Exception {
+        // given
         final CompanyEntity company = new CompanyEntity(title, "description6", "address6", "phone6", "link6");
         final MvcResult result;
 
@@ -264,6 +266,7 @@ class CompanyControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {" space at start", "space at end ", " two  spaces  inside", " three   spaces   inside"})
     public void whenAddCompanyTrimFields(final String title) throws Exception {
+        // given
         final CompanyEntity company = new CompanyEntity(title, "description6", "address6", "phone6", "link6");
         final CompanyEntity postedCompany;
         String postedTitle;
@@ -284,5 +287,28 @@ class CompanyControllerTest {
         while (postedTitle.contains("  "))
             postedTitle = postedTitle.replace("  ", " ");
         assertEquals(postedTitle, postedCompany.getTitle());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"0", "101"})
+    public void whenAddCompanyWrongFieldSize(final Integer stringSize) throws Exception {
+        // given
+        final String fieldValue = "a".repeat(stringSize);
+        final CompanyEntity company = this.ctu.getCompany(this.ctu.getRndEntityPos());
+        company.setTitle(fieldValue);
+        final MvcResult result;
+
+        // when
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .post("/companies")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(company))
+                        .with(csrf()))
+                .andReturn();
+
+        // then
+        assertEquals(400, result.getResponse().getStatus());
+        final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
+        assertTrue(errorResult.contains("must be between"));
     }
 }

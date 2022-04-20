@@ -6,7 +6,7 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.Objects;
+import javax.validation.constraints.Size;
 
 @Schema(name = "User", description = "User entity")
 @Entity
@@ -26,6 +26,7 @@ public class UserEntity {
     private Long id;
 
     @Schema(description = "Unique login", type = "string", minLength = 3, maxLength = 20)
+    @Size(min = 3, max = 20, message = "Login must be between 3 and 20 characters")
     @NotBlank
     @Column
     private String login;
