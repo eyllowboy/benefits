@@ -1,6 +1,5 @@
 package com.andersenlab.benefits.controller;
 
-import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import com.andersenlab.benefits.repository.*;
@@ -29,10 +28,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @Testcontainers
@@ -77,22 +80,20 @@ public class RoleControllerTest {
 	@Test
 	public void whenGetAllRolesSuccess() throws Exception {
 		// given
-		final List<RoleEntity> roles = this.roleRepository.saveAll(this.ctu.getRoleList());
-		final MvcResult result;
-		final List<RoleEntity> rolesResult;
+		final List<RoleEntity> roles = this.roleRepository.saveAll(ctu.getRoleList());
 
 		// when
-		result = this.mockMvc.perform(MockMvcRequestBuilders
-						.get("/roles")
+		this.mockMvc.perform(MockMvcRequestBuilders
+						.get("/roles?page=0&size=3")
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
-				.andReturn();
+				// then
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", notNullValue()))
+				.andExpect(jsonPath("$.number", is(0)))
+				.andExpect(jsonPath("$.size", is(3)));
 
-		// then
-		assertEquals(200, result.getResponse().getStatus());
-		rolesResult = this.ctu.getRolesFromJson(result.getResponse().getContentAsString());
-		rolesResult.forEach(item -> assertTrue(roles.contains(item)));
 	}
 	
 	@Test

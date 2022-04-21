@@ -4,6 +4,8 @@ import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import com.andersenlab.benefits.repository.*;
+import com.andersenlab.benefits.support.RestResponsePage;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.junit.jupiter.api.*;
@@ -12,6 +14,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -34,27 +38,28 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
+
 @SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
 @WithMockUser
 public class UserControllerTest {
 	private final MockMvc mockMvc;
+	private final ObjectMapper objectMapper;
 	private final RoleRepository roleRepository;
 	private final UserRepository userRepository;
-	private final ObjectMapper objectMapper;
 	private final ControllerTestUtils ctu;
 
 	@Autowired
 	public UserControllerTest(final MockMvc mockMvc,
+							  final ObjectMapper objectMapper,
 							  final RoleRepository roleRepository,
 							  final UserRepository userRepository,
-							  final ObjectMapper objectMapper,
 							  final ControllerTestUtils ctu) {
 		this.mockMvc = mockMvc;
+		this.objectMapper = objectMapper;
 		this.roleRepository = roleRepository;
 		this.userRepository = userRepository;
-		this.objectMapper = objectMapper;
 		this.ctu = ctu;
 	}
 
@@ -64,7 +69,7 @@ public class UserControllerTest {
 					.withDatabaseName("benefits")
 					.withUsername("benefits")
 					.withPassword("ben0147");
-	
+
 	@DynamicPropertySource
 	static void postgreSQLProperties(final DynamicPropertyRegistry registry) {
 		registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
@@ -76,24 +81,23 @@ public class UserControllerTest {
 	}
 
 	@Test
-	public void whenGetAllUsers() throws Exception {
+	public void whenGetSomeSizeAllUsers() throws Exception {
 		// given
-		final List<UserEntity> users = this.userRepository.saveAll(this.ctu.getUserList());
+		final int rndSize = (int) (random() * (5 - 1) + 1);
+		final Page<UserEntity> foundUsers = this.userRepository.findAll(PageRequest.of(0, rndSize));
 		final MvcResult result;
-		final List<UserEntity> usersResult;
-
 		// when
-		result = this.mockMvc.perform(MockMvcRequestBuilders
-					.get("/users")
+		result =this.mockMvc.perform(MockMvcRequestBuilders
+					.get("/users?page=0&size="+rndSize)
 					.with(csrf())
 					.contentType(MediaType.APPLICATION_JSON))
 					.andDo(print())
-					.andReturn();
-
+				.andReturn();
 		// then
+		final RestResponsePage<UserEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
+				new TypeReference<>() {});
 		assertEquals(200, result.getResponse().getStatus());
-		usersResult = this.ctu.getUsersFromJson(result.getResponse().getContentAsString());
-		usersResult.forEach(item -> assertTrue(users.contains(item)));
+		assertEquals(foundUsers, pageResult);
 	}
 
 	@Test
@@ -121,7 +125,7 @@ public class UserControllerTest {
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> this.mockMvc.perform(get("/users/{id}", Long.MAX_VALUE).with(csrf())));
-		
+
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("User with this id was not found in the database",
@@ -189,27 +193,25 @@ public class UserControllerTest {
 	}
 
 	@Test
-	public void whenUpdateUserWithNewLoginAndRoleIdIsExists() throws Exception {
-		// given
-		final Long id = this.userRepository.save(this.ctu.getUser(this.ctu.getRndEntityPos())).getId();
-		final UserEntity user = this.ctu.getUser(this.ctu.getRndEntityPos());
-		user.setId(id);
-		user.setLogin("newUserLogin");
-		final MvcResult result;
+    public void whenUpdateUserWithNewLoginAndRoleIdIsExists() throws Exception {
+        // given
+        final UserEntity user = this.userRepository.save(this.ctu.getUser(this.ctu.getRndEntityPos()));
+        user.setLogin("newUserLogin");
+        final MvcResult result;
 
-		// when
-		result = this.mockMvc.perform(MockMvcRequestBuilders
-				.patch("/users/{id}", user.getId())
-				.with(csrf())
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(this.objectMapper.writeValueAsString(user)))
-				.andDo(print())
-				.andReturn();
-		// then
-		assertEquals(200, result.getResponse().getStatus());
-		assertEquals(1, this.userRepository.findAll().size());
-		assertEquals(user, this.userRepository.findById(id).orElseThrow());
-	}
+        // when
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .patch("/users/{id}", user.getId())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(user)))
+                .andDo(print())
+                .andReturn();
+        // then
+        assertEquals(200, result.getResponse().getStatus());
+        assertEquals(1, this.userRepository.findAll().size());
+        assertEquals(user, this.userRepository.findById(user.getId()).orElseThrow());
+    }
 
 	@Test
 	public void whenUpdateUserAndLoginIsExists() {
@@ -225,7 +227,7 @@ public class UserControllerTest {
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(this.objectMapper.writeValueAsString(userSetLoginTo))));
-		
+
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("User with such 'login' is already exists",
@@ -247,7 +249,7 @@ public class UserControllerTest {
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(this.objectMapper.writeValueAsString(user))));
-		
+
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("Role with this id was not found in the database",
@@ -259,7 +261,7 @@ public class UserControllerTest {
 		// given
 		final UserEntity user = this.userRepository.saveAll(this.ctu.getUserList()).get(0);
 		user.setId(Long.MAX_VALUE);
-		
+
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
 				() -> this.mockMvc.perform(MockMvcRequestBuilders
@@ -267,7 +269,7 @@ public class UserControllerTest {
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(this.objectMapper.writeValueAsString(user))));
-		
+
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("User with this id was not found in the database",
@@ -302,7 +304,7 @@ public class UserControllerTest {
 				() -> this.mockMvc.perform(MockMvcRequestBuilders
 					.delete("/users/{id}", Long.MAX_VALUE)
 					.with(csrf())));
-		
+
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
 		assertEquals("User with this id was not found in the database",

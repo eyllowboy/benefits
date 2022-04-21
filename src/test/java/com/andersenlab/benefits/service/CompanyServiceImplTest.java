@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.service;
 
+import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.CompanyEntity;
 import com.andersenlab.benefits.repository.CompanyRepository;
 import com.andersenlab.benefits.service.impl.CompanyServiceImpl;
@@ -8,6 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
@@ -42,14 +46,13 @@ class CompanyServiceImplTest {
                 new CompanyEntity("Company3", "Description3", "Street3", "8900-00-00", "www.link3.ru"),
                 new CompanyEntity("Company4", "Description4", "Street3", "8900-00-00", "www.link3.ru")
         );
-
-        //when
-        when(companyRepository.findAll()).thenReturn(companies);
-        final List<CompanyEntity> companyEntities = companyService.findAllCompany();
-
-        //then
-        assertEquals(companies, companyEntities);
-        verify(companyRepository, times(1)).findAll();
+        final Page<CompanyEntity> pageOfCompany = new PageImpl<>(companies);
+        // when
+        when(this.companyRepository.findAll(PageRequest.of(0,4))).thenReturn(pageOfCompany);
+        final Page<CompanyEntity> foundCompany = this.companyService.findAllCompany(PageRequest.of(0,4));
+        // then
+        assertEquals(pageOfCompany, foundCompany);
+        verify(this.companyRepository, times(1)).findAll(PageRequest.of(0,4));
 
     }
 
@@ -59,12 +62,12 @@ class CompanyServiceImplTest {
         final CompanyEntity companyEntity = new CompanyEntity("Company1", "Description1", "Street1", "8900-00-00", "www.link.ru");
 
         //when
-        when(companyRepository.findById(companyEntity.getId())).thenReturn(Optional.of(companyEntity));
-        Optional<CompanyEntity> foundCompany = companyService.findByIdCompany(companyEntity.getId());
+        when(this.companyRepository.findById(companyEntity.getId())).thenReturn(Optional.of(companyEntity));
+        Optional<CompanyEntity> foundCompany = this.companyService.findByIdCompany(companyEntity.getId());
 
         //then
         assertEquals(Optional.of(companyEntity), foundCompany);
-        verify(companyRepository, times(1)).findById(companyEntity.getId());
+        verify(this.companyRepository, times(1)).findById(companyEntity.getId());
     }
 
     @Test
@@ -74,11 +77,11 @@ class CompanyServiceImplTest {
 
         //when
         when(companyRepository.save(any(CompanyEntity.class))).thenReturn(companyEntity);
-        final Optional<CompanyEntity> savedCompany = companyService.createCompany(companyEntity);
+        final Optional<CompanyEntity> savedCompany = this.companyService.createCompany(companyEntity);
 
         //then
         assertEquals(Optional.of(companyEntity), savedCompany);
-        verify(companyRepository, times(1)).save(any(CompanyEntity.class));
+        verify(this.companyRepository, times(1)).save(any(CompanyEntity.class));
 
     }
 
@@ -88,12 +91,12 @@ class CompanyServiceImplTest {
         final CompanyEntity companyEntity = new CompanyEntity("Company1", "Description1", "Street1", "8900-00-00", "www.link.ru");
 
         //when
-        when(companyRepository.findById(companyEntity.getId())).thenReturn(Optional.of(companyEntity));
-        Optional<CompanyEntity> foundCompany = companyService.findByIdCompany(companyEntity.getId());
+        when(this.companyRepository.findById(companyEntity.getId())).thenReturn(Optional.of(companyEntity));
+        Optional<CompanyEntity> foundCompany = this.companyService.findByIdCompany(companyEntity.getId());
         foundCompany.get().setTitle("Title");
-        when(companyRepository.save(any(CompanyEntity.class))).thenReturn(foundCompany.get());
-        companyService.createCompany(foundCompany.get());
-        final Optional<CompanyEntity> updatedCompany = companyService.findByIdCompany(companyEntity.getId());
+        when(this.companyRepository.save(any(CompanyEntity.class))).thenReturn(foundCompany.get());
+        this.companyService.createCompany(foundCompany.get());
+        final Optional<CompanyEntity> updatedCompany = this.companyService.findByIdCompany(companyEntity.getId());
 
         //then
         assertThat(updatedCompany.get().getTitle()).isEqualTo("Title");
@@ -102,9 +105,9 @@ class CompanyServiceImplTest {
     @Test
     void whenDeleteCompanyByIdIsOk() {
         //when
-        companyService.deleteCompanyById(anyLong());
+        this.companyService.deleteCompanyById(anyLong());
 
         //then
-        verify(companyRepository, times(1)).deleteById(anyLong());
+        verify(this.companyRepository, times(1)).deleteById(anyLong());
     }
 }

@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -57,8 +59,8 @@ public class RoleController {
                     content = @Content(mediaType = "application/json"))
     })
     @GetMapping("/roles")
-    public List<RoleEntity> getRoles() {
-        return this.roleService.findAll();
+    public Page<RoleEntity> getRoles(final Pageable pageable) {
+        return this.roleService.findAll(pageable);
     }
 
     /**

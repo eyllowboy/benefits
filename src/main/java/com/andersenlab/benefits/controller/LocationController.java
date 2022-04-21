@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -170,8 +172,8 @@ public class LocationController {
                     content = @Content)
     })
     @GetMapping(value = "/locations")
-    public List<LocationEntity> getLocations() {
-        return this.locationService.findAll();
+    public Page<LocationEntity> getLocations(final Pageable pageable) {
+        return this.locationService.findAll(pageable);
     }
 
     /**
@@ -189,8 +191,8 @@ public class LocationController {
                     content = @Content)
     })
     @RequestMapping(method = RequestMethod.GET, value = "/locations/country")
-    public List<Optional<LocationEntity>> findByCountry(@RequestParam final String country) {
-        return this.locationService.findByCountry(country);
+    public Page<LocationEntity> findByCountry(@RequestParam final String country,final Pageable pageable) {
+        return this.locationService.findByCountry(country,pageable);
     }
 
     /**
@@ -208,8 +210,9 @@ public class LocationController {
                     content = @Content)
     })
     @RequestMapping(method = RequestMethod.GET, value = "/locations/filter", params = {"country", "filterMask"})
-    public List<Optional<LocationEntity>> findByFirstLetters(@RequestParam final String country,
-                                                             @RequestParam final String filterMask) {
-        return this.locationService.findByFirstLetters(country, filterMask);
+    public Page<LocationEntity> findByFirstLetters(@RequestParam final String country,
+                                                             @RequestParam final String filterMask,
+                                                             final Pageable pageable) {
+        return this.locationService.findByFirstLetters(country, filterMask,pageable);
     }
 }

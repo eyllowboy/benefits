@@ -6,6 +6,8 @@ import com.andersenlab.benefits.domain.UserEntity;
 import com.andersenlab.benefits.repository.UserRepository;
 import com.andersenlab.benefits.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,8 +30,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserEntity> findAll() {
-        return this.userRepository.findAll();
+    public Page<UserEntity> findAll(final Pageable pageable) {
+        return this.userRepository.findAll(pageable);
     }
 
     @Override

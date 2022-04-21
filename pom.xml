@@ -22,6 +22,7 @@
         <springdoc-openapi.version>1.6.4</springdoc-openapi.version>
         <testcontainers>1.16.3</testcontainers>
         <keycloak.version>16.1.1</keycloak.version>
+        <liquibase.version>4.9.1</liquibase.version>
     </properties>
 
     <dependencies>
@@ -96,6 +97,7 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
+            <version>${liquibase.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -116,13 +118,13 @@
             <version>${testcontainers}</version>
             <scope>test</scope>
         </dependency>
-
-        <!--        Cache -->
+        <!-- https://mvnrepository.com/artifact/org.ehcache/ehcache -->
         <dependency>
             <groupId>org.ehcache</groupId>
             <artifactId>ehcache</artifactId>
             <version>3.9.9</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-jcache -->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-jcache</artifactId>

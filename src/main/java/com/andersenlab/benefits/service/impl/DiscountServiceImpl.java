@@ -5,6 +5,8 @@ import com.andersenlab.benefits.repository.DiscountRepository;
 import com.andersenlab.benefits.repository.DiscountSpec;
 import com.andersenlab.benefits.service.DiscountService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -39,10 +41,8 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
-    public List<Optional<DiscountEntity>> findAllDiscounts() {
-        return this.discountRepository.findAll().stream()
-                .map(discount -> Optional.of(Objects.requireNonNullElseGet(discount, DiscountEntity::new)))
-                .toList();
+    public Page<DiscountEntity> findAllDiscounts(final Pageable pageable) {
+        return this.discountRepository.findAll(pageable);
     }
 
     @Override
@@ -63,8 +63,8 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
-    public List<DiscountEntity> getDiscountsByCriteria(final Specification<DiscountEntity> specificDiscountEntity) {
-        return this.discountRepository.findAll(specificDiscountEntity);
+    public Page<DiscountEntity> getDiscountsByCriteria(final Specification<DiscountEntity> specificDiscountEntity, final Pageable pageable) {
+        return this.discountRepository.findAll(specificDiscountEntity,pageable);
     }
 
     @Override

@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -77,7 +79,7 @@ public class CategoryController {
     })
     @GetMapping("/categories/{id}")
     public CategoryEntity getCategoryById(@PathVariable final Long id) {
-        return (categoryService.findById(id)).orElseThrow(
+        return (this.categoryService.findById(id)).orElseThrow(
                 () -> new IllegalStateException("Category with this id was not found in the database"));
     }
 
@@ -146,7 +148,7 @@ public class CategoryController {
                     content = @Content)
     })
     @GetMapping(value = "/categories")
-    public List<CategoryEntity> getCategories() {
-        return this.categoryService.findAll();
+    public Page<CategoryEntity> getCategories(final Pageable pageable) {
+        return this.categoryService.findAll(pageable);
     }
 }

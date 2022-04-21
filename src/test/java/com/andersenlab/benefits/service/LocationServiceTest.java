@@ -8,6 +8,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
@@ -37,14 +40,14 @@ public class LocationServiceTest {
                 new LocationEntity("Россия", "Москва"),
                 new LocationEntity("Украина", "Киев"),
                 new LocationEntity("Белоруссия", "Минск"));
-
+        final Page<LocationEntity> pageOfLocation = new PageImpl<>(locations);
         // when
-        when(locationRepository.findAll()).thenReturn(locations);
-        final List<LocationEntity> foundLocations = locationService.findAll();
+        when(this.locationRepository.findAll(PageRequest.of(0,3))).thenReturn(pageOfLocation);
+        final Page<LocationEntity> foundLocations = locationService.findAll(PageRequest.of(0,3));
 
         // then
-        assertEquals(locations, foundLocations);
-        verify(locationRepository, times(1)).findAll();
+        assertEquals(pageOfLocation, foundLocations);
+        verify(this.locationRepository, times(1)).findAll(PageRequest.of(0,3));
     }
 
     @Test
@@ -53,12 +56,12 @@ public class LocationServiceTest {
         final LocationEntity locationEntity = new LocationEntity("Россия", "Москва");
 
         // when
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(locationEntity));
-        Optional<LocationEntity> foundLocation = locationService.findById(1L);
+        when(this.locationRepository.findById(1L)).thenReturn(Optional.of(locationEntity));
+        Optional<LocationEntity> foundLocation = this.locationService.findById(1L);
 
         // then
         assertEquals(Optional.of(locationEntity), foundLocation);
-        verify(locationRepository, times(1)).findById(1L);
+        verify(this.locationRepository, times(1)).findById(1L);
     }
 
     @Test
@@ -67,12 +70,12 @@ public class LocationServiceTest {
         final LocationEntity locationEntity = new LocationEntity("Россия", "Казань");
 
         // when
-        when(locationRepository.findByCity("Россия", "Казань")).thenReturn(Optional.of(locationEntity));
-        Optional<LocationEntity> foundLocation = locationService.findByCity("Россия", "Казань");
+        when(this.locationRepository.findByCity("Россия", "Казань")).thenReturn(Optional.of(locationEntity));
+        Optional<LocationEntity> foundLocation = this.locationService.findByCity("Россия", "Казань");
 
         // then
         assertEquals(Optional.of(locationEntity), foundLocation);
-        verify(locationRepository, times(1)).findByCity("Россия", "Казань");
+        verify(this.locationRepository, times(1)).findByCity("Россия", "Казань");
     }
 
     @Test
@@ -81,30 +84,30 @@ public class LocationServiceTest {
         final LocationEntity locationEntity = new LocationEntity("Россия", "Казань");
 
         // when
-        when(locationRepository.save(any(LocationEntity.class))).thenReturn(locationEntity);
-        final LocationEntity savedLocation = locationService.save(locationEntity);
+        when(this.locationRepository.save(any(LocationEntity.class))).thenReturn(locationEntity);
+        final LocationEntity savedLocation = this.locationService.save(locationEntity);
 
         // then
         assertEquals(locationEntity, savedLocation);
-        verify(locationRepository, times(1)).save(locationEntity);
+        verify(this.locationRepository, times(1)).save(locationEntity);
     }
 
     @Test
     public void whenUpdateLocation() {
         // when
-        locationRepository.updateLocationEntity(anyLong(), anyString(), anyString());
+        this.locationRepository.updateLocationEntity(anyLong(), anyString(), anyString());
 
         // then
-        verify(locationRepository, times(1)).updateLocationEntity(anyLong(), anyString(), anyString());
+        verify(this.locationRepository, times(1)).updateLocationEntity(anyLong(), anyString(), anyString());
     }
 
     @Test
     public void whenDeleteLocation() {
         // when
-        locationService.delete(anyLong());
+        this.locationService.delete(anyLong());
 
         // then
-        verify(locationRepository, times(1)).deleteById(anyLong());
+        verify(this.locationRepository, times(1)).deleteById(anyLong());
     }
 
 }

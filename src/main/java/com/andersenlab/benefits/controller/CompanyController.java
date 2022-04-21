@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -97,8 +99,8 @@ public class CompanyController {
                     content = @Content)
     })
     @GetMapping("/companies")
-    public List<CompanyEntity> getAllCompany() {
-        return this.companyService.findAllCompany();
+    public Page<CompanyEntity> getAllCompany(final Pageable pageable) {
+        return this.companyService.findAllCompany(pageable);
     }
 
 

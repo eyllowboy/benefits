@@ -1,8 +1,11 @@
 package com.andersenlab.benefits.controller;
 
+import com.andersenlab.benefits.domain.CompanyEntity;
 import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.repository.*;
+import com.andersenlab.benefits.support.RestResponsePage;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.junit.jupiter.api.*;
@@ -11,6 +14,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -25,6 +30,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Objects;
 import java.util.Set;
+
+import static java.lang.Math.random;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.*;
@@ -86,16 +93,24 @@ public class LocationControllerTest {
     }
 
     @Test
-    public void whenGetAllLocationsSuccess() throws Exception {
+    public void whenGetSomeSizeLocationsSuccess() throws Exception {
+        // given
+        final int rndSize = (int) (random() * (5 - 1) + 1);
+        final Page<LocationEntity> foundCompany = this.locationRepository.findAll(PageRequest.of(0, rndSize));
+        final MvcResult result;
         // when
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/locations")
+        result=mockMvc.perform(MockMvcRequestBuilders
+                        .get("/locations?page=0&size="+rndSize)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andDo(print())
                 // then
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", notNullValue()));
+                .andReturn();
+        // then
+        final RestResponsePage<LocationEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
+                new TypeReference<>() {});
+        assertEquals(200, result.getResponse().getStatus());
+        assertEquals(foundCompany, pageResult);
     }
 
     @Test
@@ -104,7 +119,7 @@ public class LocationControllerTest {
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/locations")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("country", "Country10")
+                        .param("country", "Country5")
                         .with(csrf()))
                 .andDo(print())
                 // then
@@ -167,6 +182,7 @@ public class LocationControllerTest {
         // given
         final String country = "Россия";
         final String city = "Тьмутаракань";
+
         // when
         final NestedServletException NestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders

@@ -2,6 +2,8 @@ package com.andersenlab.benefits.service;
 
 
 import com.andersenlab.benefits.domain.CompanyEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,7 +24,7 @@ public interface CompanyService {
      *
      * @return the list of companies from database, error if not processed
      */
-    List<CompanyEntity> findAllCompany();
+    Page<CompanyEntity> findAllCompany(final Pageable pageable);
 
     /**
      * Method allows us find the company by id.
