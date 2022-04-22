@@ -380,4 +380,25 @@ public class UserControllerTest {
 		final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
 		assertTrue(errorResult.contains("must be between"));
 	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"50", "150"})
+	public void whenUpdateUserWrongFieldSize(final Integer stringSize) {
+		// given
+		final UserEntity user = this.userRepository.save(this.ctu.getUser(this.ctu.getRndEntityPos()));
+		final String fieldValue = "a".repeat(stringSize);
+		user.setLogin(fieldValue);
+
+		// when
+		final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
+				this.mockMvc.perform(MockMvcRequestBuilders
+						.patch("/users/{id}", user.getId())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(this.objectMapper.writeValueAsString(user))
+						.with(csrf())));
+
+		// then
+		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
+		assertTrue(nestedServletException.getCause().getMessage().contains("must be between"));
+	}
 }
