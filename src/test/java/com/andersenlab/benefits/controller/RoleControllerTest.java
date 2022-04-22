@@ -217,6 +217,7 @@ public class RoleControllerTest {
 		// given
 		final RoleEntity role = this.roleRepository.saveAll(this.ctu.getRoleList()).get(0);
 		role.setId(0L);
+		role.setCode("New code");
 
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,

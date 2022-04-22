@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -125,6 +126,11 @@ public class LocationController {
     @PatchMapping("/locations/{id}")
     public ResponseEntity<LocationEntity> updateLocation(@PathVariable final Long id,
                                                          @RequestBody final LocationEntity location) {
+        if (!Objects.isNull(location.getCity())) {
+            final Optional<LocationEntity> theSameLocation = this.locationService.findByCity(location.getCountry(), location.getCity());
+            if (theSameLocation.isPresent() && !theSameLocation.get().getId().equals(id))
+                throw new IllegalStateException("Location with city '" + location.getCity() + "' already exists");
+        }
         final LocationEntity existingLocation = this.locationService.findById(id)
             .orElseThrow(() -> new IllegalStateException("Location with this id was not found in the database"));
         BeanUtils.copyProperties(location, existingLocation, "id");

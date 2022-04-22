@@ -300,7 +300,7 @@ public class CategoryControllerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {" space at start", "space at end ", " two  spaces  inside", " three   spaces   inside"})
+    @ValueSource(strings = {" space at start", "space at end ", " two  spaces  inside", " three   spaces"})
     public void whenAddCategoryTrimFields(final String title) throws Exception {
         // given
         final CategoryEntity category = new CategoryEntity(title);

@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -100,15 +101,21 @@ public class UserController {
     @PatchMapping("/users/{id}")
     public ResponseEntity<UserEntity> updateUser(@PathVariable final Long id,
                                                  @RequestBody final UserEntity userEntity) {
+
+        if (!Objects.isNull(userEntity.getRoleEntity()))
+            this.roleService.findById(userEntity.getRoleEntity().getId()).orElseThrow(() ->
+                new IllegalStateException("Role with this id was not found in the database"));
+        if (!Objects.isNull(userEntity.getLocation()))
+            this.locationService.findById(userEntity.getLocation().getId()).orElseThrow(() ->
+                    new IllegalStateException("Location with this id was not found in the database"));
+        if (!Objects.isNull(userEntity.getLogin())) {
+            final Optional<UserEntity> theSameUser = this.userService.findByLogin(userEntity.getLogin());
+            if (theSameUser.isPresent() && !theSameUser.get().getId().equals(id))
+                throw new IllegalStateException("User with such 'login' is already exists");
+        }
         final UserEntity existingUser = this.userService.findById(userEntity.getId()).orElseThrow(() ->
-            new IllegalStateException("User with this id was not found in the database"));
-        this.roleService.findById(userEntity.getRoleEntity().getId()).orElseThrow(() ->
-            new IllegalStateException("Role with this id was not found in the database"));
-        this.userService.findByLogin(userEntity.getLogin()).ifPresent(foundUser -> {
-            throw new IllegalStateException("User with such 'login' is already exists");});
-        this.locationService.findById(userEntity.getLocation().getId()).orElseThrow(() ->
-            new IllegalStateException("Location with this id was not found in the database"));
-        BeanUtils.copyProperties(userEntity, existingUser, "id");
+                new IllegalStateException("User with this id was not found in the database"));
+        BeanUtils.copyProperties(userEntity, existingUser, "id", "login");
         this.userService.updateUserEntity(id,
                     existingUser.getLogin(),
                     existingUser.getRoleEntity(),

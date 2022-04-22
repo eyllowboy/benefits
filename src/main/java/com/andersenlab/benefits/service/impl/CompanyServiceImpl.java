@@ -43,6 +43,11 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
+    public Optional<CompanyEntity> findByTitle(final String title) {
+        return this.companyRepository.findCompanyEntityByTitle(title);
+    }
+
+    @Override
     public Optional<CompanyEntity> createCompany(final CompanyEntity company) {
         company.setId(null);
         validateEntityFieldsAnnotations(company, true);
