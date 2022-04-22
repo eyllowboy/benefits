@@ -12,6 +12,8 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntityFieldsAnnotations;
+
 /***
  * Implementation for performing operations on a {@link LocationEntity}
  * @author Denis Popov
@@ -53,7 +55,7 @@ public class LocationServiceImpl implements LocationService {
     @Transactional
     public void updateLocationEntity(final Long id, final String country, final String city) {
         final LocationEntity location = new LocationEntity(id, country, city);
-        ValidateUtils.validateEntityPatch(location);
+        validateEntityFieldsAnnotations(location, false);
         this.locationRepository.updateLocationEntity(location.getId(), location.getCountry(), location.getCity());
     }
 
@@ -64,7 +66,8 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public LocationEntity save(final LocationEntity entity) {
-        ValidateUtils.validateEntityPost(entity);
+        entity.setId(null);
+        validateEntityFieldsAnnotations(entity, true);
         return this.locationRepository.save(entity);
     }
 

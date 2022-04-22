@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntityFieldsAnnotations;
+
 /**
  * The implementation for performing operations on a {@link DiscountEntity}.
  *
@@ -47,13 +49,14 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public Optional<DiscountEntity> createDiscount(final DiscountEntity discount) {
-        ValidateUtils.validateEntityPost(discount);
+        discount.setId(null);
+        validateEntityFieldsAnnotations(discount, true);
         return Optional.of(this.discountRepository.save(discount));
     }
 
     @Override
     public Optional<DiscountEntity> updateDiscountById(final Long id, final DiscountEntity newDiscount) {
-        ValidateUtils.validateEntityPatch(newDiscount);
+        validateEntityFieldsAnnotations(newDiscount, false);
         return Optional.of(this.discountRepository.save(newDiscount));
     }
 

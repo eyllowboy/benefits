@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntityFieldsAnnotations;
+
 /**
  * The implementation for performing operations on a {@link CompanyEntity}
  *
@@ -42,13 +44,14 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public Optional<CompanyEntity> createCompany(final CompanyEntity company) {
-        ValidateUtils.validateEntityPost(company);
+        company.setId(null);
+        validateEntityFieldsAnnotations(company, true);
         return Optional.of(this.companyRepository.save(company));
     }
 
     @Override
     public Optional<CompanyEntity> updateCompanyById(final Long id, final CompanyEntity newCompany) {
-        ValidateUtils.validateEntityPatch(newCompany);
+        validateEntityFieldsAnnotations(newCompany, false);
         return Optional.of(this.companyRepository.save(newCompany));
     }
 

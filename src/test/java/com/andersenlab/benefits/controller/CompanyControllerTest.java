@@ -1,9 +1,7 @@
 package com.andersenlab.benefits.controller;
 
-import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.CompanyEntity;
 import com.andersenlab.benefits.domain.DiscountEntity;
-import com.andersenlab.benefits.domain.DiscountType;
 import com.andersenlab.benefits.repository.*;
 import com.andersenlab.benefits.support.RestResponsePage;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -320,5 +318,26 @@ class CompanyControllerTest {
         assertEquals(400, result.getResponse().getStatus());
         final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
         assertTrue(errorResult.contains("must be between"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"51", "101"})
+    public void whenUpdateCompanyWrongFieldSize(final Integer stringSize) throws Exception {
+        // given
+        final CompanyEntity company = this.companyRepository.save(this.ctu.getCompany(this.ctu.getRndEntityPos()));
+        final String fieldValue = "a".repeat(stringSize);
+        company.setTitle(fieldValue);
+
+        // when
+        final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
+                this.mockMvc.perform(MockMvcRequestBuilders
+                        .patch("/companies/{id}", company.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(company))
+                        .with(csrf())));
+
+        // then
+        assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
+        assertTrue(nestedServletException.getCause().getMessage().contains("must be between"));
     }
 }
