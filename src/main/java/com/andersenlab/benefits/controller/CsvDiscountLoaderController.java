@@ -69,7 +69,7 @@ public class CsvDiscountLoaderController {
         if (file.isEmpty() || !Objects.requireNonNull(file.getOriginalFilename()).endsWith(".csv")) {
             throw new IllegalStateException("Please select a CSV file to upload");
         } else {
-            return csvDiscountLoaderService.loadDiscountsFromCsv(file, "\\" + delimiter);
+            return this.csvDiscountLoaderService.loadDiscountsFromCsv(file, "\\" + delimiter);
         }
     }
     

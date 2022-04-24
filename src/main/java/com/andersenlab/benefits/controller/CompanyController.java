@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -99,8 +100,9 @@ public class CompanyController {
                     content = @Content)
     })
     @GetMapping("/companies")
-    public Page<CompanyEntity> getAllCompany(final Pageable pageable) {
-        return this.companyService.findAllCompany(pageable);
+    public Page<CompanyEntity> getAllCompany(@RequestParam(required = false, defaultValue = "0") final int page,
+                                             @RequestParam(required = false, defaultValue = "6") final int size) {
+        return this.companyService.findAllCompany(PageRequest.of(page, size));
     }
 
 

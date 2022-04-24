@@ -37,20 +37,20 @@ public class CategoryEntity {
     @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
     private Set<DiscountEntity> discounts;
 
-    public CategoryEntity(Long id, String title) {
+    public CategoryEntity(final Long id, final String title) {
         this.id = id;
         this.title = title;
     }
 
-    public CategoryEntity(String title) {
+    public CategoryEntity(final  String title) {
         this.title = title;
     }
 
     @Override
     public String toString() {
         return "CategoryEntity{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
+                "id=" + this.id +
+                ", title='" + this.title + '\'' +
                 '}';
     }
 }

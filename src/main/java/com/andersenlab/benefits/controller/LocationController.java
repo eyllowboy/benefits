@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -126,7 +127,7 @@ public class LocationController {
     public ResponseEntity<LocationEntity> updateLocation(@PathVariable final Long id,
                                                          @RequestBody final LocationEntity location) {
         final LocationEntity existingLocation = this.locationService.findById(id)
-            .orElseThrow(() -> new IllegalStateException("Location with this id was not found in the database"));
+                .orElseThrow(() -> new IllegalStateException("Location with this id was not found in the database"));
         BeanUtils.copyProperties(location, existingLocation, "id");
         this.locationService.updateLocationEntity(id, existingLocation.getCountry(), existingLocation.getCity());
         return ResponseEntity.ok(existingLocation);
@@ -172,8 +173,9 @@ public class LocationController {
                     content = @Content)
     })
     @GetMapping(value = "/locations")
-    public Page<LocationEntity> getLocations(final Pageable pageable) {
-        return this.locationService.findAll(pageable);
+    public Page<LocationEntity> getLocations(@RequestParam(required = false, defaultValue = "0") final int page,
+                                             @RequestParam(required = false, defaultValue = "6") final int size) {
+        return this.locationService.findAll(PageRequest.of(page, size));
     }
 
     /**
@@ -191,8 +193,8 @@ public class LocationController {
                     content = @Content)
     })
     @RequestMapping(method = RequestMethod.GET, value = "/locations/country")
-    public Page<LocationEntity> findByCountry(@RequestParam final String country,final Pageable pageable) {
-        return this.locationService.findByCountry(country,pageable);
+    public Page<LocationEntity> findByCountry(@RequestParam final String country, final Pageable pageable) {
+        return this.locationService.findByCountry(country, pageable);
     }
 
     /**
@@ -211,8 +213,9 @@ public class LocationController {
     })
     @RequestMapping(method = RequestMethod.GET, value = "/locations/filter", params = {"country", "filterMask"})
     public Page<LocationEntity> findByFirstLetters(@RequestParam final String country,
-                                                             @RequestParam final String filterMask,
-                                                             final Pageable pageable) {
-        return this.locationService.findByFirstLetters(country, filterMask,pageable);
+                                                   @RequestParam final String filterMask,
+                                                   @RequestParam(required = false, defaultValue = "0") final int page,
+                                                   @RequestParam(required = false, defaultValue = "6") final int size) {
+        return this.locationService.findByFirstLetters(country, filterMask, PageRequest.of(page, size));
     }
 }

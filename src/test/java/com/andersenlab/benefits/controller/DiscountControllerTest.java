@@ -336,6 +336,8 @@ public class DiscountControllerTest {
                         .get("/discounts/filter-by-type")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("type", discount.getType())
+                        .param("page", "0")
+                        .param("size", "6")
                         .with(csrf()))
                 .andDo(print())
                 .andReturn();
@@ -359,7 +361,7 @@ public class DiscountControllerTest {
         result = this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/discounts/filter-by-size")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("size", discount.getSizeDiscount())
+                        .param("sizeDiscount", discount.getSizeDiscount())
                         .with(csrf()))
                 .andDo(print())
                 .andReturn();
@@ -455,7 +457,10 @@ public class DiscountControllerTest {
         result = this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/discounts/filter-by-size")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("size", discountSize)
+                        .param("sizeDiscount", discountSize)
+                        .param("size", "3")
+                        .param("page", "0")
+                        .param("sort", "id")
                         .with(csrf()))
                 .andDo(print())
                 .andReturn();

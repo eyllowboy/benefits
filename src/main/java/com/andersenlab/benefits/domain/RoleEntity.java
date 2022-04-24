@@ -57,9 +57,9 @@ public class RoleEntity {
     @Override
     public String toString() {
         return "RoleEntity{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", code='" + code + '\'' +
+                "id=" + this.id +
+                ", name='" + this.name + '\'' +
+                ", code='" + this.code + '\'' +
                 '}';
     }
 }
