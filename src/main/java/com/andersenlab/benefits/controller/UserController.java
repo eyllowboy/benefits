@@ -15,7 +15,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,8 +74,10 @@ public class UserController {
                     content = @Content)
     })
     @GetMapping("/users")
-    public Page<UserEntity> getUsers(final Pageable pageable) {
-        return this.userService.findAll(pageable);
+    public Page<UserEntity> getUsers(@RequestParam(required = false, defaultValue = "0") final int page,
+                                     @RequestParam(required = false, defaultValue = "6") final int size,
+                                     @RequestParam(required = false, defaultValue = "id") final String sort) {
+        return this.userService.findAll(PageRequest.of(page, size, Sort.by(sort)));
     }
 
     /**
@@ -101,18 +105,19 @@ public class UserController {
     public ResponseEntity<UserEntity> updateUser(@PathVariable final Long id,
                                                  @RequestBody final UserEntity userEntity) {
         final UserEntity existingUser = this.userService.findById(userEntity.getId()).orElseThrow(() ->
-            new IllegalStateException("User with this id was not found in the database"));
+                new IllegalStateException("User with this id was not found in the database"));
         this.roleService.findById(userEntity.getRoleEntity().getId()).orElseThrow(() ->
-            new IllegalStateException("Role with this id was not found in the database"));
+                new IllegalStateException("Role with this id was not found in the database"));
         this.userService.findByLogin(userEntity.getLogin()).ifPresent(foundUser -> {
-            throw new IllegalStateException("User with such 'login' is already exists");});
+            throw new IllegalStateException("User with such 'login' is already exists");
+        });
         this.locationService.findById(userEntity.getLocation().getId()).orElseThrow(() ->
-            new IllegalStateException("Location with this id was not found in the database"));
+                new IllegalStateException("Location with this id was not found in the database"));
         BeanUtils.copyProperties(userEntity, existingUser, "id");
         this.userService.updateUserEntity(id,
-                    existingUser.getLogin(),
-                    existingUser.getRoleEntity(),
-                    existingUser.getLocation());
+                existingUser.getLogin(),
+                existingUser.getRoleEntity(),
+                existingUser.getLocation());
         return ResponseEntity.ok(existingUser);
     }
 
@@ -140,13 +145,16 @@ public class UserController {
     @Transactional
     public ResponseEntity<UserEntity> addUser(@Valid @RequestBody final UserEntity user) {
         this.userService.findByLogin(user.getLogin()).ifPresent(foundUser -> {
-            throw new IllegalStateException("User with such 'login' is already exists");}
+                    throw new IllegalStateException("User with such 'login' is already exists");
+                }
         );
         this.roleService.findById(user.getRoleEntity().getId()).orElseThrow(() -> {
-            throw new IllegalStateException("Role with this id was not found in the database");}
+                    throw new IllegalStateException("Role with this id was not found in the database");
+                }
         );
         this.locationService.findById(user.getLocation().getId()).orElseThrow(() -> {
-            throw new IllegalStateException("Location with this id was not found in the database");}
+                    throw new IllegalStateException("Location with this id was not found in the database");
+                }
         );
         final UserEntity savedUserEntity = this.userService.save(user);
         return new ResponseEntity<>(savedUserEntity, HttpStatus.CREATED);

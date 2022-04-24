@@ -11,7 +11,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -101,7 +103,7 @@ public class CategoryController {
     @PatchMapping("/categories/{id}")
     public ResponseEntity<CategoryEntity> updateCategory(@PathVariable final Long id,
                                                          @RequestBody final CategoryEntity category) {
-        CategoryEntity existingCategory = this.categoryService.findById(id)
+        final CategoryEntity existingCategory = this.categoryService.findById(id)
                 .orElseThrow(() -> new IllegalStateException("Category with this id was not found in the database"));
         BeanUtils.copyProperties(category, existingCategory, "id");
         this.categoryService.updateCategoryEntity(existingCategory.getId(), existingCategory.getTitle());
@@ -148,7 +150,9 @@ public class CategoryController {
                     content = @Content)
     })
     @GetMapping(value = "/categories")
-    public Page<CategoryEntity> getCategories(final Pageable pageable) {
-        return this.categoryService.findAll(pageable);
+    public Page<CategoryEntity> getCategories(@RequestParam(required = false, defaultValue = "0") final int page,
+                                              @RequestParam(required = false, defaultValue = "6") final int size,
+                                              @RequestParam(required = false, defaultValue = "id") final String sort) {
+        return this.categoryService.findAll(PageRequest.of(page, size, Sort.by(sort)));
     }
 }

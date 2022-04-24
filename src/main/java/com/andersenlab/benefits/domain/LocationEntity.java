@@ -44,13 +44,13 @@ public class LocationEntity {
     @ManyToMany(mappedBy = "area", fetch = FetchType.LAZY)
     private Set<DiscountEntity> discounts;
 
-    public LocationEntity(Long id, String country, String city) {
+    public LocationEntity(final Long id, final String country, final String city) {
         this.country = country;
         this.city = city;
         this.id = id;
     }
 
-    public LocationEntity(String country, String city) {
+    public LocationEntity(final String country, final String city) {
         this.country = country;
         this.city = city;
     }
@@ -58,9 +58,9 @@ public class LocationEntity {
     @Override
     public String toString() {
         return "LocationEntity{" +
-                "id=" + id +
-                ", country='" + country + '\'' +
-                ", city='" + city + '\'' +
+                "id=" + this.id +
+                ", country='" + this.country + '\'' +
+                ", city='" + this.city + '\'' +
                 '}';
     }
 }
