@@ -35,6 +35,9 @@ spring:
   main:
     banner-mode: off
     allow-circular-references: true
+  profiles:
+    active: test
+    allow-circular-references: true
   application:
     name: A-Benefits
 
