@@ -14,6 +14,7 @@ import java.util.Optional;
 @Repository
 public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
     Optional<RoleEntity> findByCode(final String code);
+    Optional<RoleEntity> findByName(final String name);
 
     @Modifying
     @Transactional

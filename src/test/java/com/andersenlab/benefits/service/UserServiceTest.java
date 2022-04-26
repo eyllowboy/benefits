@@ -1,6 +1,8 @@
 package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.UserEntity;
+import com.andersenlab.benefits.repository.LocationRepository;
+import com.andersenlab.benefits.repository.RoleRepository;
 import com.andersenlab.benefits.repository.UserRepository;
 import com.andersenlab.benefits.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -17,6 +19,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.*;
 import static com.andersenlab.benefits.service.ServiceTestUtils.*;
 
@@ -28,12 +31,20 @@ public class UserServiceTest {
 
     @MockBean
     private final UserRepository userRepository;
+    @MockBean
+    private final RoleRepository roleRepository;
+    @MockBean
+    private final LocationRepository locationRepository;
 
     @Autowired
     public UserServiceTest(final UserService userService,
-                           final UserRepository userRepository) {
+                           final UserRepository userRepository,
+                           final RoleRepository roleRepository,
+                           final LocationRepository locationRepository) {
         this.userService = userService;
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.locationRepository = locationRepository;
     }
 
     @Test
@@ -92,18 +103,19 @@ public class UserServiceTest {
         final List<UserEntity> usersList = getUserList();
         final UserEntity user = usersList.get(userPos);
         doAnswer(invocation -> {
-            usersList.remove(usersList.stream()
-                    .filter(item -> Objects.equals(item.getId(), invocation.getArgument(0)))
-                    .findFirst().orElse(null));
+            usersList.remove((UserEntity) invocation.getArgument(0));
             return null;
-        }).when(this.userRepository).deleteById(anyLong());
+        }).when(this.userRepository).delete(any(UserEntity.class));
+        when(this.userRepository.findById(anyLong())).thenAnswer(invocation ->
+                usersList.stream().filter(item ->
+                        Objects.equals(item.getId(), invocation.getArgument(0))).findFirst());
 
         // when
         this.userService.delete(user.getId());
 
         // then
-        Assertions.assertFalse(usersList.contains(user));
-        verify(this.userRepository, times(1)).deleteById(user.getId());
+        assertFalse(usersList.contains(user));
+        verify(this.userRepository, times(1)).delete(user);
     }
 
     @Test

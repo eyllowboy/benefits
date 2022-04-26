@@ -130,7 +130,8 @@ public class UserController {
     /**
      * Create {@link UserEntity} in the database.
      *
-     * @param user new {@link UserEntity} to be added
+     * @param login of new {@link UserEntity}
+     * @param password of user just for authorization
      * @throws IllegalStateException if:
      *                               <ul>
      *                               <li>{@link UserEntity} with {@link UserEntity#getLogin()} field is already exists
@@ -149,19 +150,23 @@ public class UserController {
     })
     @PostMapping("/users")
     @Transactional
-    public ResponseEntity<UserEntity> addUser(@Valid @RequestBody final UserEntity user) {
-        this.userService.findByLogin(user.getLogin()).ifPresent(foundUser -> {
-            throw new IllegalStateException("User with such 'login' is already exists");}
-        );
-        this.roleService.findById(user.getRoleEntity().getId()).orElseThrow(() -> {
-            throw new IllegalStateException("Role with this id was not found in the database");}
-        );
-        this.locationService.findById(user.getLocation().getId()).orElseThrow(() -> {
-            throw new IllegalStateException("Location with this id was not found in the database");}
-        );
-        final UserEntity savedUserEntity = this.userService.save(user);
-        return new ResponseEntity<>(savedUserEntity, HttpStatus.CREATED);
+    public ResponseEntity<UserEntity> addUser(@RequestParam final String login,
+                                              @RequestParam final String password) {
+        return new ResponseEntity<>(this.userService.createNewUser(login, password), HttpStatus.CREATED);
     }
+//    public ResponseEntity<UserEntity> addUser(@Valid @RequestBody final UserEntity user) {
+//        this.userService.findByLogin(user.getLogin()).ifPresent(foundUser -> {
+//            throw new IllegalStateException("User with such 'login' is already exists");}
+//        );
+//        this.roleService.findById(user.getRoleEntity().getId()).orElseThrow(() -> {
+//            throw new IllegalStateException("Role with this id was not found in the database");}
+//        );
+//        this.locationService.findById(user.getLocation().getId()).orElseThrow(() -> {
+//            throw new IllegalStateException("Location with this id was not found in the database");}
+//        );
+//        final UserEntity savedUserEntity = this.userService.save(user);
+//        return new ResponseEntity<>(savedUserEntity, HttpStatus.CREATED);
+//    }
 
     /**
      * Gets {@link UserEntity} from the database.
