@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -82,10 +83,13 @@ public class RoleController {
     @PatchMapping("/roles/{id}")
     public ResponseEntity<RoleEntity> updateRole(@PathVariable final Long id,
                                                  @RequestBody final RoleEntity roleEntity) {
+        if (!Objects.isNull(roleEntity.getCode())) {
+            final Optional<RoleEntity> theSameCodeRole = this.roleService.findByCode(roleEntity.getCode());
+            if (theSameCodeRole.isPresent() && (!theSameCodeRole.get().getId().equals(id)))
+                throw new IllegalStateException("Role with such 'code' is already exists");
+        }
         final RoleEntity existingRole = this.roleService.findById(id)
             .orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
-        this.roleService.findByCode(roleEntity.getCode()).ifPresent(foundRole -> {
-            throw new IllegalStateException("Role with such 'code' is already exists");});
         BeanUtils.copyProperties(roleEntity, existingRole, "id");
         this.roleService.updateRoleEntity(id, existingRole.getName(), existingRole.getCode());
         return ResponseEntity.ok(existingRole);

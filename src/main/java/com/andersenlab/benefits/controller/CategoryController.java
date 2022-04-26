@@ -101,7 +101,10 @@ public class CategoryController {
     @PatchMapping("/categories/{id}")
     public ResponseEntity<CategoryEntity> updateCategory(@PathVariable final Long id,
                                                          @RequestBody final CategoryEntity category) {
-        CategoryEntity existingCategory = this.categoryService.findById(id)
+        final Optional<CategoryEntity> theSameTitle = this.categoryService.findByTitle(category.getTitle());
+        if (theSameTitle.isPresent() && !theSameTitle.get().getId().equals(id))
+            throw new IllegalStateException("Category with title '" + category.getTitle() + "' already exists");
+        final CategoryEntity existingCategory = this.categoryService.findById(id)
                 .orElseThrow(() -> new IllegalStateException("Category with this id was not found in the database"));
         BeanUtils.copyProperties(category, existingCategory, "id");
         this.categoryService.updateCategoryEntity(existingCategory.getId(), existingCategory.getTitle());

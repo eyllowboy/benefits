@@ -256,6 +256,7 @@ public class LocationControllerTest {
         // given
         final LocationEntity lastLocationFromContainer = this.locationRepository.findByCity("Country5", "City5").get();
         lastLocationFromContainer.setId(lastLocationFromContainer.getId()+1);
+        lastLocationFromContainer.setCity(lastLocationFromContainer.getCity() + 1);
         final String locationEntity = this.objectMapper.writeValueAsString(lastLocationFromContainer);
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->

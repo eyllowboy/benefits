@@ -17,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -123,6 +122,11 @@ public class CompanyController {
     @PatchMapping("/companies/{id}")
     public ResponseEntity<CompanyEntity> updatedCompany(@PathVariable final Long id,
                                                         @RequestBody final CompanyEntity company) {
+        if (!Objects.isNull(company.getTitle())) {
+            final Optional<CompanyEntity> theSameCompany = this.companyService.findByTitle(company.getTitle());
+            if (theSameCompany.isPresent() && !theSameCompany.get().getId().equals(id))
+                throw new IllegalStateException("Company with title '" + company.getTitle() + "' already exists");
+        }
         final CompanyEntity existingCompany = this.companyService.findByIdCompany(id).orElseThrow(() ->
             new IllegalStateException("The company with id: " + id + " was not found in the database."));
         BeanUtils.copyProperties(company, existingCompany, "id");

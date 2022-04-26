@@ -193,10 +193,10 @@ public class UserControllerTest {
 	}
 
 	@Test
-    public void whenUpdateUserWithNewLoginAndRoleIdIsExists() throws Exception {
+    public void whenUpdateUserWithNewLocationAndRoleIdExists() throws Exception {
         // given
         final UserEntity user = this.userRepository.save(this.ctu.getUser(this.ctu.getRndEntityPos()));
-        user.setLogin("newUserLogin");
+        user.setLocation(this.ctu.getLocation(this.ctu.getRndEntityPos()));
         final MvcResult result;
 
         // when
@@ -261,6 +261,7 @@ public class UserControllerTest {
 		// given
 		final UserEntity user = this.userRepository.saveAll(this.ctu.getUserList()).get(0);
 		user.setId(Long.MAX_VALUE);
+		user.setLogin("New Login");
 
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
@@ -379,26 +380,5 @@ public class UserControllerTest {
 		assertEquals(400, result.getResponse().getStatus());
 		final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
 		assertTrue(errorResult.contains("must be between"));
-	}
-
-	@ParameterizedTest
-	@ValueSource(strings = {"50", "150"})
-	public void whenUpdateUserWrongFieldSize(final Integer stringSize) {
-		// given
-		final UserEntity user = this.userRepository.save(this.ctu.getUser(this.ctu.getRndEntityPos()));
-		final String fieldValue = "a".repeat(stringSize);
-		user.setLogin(fieldValue);
-
-		// when
-		final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
-				this.mockMvc.perform(MockMvcRequestBuilders
-						.patch("/users/{id}", user.getId())
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(this.objectMapper.writeValueAsString(user))
-						.with(csrf())));
-
-		// then
-		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-		assertTrue(nestedServletException.getCause().getMessage().contains("must be between"));
 	}
 }
