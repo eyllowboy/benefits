@@ -1,6 +1,5 @@
 package com.andersenlab.benefits.controller;
 
-import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.service.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,9 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -53,10 +51,6 @@ public class RoleController {
     }
 
     /**
-     *
-     * @param page is the page of {@link CategoryEntity} that needs to pagination
-     * @param size is the count of {@link CategoryEntity} that needs to pagination
-     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
      * @return a list of {@link RoleEntity} from database.
      */
     @Operation(summary = "This is to fetch all the roles stored in DB")
@@ -66,10 +60,8 @@ public class RoleController {
                     content = @Content(mediaType = "application/json"))
     })
     @GetMapping("/roles")
-    public Page<RoleEntity> getRoles(@RequestParam(required = false, defaultValue = "0") final int page,
-                                     @RequestParam(required = false, defaultValue = "6") final int size,
-                                     @RequestParam(required = false, defaultValue = "id") final String sort) {
-        return this.roleService.findAll(PageRequest.of(page, size, Sort.by(sort)));
+    public Page<RoleEntity> getRoles(final Pageable pageable) {
+        return this.roleService.findAll(pageable);
     }
 
     /**
@@ -91,11 +83,13 @@ public class RoleController {
     @PatchMapping("/roles/{id}")
     public ResponseEntity<RoleEntity> updateRole(@PathVariable final Long id,
                                                  @RequestBody final RoleEntity roleEntity) {
+        if (!Objects.isNull(roleEntity.getCode())) {
+            final Optional<RoleEntity> theSameCodeRole = this.roleService.findByCode(roleEntity.getCode());
+            if (theSameCodeRole.isPresent() && (!theSameCodeRole.get().getId().equals(id)))
+                throw new IllegalStateException("Role with such 'code' is already exists");
+        }
         final RoleEntity existingRole = this.roleService.findById(id)
-                .orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
-        this.roleService.findByCode(roleEntity.getCode()).ifPresent(foundRole -> {
-            throw new IllegalStateException("Role with such 'code' is already exists");
-        });
+            .orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
         BeanUtils.copyProperties(roleEntity, existingRole, "id");
         this.roleService.updateRoleEntity(id, existingRole.getName(), existingRole.getCode());
         return ResponseEntity.ok(existingRole);
@@ -116,8 +110,7 @@ public class RoleController {
     @PostMapping("/roles")
     public ResponseEntity<RoleEntity> addRole(@Valid @RequestBody final RoleEntity role) {
         this.roleService.findByCode(role.getCode()).ifPresent(roleEntity -> {
-                    throw new IllegalStateException("Role with such 'code' is already exists");
-                }
+                    throw new IllegalStateException("Role with such 'code' is already exists");}
         );
         final RoleEntity savedRoleEntity = this.roleService.save(role);
         return new ResponseEntity<>(savedRoleEntity, HttpStatus.CREATED);
@@ -161,7 +154,7 @@ public class RoleController {
                 new IllegalStateException("Role with this id was not found in the database"));
         final Optional<RoleEntity> roleEntity = this.roleService.findWithAssociatedUsers(id);
         if (roleEntity.isPresent() && roleEntity.get().getUsers().size() > 0)
-            throw new IllegalStateException("There is active users with this Role in database");
+                throw new IllegalStateException("There is active users with this Role in database");
         this.roleService.delete(id);
     }
 }

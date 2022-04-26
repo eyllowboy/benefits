@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntityFieldsAnnotations;
+
 /**
  * An implementation for performing operations on a {@link UserEntity}.
  *
@@ -46,14 +48,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserEntity save(final UserEntity user) {
-        ValidateUtils.validateEntityPost(user);
+        user.setId(null);
+        validateEntityFieldsAnnotations(user, true);
         return this.userRepository.save(user);
     }
 
     @Override
     public void updateUserEntity(final Long id, final String login, final RoleEntity roleEntity, final LocationEntity location) {
         final UserEntity user = new UserEntity(id, login, roleEntity, location);
-        ValidateUtils.validateEntityPatch(user);
+        validateEntityFieldsAnnotations(user, false);
         this.userRepository.updateUserEntity(user.getId(), user.getLogin(), user.getRoleEntity(), user.getLocation());
     }
 

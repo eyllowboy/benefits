@@ -24,6 +24,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -216,6 +217,7 @@ public class RoleControllerTest {
 		// given
 		final RoleEntity role = this.roleRepository.saveAll(this.ctu.getRoleList()).get(0);
 		role.setId(0L);
+		role.setCode("New code");
 
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
@@ -358,5 +360,27 @@ public class RoleControllerTest {
 		assertEquals(400, result.getResponse().getStatus());
 		final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
 		assertTrue(errorResult.contains("must be between"));
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"50", "150"})
+	public void whenUpdateRoleWrongFieldSize(final Integer stringSize) throws Exception {
+		// given
+		final RoleEntity role = this.roleRepository.save(this.ctu.getRole(this.ctu.getRndEntityPos()));
+		final String fieldValue = "a".repeat(stringSize);
+		role.setName(fieldValue);
+		role.setCode("New code");
+
+		// when
+		final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
+				this.mockMvc.perform(MockMvcRequestBuilders
+						.patch("/roles/{id}", role.getId())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(this.objectMapper.writeValueAsString(role))
+						.with(csrf())));
+
+		// then
+		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
+		assertTrue(nestedServletException.getCause().getMessage().contains("must be between"));
 	}
 }

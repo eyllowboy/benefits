@@ -256,6 +256,7 @@ public class LocationControllerTest {
         // given
         final LocationEntity lastLocationFromContainer = this.locationRepository.findByCity("Country5", "City5").get();
         lastLocationFromContainer.setId(lastLocationFromContainer.getId()+1);
+        lastLocationFromContainer.setCity(lastLocationFromContainer.getCity() + 1);
         final String locationEntity = this.objectMapper.writeValueAsString(lastLocationFromContainer);
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
@@ -404,5 +405,26 @@ public class LocationControllerTest {
         assertEquals(400, result.getResponse().getStatus());
         final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
         assertTrue(errorResult.contains("must be between"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"50", "150"})
+    public void whenUpdateLocationWrongFieldSize(final Integer stringSize) {
+        // given
+        final LocationEntity location = this.locationRepository.save(this.ctu.getLocation(this.ctu.getRndEntityPos()));
+        final String fieldValue = "a".repeat(stringSize);
+        location.setCountry(fieldValue);
+
+        // when
+        final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
+                this.mockMvc.perform(MockMvcRequestBuilders
+                        .patch("/locations/{id}", location.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(location))
+                        .with(csrf())));
+
+        // then
+        assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
+        assertTrue(nestedServletException.getCause().getMessage().contains("must be between"));
     }
 }

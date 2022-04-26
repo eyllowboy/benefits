@@ -11,9 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -103,6 +101,9 @@ public class CategoryController {
     @PatchMapping("/categories/{id}")
     public ResponseEntity<CategoryEntity> updateCategory(@PathVariable final Long id,
                                                          @RequestBody final CategoryEntity category) {
+        final Optional<CategoryEntity> theSameTitle = this.categoryService.findByTitle(category.getTitle());
+        if (theSameTitle.isPresent() && !theSameTitle.get().getId().equals(id))
+            throw new IllegalStateException("Category with title '" + category.getTitle() + "' already exists");
         final CategoryEntity existingCategory = this.categoryService.findById(id)
                 .orElseThrow(() -> new IllegalStateException("Category with this id was not found in the database"));
         BeanUtils.copyProperties(category, existingCategory, "id");
@@ -138,9 +139,6 @@ public class CategoryController {
     /**
      * Get list of all {@link CategoryEntity} from database.
      *
-     * @param page is the page of {@link CategoryEntity} that needs to pagination
-     * @param size is the count of {@link CategoryEntity} that needs to pagination
-     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
      * @return a list of {@link CategoryEntity} from database.
      */
     @Operation(summary = "This is to fetch all the stored categories")
@@ -153,9 +151,7 @@ public class CategoryController {
                     content = @Content)
     })
     @GetMapping(value = "/categories")
-    public Page<CategoryEntity> getCategories(@RequestParam(required = false, defaultValue = "0") final int page,
-                                              @RequestParam(required = false, defaultValue = "6") final int size,
-                                              @RequestParam(required = false, defaultValue = "id") final String sort) {
-        return this.categoryService.findAll(PageRequest.of(page, size, Sort.by(sort)));
+    public Page<CategoryEntity> getCategories(final Pageable pageable) {
+        return this.categoryService.findAll(pageable);
     }
 }

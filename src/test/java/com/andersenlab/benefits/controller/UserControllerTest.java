@@ -193,10 +193,10 @@ public class UserControllerTest {
 	}
 
 	@Test
-    public void whenUpdateUserWithNewLoginAndRoleIdIsExists() throws Exception {
+    public void whenUpdateUserWithNewLocationAndRoleIdExists() throws Exception {
         // given
         final UserEntity user = this.userRepository.save(this.ctu.getUser(this.ctu.getRndEntityPos()));
-        user.setLogin("newUserLogin");
+        user.setLocation(this.ctu.getLocation(this.ctu.getRndEntityPos()));
         final MvcResult result;
 
         // when
@@ -261,6 +261,7 @@ public class UserControllerTest {
 		// given
 		final UserEntity user = this.userRepository.saveAll(this.ctu.getUserList()).get(0);
 		user.setId(Long.MAX_VALUE);
+		user.setLogin("New Login");
 
 		// when
 		final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
