@@ -28,7 +28,7 @@ public class ServiceTestUtils {
     }
 
     public static Set<CategoryEntity> getCategoryList() {
-        Set<CategoryEntity> result = new LinkedHashSet<>();
+        final Set<CategoryEntity> result = new LinkedHashSet<>();
         final int size = (int) (random() * 9 + 1);
         for (long i = 1; i <= size; i++) {
             result.add(getCategory(i));
@@ -41,7 +41,7 @@ public class ServiceTestUtils {
     }
 
     public static Set<LocationEntity> getLocationList() {
-        Set<LocationEntity> result = new LinkedHashSet<>();
+        final Set<LocationEntity> result = new LinkedHashSet<>();
         final int size = (int) (random() * 9 + 1);
         for (long i = 1; i <= size; i++) {
             result.add(getLocation(i));
@@ -60,8 +60,8 @@ public class ServiceTestUtils {
         ));
     }
 
-    public static RoleEntity getRole(long num) {
-        RoleEntity role = new RoleEntity("roleName" + num, "code" + num);
+    public static RoleEntity getRole(final long num) {
+        final RoleEntity role = new RoleEntity("roleName" + num, "code" + num);
         role.setId(num);
         return role;
     }
@@ -74,8 +74,8 @@ public class ServiceTestUtils {
         return result;
     }
 
-    public static UserEntity getUser(long num) {
-        UserEntity user = new UserEntity("userLogin" + num, getRole(num), getLocation(num));
+    public static UserEntity getUser(final long num) {
+        final UserEntity user = new UserEntity("userLogin" + num, getRole(num), getLocation(num));
         user.setId(num);
         return user;
     }
@@ -89,7 +89,7 @@ public class ServiceTestUtils {
     }
 
     public static List<DiscountEntity> getDiscountList() {
-        List<DiscountEntity> result = new ArrayList<>();
+        final List<DiscountEntity> result = new ArrayList<>();
         for (long i = 1; i <= listLength; i++) {
             result.add(new DiscountEntity(
                     i,
@@ -131,7 +131,7 @@ public class ServiceTestUtils {
     }
 
     public static MockMultipartFile newMockMultipartFile(final List<DiscountEntity> discounts) {
-        StringBuilder contents = new StringBuilder("number;company_title;type;category;image;company_description;company_address;company_phone;links;size;discount_type;discount_description;discount_condition;start_date;end_date;location");
+        final StringBuilder contents = new StringBuilder("number;company_title;type;category;image;company_description;company_address;company_phone;links;size;discount_type;discount_description;discount_condition;start_date;end_date;location");
         discounts.forEach(discount -> contents.append("\n").append(discountToString(discount)));
         return (new MockMultipartFile(
                 "file",
@@ -172,7 +172,7 @@ public class ServiceTestUtils {
         if (result == item) {
             collection.add(item);
             try {
-                Method setId = Arrays.stream(item.getClass().getMethods()).filter(method ->
+                final Method setId = Arrays.stream(item.getClass().getMethods()).filter(method ->
                         Objects.equals(method.getName(), "setId")).findFirst().orElse(null);
                 if (!Objects.isNull(setId))
                     setId.invoke(item, (long) collection.size());

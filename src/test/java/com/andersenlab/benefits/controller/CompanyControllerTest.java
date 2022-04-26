@@ -1,9 +1,7 @@
 package com.andersenlab.benefits.controller;
 
-import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.CompanyEntity;
 import com.andersenlab.benefits.domain.DiscountEntity;
-import com.andersenlab.benefits.domain.DiscountType;
 import com.andersenlab.benefits.repository.*;
 import com.andersenlab.benefits.support.RestResponsePage;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -29,8 +27,11 @@ import org.springframework.web.util.NestedServletException;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
 import static java.lang.Math.random;
+
 import java.util.Objects;
+
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -88,7 +89,7 @@ class CompanyControllerTest {
     private void createAndSaveCompanyInContainer() {
         final int size = 5;
         for (long i = 1; i <= size; i++) {
-            CompanyEntity company = new CompanyEntity("title" + i, "description" + i, "address" + i, "phone" + i, "title" + i);
+            final CompanyEntity company = new CompanyEntity("title" + i, "description" + i, "address" + i, "phone" + i, "title" + i);
             this.companyRepository.save(company);
         }
     }
@@ -134,18 +135,19 @@ class CompanyControllerTest {
     void whenGetSomeSizeCompanyIsOk() throws Exception {
         // given
         final int rndSize = (int) (random() * (5 - 1) + 1);
-        final Page<CompanyEntity> foundCompany = companyRepository.findAll(PageRequest.of(0, rndSize));
+        final Page<CompanyEntity> foundCompany = this.companyRepository.findAll(PageRequest.of(0, rndSize));
         final MvcResult result;
         //when
-        result =this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/companies?page=0&size="+rndSize)
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/companies?page=0&size=" + rndSize)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andDo(print())
                 .andReturn();
         // then
         final RestResponsePage<CompanyEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(foundCompany, pageResult);
     }
@@ -157,8 +159,8 @@ class CompanyControllerTest {
         final CompanyEntity saveEntity = this.companyRepository.save(company);
         final long notExistId = saveEntity.getId() + 1;
         //when
-        NestedServletException NestedServletException = assertThrows(NestedServletException.class,
-                () -> mockMvc.perform(get("/companies/{id}", notExistId).with(csrf())));
+        final NestedServletException NestedServletException = assertThrows(NestedServletException.class,
+                () -> this.mockMvc.perform(get("/companies/{id}", notExistId).with(csrf())));
         //then
         assertEquals(IllegalStateException.class,
                 NestedServletException.getCause().getClass());
@@ -261,10 +263,10 @@ class CompanyControllerTest {
 
         // when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                    .post("/companies")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(this.objectMapper.writeValueAsString(company))
-                    .with(csrf()))
+                        .post("/companies")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(company))
+                        .with(csrf()))
                 .andReturn();
 
         // then*
@@ -320,5 +322,26 @@ class CompanyControllerTest {
         assertEquals(400, result.getResponse().getStatus());
         final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
         assertTrue(errorResult.contains("must be between"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"51", "101"})
+    public void whenUpdateCompanyWrongFieldSize(final Integer stringSize) throws Exception {
+        // given
+        final CompanyEntity company = this.companyRepository.save(this.ctu.getCompany(this.ctu.getRndEntityPos()));
+        final String fieldValue = "a".repeat(stringSize);
+        company.setTitle(fieldValue);
+
+        // when
+        final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
+                this.mockMvc.perform(MockMvcRequestBuilders
+                        .patch("/companies/{id}", company.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(company))
+                        .with(csrf())));
+
+        // then
+        assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
+        assertTrue(nestedServletException.getCause().getMessage().contains("must be between"));
     }
 }

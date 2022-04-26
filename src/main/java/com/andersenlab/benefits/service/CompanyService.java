@@ -64,4 +64,12 @@ public interface CompanyService {
      * @param id the id of record in the database, not null
      */
     Optional<CompanyEntity> findWithAssociatedDiscount(final Long id);
+
+    /**
+     * Method to get company by its Title.
+     *
+     * @param title of {@link CompanyEntity} to be searched
+     * @return {@link CompanyEntity} with searched title
+     */
+    Optional<CompanyEntity> findByTitle(final String title);
 }

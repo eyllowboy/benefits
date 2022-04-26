@@ -61,7 +61,7 @@ public class CsvDiscountLoaderServiceTest {
         this.discounts.clear();
 
         when(this.companyRepository.save(any())).thenAnswer(invocation ->
-                    saveItem(this.companies, invocation.getArgument(0), ServiceTestUtils::isCompaniesEquals));
+                saveItem(this.companies, invocation.getArgument(0), ServiceTestUtils::isCompaniesEquals));
 
         when(this.locationRepository.save(any())).thenAnswer(invocation ->
                 saveItem(this.locations, invocation.getArgument(0), Objects::equals));
@@ -71,19 +71,19 @@ public class CsvDiscountLoaderServiceTest {
                 saveItem(this.categories, invocation.getArgument(0), Objects::equals));
         when(this.categoryRepository.findAll()).thenReturn(this.categories);
         when(this.categoryRepository.findByTitle(any())).thenAnswer(invocation -> {
-            CategoryEntity result = this.categories.stream().filter(category ->
+            final CategoryEntity result = this.categories.stream().filter(category ->
                     Objects.equals(category.getTitle(), invocation.getArgument(0))).findFirst().orElse(null);
             return !Objects.isNull(result) ? Optional.of(result) : Optional.empty();
         });
 
         when(this.discountRepository.save(any())).thenAnswer(invocation -> {
-            DiscountEntity discount = invocation.getArgument(0);
+            final DiscountEntity discount = invocation.getArgument(0);
             discount.setCompany(saveItem(this.companies, discount.getCompany(), ServiceTestUtils::isCompaniesEquals));
             return saveItem(this.discounts, discount, ServiceTestUtils::isDiscountsEquals);
         });
         when(this.discountRepository.saveAll(any())).thenAnswer(invocation -> {
-            List<DiscountEntity> items = invocation.getArgument(0);
-            List<DiscountEntity> result = new ArrayList<>();
+            final List<DiscountEntity> items = invocation.getArgument(0);
+            final List<DiscountEntity> result = new ArrayList<>();
             items.forEach(item -> {
                 item.setCompany(saveItem(this.companies, item.getCompany(), ServiceTestUtils::isCompaniesEquals));
                 result.add(saveItem(this.discounts, item, ServiceTestUtils::isDiscountsEquals));
@@ -178,6 +178,6 @@ public class CsvDiscountLoaderServiceTest {
         final List<String> result = this.csvDiscountLoaderService.loadDiscountsFromCsv(csvData, ";");
 
         // then
-        assertEquals(result.get(0),"1: Number of delimited fields does not match header");
+        assertEquals(result.get(0), "1: Number of delimited fields does not match header");
     }
 }

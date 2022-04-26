@@ -98,7 +98,7 @@ public class CsvDiscountLoaderControllerTest {
         final List<String> result = new ArrayList<>();
         final List<CompanyEntity> companies = this.companyRepository.findAll();
         discounts.forEach(discount -> {
-            CompanyEntity company = companies.stream().filter(item ->
+            final CompanyEntity company = companies.stream().filter(item ->
                     item.getTitle().equals(discount.getCompany().getTitle())).findFirst()
                         .orElse(discount.getCompany());
             if (Objects.isNull(company.getId()))

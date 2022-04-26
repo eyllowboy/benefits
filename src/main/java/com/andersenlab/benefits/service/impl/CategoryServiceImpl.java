@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntityFieldsAnnotations;
+
 /***
  * Implementation for performing operations on a {@link CategoryEntity}
  * @author Denis Popov
@@ -36,7 +38,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public void updateCategoryEntity(final Long id, final String title) {
         final CategoryEntity validatedCategory = new CategoryEntity(id, title);
-        ValidateUtils.validateEntityPatch(validatedCategory);
+        validateEntityFieldsAnnotations(validatedCategory, false);
         this.categoryRepository.updateCategoryEntity(validatedCategory.getId(), validatedCategory.getTitle());
     }
 
@@ -52,7 +54,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryEntity save(final CategoryEntity entity) {
-        ValidateUtils.validateEntityPost(entity);
+        entity.setId(null);
+        validateEntityFieldsAnnotations(entity, true);
         return this.categoryRepository.save(entity);
     }
 

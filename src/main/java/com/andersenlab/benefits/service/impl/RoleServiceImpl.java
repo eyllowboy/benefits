@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntityFieldsAnnotations;
+
 /**
  * An implementation for performing operations on a {@link RoleEntity}.
  *
@@ -44,14 +46,15 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleEntity save(final RoleEntity role) {
-        ValidateUtils.validateEntityPost(role);
+        role.setId(null);
+        validateEntityFieldsAnnotations(role, true);
         return this.roleRepository.save(role);
     }
 
     @Override
     public void updateRoleEntity(final Long id, final String name, final String code) {
         final RoleEntity role = new RoleEntity(id, name, code);
-        ValidateUtils.validateEntityPatch(role);
+        validateEntityFieldsAnnotations(role, false);
         this.roleRepository.updateRoleEntity(role.getId(), role.getName(), role.getCode());
     }
 

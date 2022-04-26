@@ -35,7 +35,7 @@ import java.util.Set;
 import static java.lang.Math.random;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -91,7 +91,7 @@ public class CategoryControllerTest {
     private void createAndSaveCategoryInContainer() {
         final int size = 5;
         for (long i = 1; i <= size; i++) {
-            CategoryEntity category = new CategoryEntity("Category" + i);
+            final CategoryEntity category = new CategoryEntity("Category" + i);
             this.categoryRepository.save(category);
         }
     }
@@ -145,8 +145,9 @@ public class CategoryControllerTest {
                 .andDo(print())
                 .andReturn();
         // then
-        final RestResponsePage<CategoryEntity> pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
+        final RestResponsePage<CategoryEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(foundCategory, pageResult);
     }
@@ -157,7 +158,7 @@ public class CategoryControllerTest {
         //given
         final CategoryEntity lastCategoryFromContainer = this.categoryRepository.findByTitle("Category5").get();
         // when
-        NestedServletException NestedServletException = assertThrows(NestedServletException.class, () -> {
+        final NestedServletException NestedServletException = assertThrows(NestedServletException.class, () -> {
             this.mockMvc.perform(MockMvcRequestBuilders
                     .get("/categories/{id}", lastCategoryFromContainer.getId() + 1)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -174,7 +175,7 @@ public class CategoryControllerTest {
         // given
         final CategoryEntity category = new CategoryEntity("Category3");
         // when
-        NestedServletException NestedServletException = assertThrows(NestedServletException.class, () -> {
+        final NestedServletException NestedServletException = assertThrows(NestedServletException.class, () -> {
             this.mockMvc.perform(MockMvcRequestBuilders.post("/categories")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(this.objectMapper.writeValueAsString(category))
@@ -198,7 +199,7 @@ public class CategoryControllerTest {
                         .content(this.objectMapper.writeValueAsString(category))
                         .with((csrf())))
                 .andDo(print())
-        // then
+                // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(category.getId().intValue())))
                 .andExpect(jsonPath("$.title", is(this.categoryRepository.findById(category.getId()).orElseThrow().getTitle())));
@@ -212,7 +213,7 @@ public class CategoryControllerTest {
         final CategoryEntity category = new CategoryEntity(notExistId, "Прочее");
         final String categoryEntity = (this.objectMapper).writeValueAsString(category);
         // when
-        NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
+        final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
             this.mockMvc.perform(MockMvcRequestBuilders
                     .patch("/categories/{id}", category.getId())
                     .contentType(MediaType.APPLICATION_JSON)
@@ -228,7 +229,7 @@ public class CategoryControllerTest {
     public void whenDeleteCategoryWithoutDiscountsSuccess() throws Exception {
         // given
         final Optional<CategoryEntity> LastCategoryFromContainer = this.categoryRepository.findByTitle("Category5");
-        Long lastIdEntity = LastCategoryFromContainer.get().getId();
+        final Long lastIdEntity = LastCategoryFromContainer.get().getId();
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .delete("/categories/{id}", lastIdEntity)
@@ -249,7 +250,7 @@ public class CategoryControllerTest {
         this.discountRepository.save(discount);
 
         // when
-        NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
+        final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
             this.mockMvc.perform(MockMvcRequestBuilders
                     .delete("/categories/{id}", savedCategory.getId())
                     .contentType(MediaType.APPLICATION_JSON)
@@ -267,7 +268,7 @@ public class CategoryControllerTest {
         final CategoryEntity lastCategoryFromContainer = this.categoryRepository.findByTitle("Category5").get();
         final Long lastIdEntity = lastCategoryFromContainer.getId();
         // when
-        NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
+        final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
             this.mockMvc.perform(MockMvcRequestBuilders
                     .delete("/categories/{id}", lastIdEntity + 1)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -300,7 +301,7 @@ public class CategoryControllerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {" space at start", "space at end ", " two  spaces  inside", " three   spaces   inside"})
+    @ValueSource(strings = {" space at start", "space at end ", " two  spaces  inside", " three   spaces"})
     public void whenAddCategoryTrimFields(final String title) throws Exception {
         // given
         final CategoryEntity category = new CategoryEntity(title);
@@ -345,5 +346,25 @@ public class CategoryControllerTest {
         assertEquals(400, result.getResponse().getStatus());
         final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
         assertTrue(errorResult.contains("must be between"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"2", "150"})
+    public void whenUpdateCategoryWrongFieldSize(final Integer stringSize) {
+        // given
+        final CategoryEntity category = this.categoryRepository.save(this.ctu.getCategoryList().iterator().next());
+        category.setTitle("a".repeat(stringSize));
+
+        // when
+        final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
+                this.mockMvc.perform(MockMvcRequestBuilders
+                        .patch("/categories/{id}", category.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(category))
+                        .with(csrf())));
+
+        // then
+        assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
+        assertTrue(nestedServletException.getCause().getMessage().contains("must be between"));
     }
 }

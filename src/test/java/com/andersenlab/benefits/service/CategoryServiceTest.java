@@ -44,11 +44,11 @@ public class CategoryServiceTest {
                 new CategoryEntity("Категория 3"));
         final Page<CategoryEntity> pageOfCategory = new PageImpl<>(categories);
         // when
-        when(this.categoryRepository.findAll(PageRequest.of(0,3))).thenReturn(pageOfCategory);
-        final Page<CategoryEntity> foundCategory = this.categoryService.findAll(PageRequest.of(0,3));
+        when(this.categoryRepository.findAll(PageRequest.of(0, 3))).thenReturn(pageOfCategory);
+        final Page<CategoryEntity> foundCategory = this.categoryService.findAll(PageRequest.of(0, 3));
         // then
         assertEquals(pageOfCategory, foundCategory);
-        verify(this.categoryRepository, times(1)).findAll(PageRequest.of(0,3));
+        verify(this.categoryRepository, times(1)).findAll(PageRequest.of(0, 3));
     }
 
     @Test
@@ -57,7 +57,7 @@ public class CategoryServiceTest {
         final CategoryEntity categoryEntity = new CategoryEntity("Категория 10");
         // when
         when(this.categoryRepository.findById(1L)).thenReturn(Optional.of(categoryEntity));
-        Optional<CategoryEntity> foundCategory = this.categoryService.findById(1L);
+        final Optional<CategoryEntity> foundCategory = this.categoryService.findById(1L);
         // then
         assertEquals(Optional.of(categoryEntity), foundCategory);
         verify(this.categoryRepository, times(1)).findById(1L);
@@ -69,7 +69,7 @@ public class CategoryServiceTest {
         final CategoryEntity categoryEntity = new CategoryEntity("Категория 100");
         // when
         when(this.categoryRepository.save(any(CategoryEntity.class))).thenReturn(categoryEntity);
-        final CategoryEntity savedCategory = (CategoryEntity)this.categoryService.save(categoryEntity);
+        final CategoryEntity savedCategory = (CategoryEntity) this.categoryService.save(categoryEntity);
         // then
         assertEquals(categoryEntity, savedCategory);
         verify(this.categoryRepository, times(1)).save(categoryEntity);

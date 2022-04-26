@@ -103,6 +103,9 @@ public class CategoryController {
     @PatchMapping("/categories/{id}")
     public ResponseEntity<CategoryEntity> updateCategory(@PathVariable final Long id,
                                                          @RequestBody final CategoryEntity category) {
+        final Optional<CategoryEntity> theSameTitle = this.categoryService.findByTitle(category.getTitle());
+        if (theSameTitle.isPresent() && !theSameTitle.get().getId().equals(id))
+            throw new IllegalStateException("Category with title '" + category.getTitle() + "' already exists");
         final CategoryEntity existingCategory = this.categoryService.findById(id)
                 .orElseThrow(() -> new IllegalStateException("Category with this id was not found in the database"));
         BeanUtils.copyProperties(category, existingCategory, "id");
@@ -138,9 +141,6 @@ public class CategoryController {
     /**
      * Get list of all {@link CategoryEntity} from database.
      *
-     * @param page is the page of {@link CategoryEntity} that needs to pagination
-     * @param size is the count of {@link CategoryEntity} that needs to pagination
-     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
      * @return a list of {@link CategoryEntity} from database.
      */
     @Operation(summary = "This is to fetch all the stored categories")
