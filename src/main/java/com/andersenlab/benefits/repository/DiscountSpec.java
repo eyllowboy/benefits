@@ -18,9 +18,9 @@ public class DiscountSpec {
     public static Specification<DiscountEntity> getByCategory(final String category) {
         return new Specification<DiscountEntity>() {
             @Override
-            public Predicate toPredicate(Root<DiscountEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                Join<Object, Object> categoryJoin = root.join(DiscountEntity_.CATEGORIES);
-                Predicate equalPredicate = criteriaBuilder.equal(categoryJoin.get(CategoryEntity_.TITLE), category);
+            public Predicate toPredicate(final Root<DiscountEntity> root,final CriteriaQuery<?> query,final CriteriaBuilder criteriaBuilder) {
+                final Join<Object, Object> categoryJoin = root.join(DiscountEntity_.CATEGORIES);
+                final Predicate equalPredicate = criteriaBuilder.equal(categoryJoin.get(CategoryEntity_.TITLE), category);
                 return equalPredicate;
             }
         };
@@ -30,9 +30,9 @@ public class DiscountSpec {
     public static Specification<DiscountEntity> getByLocation(final String location) {
         return new Specification<DiscountEntity>() {
             @Override
-            public Predicate toPredicate(Root<DiscountEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                Join<Object, Object> areaJoin = root.join(DiscountEntity_.AREA);
-                Predicate equalPredicate = criteriaBuilder.like(areaJoin.get(LocationEntity_.CITY), "%" + location + "%");
+            public Predicate toPredicate(final Root<DiscountEntity> root,final CriteriaQuery<?> query,final CriteriaBuilder criteriaBuilder) {
+                final Join<Object, Object> areaJoin = root.join(DiscountEntity_.AREA);
+                final Predicate equalPredicate = criteriaBuilder.like(areaJoin.get(LocationEntity_.CITY), "%" + location + "%");
                 return equalPredicate;
             }
         };
@@ -41,9 +41,9 @@ public class DiscountSpec {
     public static Specification<DiscountEntity> getLastAdded() {
         return new Specification<DiscountEntity>() {
             @Override
-            public Predicate toPredicate(Root<DiscountEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                Order order = criteriaBuilder.desc(root.<Date>get(DiscountEntity_.DATE_BEGIN));
-                CriteriaQuery cr = query.orderBy(order);
+            public Predicate toPredicate(final Root<DiscountEntity> root,final CriteriaQuery<?> query,final CriteriaBuilder criteriaBuilder) {
+                final Order order = criteriaBuilder.desc(root.<Date>get(DiscountEntity_.DATE_BEGIN));
+                final CriteriaQuery cr = query.orderBy(order);
                 return cr.getRestriction();
             }
         };
@@ -52,7 +52,7 @@ public class DiscountSpec {
     public static Specification<DiscountEntity> getByType(final String type) {
         return new Specification<DiscountEntity>() {
             @Override
-            public Predicate toPredicate(Root<DiscountEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+            public Predicate toPredicate(final Root<DiscountEntity> root,final CriteriaQuery<?> query,final CriteriaBuilder criteriaBuilder) {
                 return criteriaBuilder.like(root.get(DiscountEntity_.TYPE), "%" + type + "%");
             }
         };
@@ -62,7 +62,7 @@ public class DiscountSpec {
     public static Specification<DiscountEntity> getBySize(final String sizeDiscount) {
         return new Specification<DiscountEntity>() {
             @Override
-            public Predicate toPredicate(Root<DiscountEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+            public Predicate toPredicate(final Root<DiscountEntity> root,final CriteriaQuery<?> query,final CriteriaBuilder criteriaBuilder) {
                 return criteriaBuilder.like(root.get(DiscountEntity_.SIZE_DISCOUNT), "%" + sizeDiscount + "%");
             }
         };

@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.controller;
 
+import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
@@ -62,6 +63,9 @@ public class UserController {
     }
 
     /**
+     * @param page is the page of {@link CategoryEntity} that needs to pagination
+     * @param size is the count of {@link CategoryEntity} that needs to pagination
+     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
      * @return a list of {@link UserEntity} from database.
      */
     @Operation(summary = "This is to fetch all the users stored in DB")

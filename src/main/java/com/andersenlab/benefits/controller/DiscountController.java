@@ -1,6 +1,7 @@
 package com.andersenlab.benefits.controller;
 
 
+import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.repository.DiscountSpec;
@@ -66,6 +67,9 @@ public class DiscountController {
     /**
      * Find all {@link DiscountEntity} from the database.
      *
+     * @param page is the page of {@link CategoryEntity} that needs to pagination
+     * @param size is the count of {@link CategoryEntity} that needs to pagination
+     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
      * @return a list of {@link DiscountEntity} from database.
      */
     @Operation(summary = "This is to fetch all discounts from database.")
@@ -168,6 +172,9 @@ public class DiscountController {
     /**
      * Filters {@link DiscountEntity} from the database by city and lastDate.
      *
+     * @param page is the page of {@link CategoryEntity} that needs to pagination
+     * @param size is the count of {@link CategoryEntity} that needs to pagination
+     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
      * @param city the city {@link LocationEntity} that needs to filtering
      */
     @Operation(summary = "This is method to filtering the discount by city and lastDate.")
@@ -189,6 +196,9 @@ public class DiscountController {
     /**
      * Filters {@link DiscountEntity} from the database by category and lastDate.
      *
+     * @param page     is the page of {@link CategoryEntity} that needs to pagination
+     * @param size     is the count of {@link CategoryEntity} that needs to pagination
+     * @param sort     is the sort of {@link CategoryEntity} that needs to pagination
      * @param category the city {@link LocationEntity} that needs to filtering
      */
     @Operation(summary = "This is method to filtering the discount by category and lastDate.")
@@ -209,6 +219,9 @@ public class DiscountController {
     /**
      * Filters {@link DiscountEntity} from the database by type and lastDate.
      *
+     * @param page is the page of {@link CategoryEntity} that needs to pagination
+     * @param size is the count of {@link CategoryEntity} that needs to pagination
+     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
      * @param type the type {@link DiscountEntity} that needs to filtering
      */
     @Operation(summary = "This is method to filtering the discount by type and lastDate.")
@@ -229,6 +242,9 @@ public class DiscountController {
     /**
      * Filters {@link DiscountEntity} from the database by discountSize and lastDate.
      *
+     * @param page is the page of {@link CategoryEntity} that needs to pagination
+     * @param size is the count of {@link CategoryEntity} that needs to pagination
+     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
      * @param size the size {@link DiscountEntity} that needs to filtering
      */
     @Operation(summary = "This is method to filtering the discount by size and lastDate.")
@@ -252,7 +268,7 @@ public class DiscountController {
      * @param category     string with category name in which to search
      * @param sizeDiscount string which must be contained in {@link DiscountEntity}'s size or vice versa
      * @param city         is name of City where to search (optional) if certain location needed
-     * @param limit         count {@link DiscountEntity} to return
+     * @param limit        count {@link DiscountEntity} to return
      * @return List of {@link DiscountEntity} suitable to search conditions
      */
     @Operation(summary = "This is method to find discounts in the same \"Category\" and with similar size of discount")

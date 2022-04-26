@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.controller;
 
+import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.service.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,6 +53,10 @@ public class RoleController {
     }
 
     /**
+     *
+     * @param page is the page of {@link CategoryEntity} that needs to pagination
+     * @param size is the count of {@link CategoryEntity} that needs to pagination
+     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
      * @return a list of {@link RoleEntity} from database.
      */
     @Operation(summary = "This is to fetch all the roles stored in DB")

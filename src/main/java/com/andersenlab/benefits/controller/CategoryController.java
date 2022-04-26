@@ -138,6 +138,9 @@ public class CategoryController {
     /**
      * Get list of all {@link CategoryEntity} from database.
      *
+     * @param page is the page of {@link CategoryEntity} that needs to pagination
+     * @param size is the count of {@link CategoryEntity} that needs to pagination
+     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
      * @return a list of {@link CategoryEntity} from database.
      */
     @Operation(summary = "This is to fetch all the stored categories")

@@ -54,7 +54,7 @@ public class ValidateUtils {
         try {
             final PropertyAccessor propertyAccessor = PropertyAccessorFactory.forDirectFieldAccess(entity);
             Arrays.stream(entity.getClass().getDeclaredFields()).forEach(field -> {
-                Object val = propertyAccessor.getPropertyValue(field.getName());
+               final Object val = propertyAccessor.getPropertyValue(field.getName());
                 validateField(field, val, entity.getClass().getSimpleName());
                 if (val instanceof String) {
                     propertyAccessor.setPropertyValue(
@@ -73,7 +73,7 @@ public class ValidateUtils {
         try {
             final PropertyAccessor propertyAccessor = PropertyAccessorFactory.forDirectFieldAccess(entity);
             Arrays.stream(entity.getClass().getDeclaredFields()).forEach(field -> {
-                Object val = propertyAccessor.getPropertyValue(field.getName());
+               final Object val = propertyAccessor.getPropertyValue(field.getName());
                 if (val instanceof String)
                     propertyAccessor.setPropertyValue(
                             field.getName(),

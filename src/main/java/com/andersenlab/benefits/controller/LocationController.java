@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.controller;
 
+import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.service.LocationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -162,6 +163,9 @@ public class LocationController {
     /**
      * Get list of all {@link LocationEntity} from database.
      *
+     * @param page is the page of {@link CategoryEntity} that needs to pagination
+     * @param size is the count of {@link CategoryEntity} that needs to pagination
+     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
      * @return a list of {@link LocationEntity} from database.
      */
     @Operation(summary = "This is to fetch all the stored locations")
@@ -175,13 +179,18 @@ public class LocationController {
     })
     @GetMapping(value = "/locations")
     public Page<LocationEntity> getLocations(@RequestParam(required = false, defaultValue = "0") final int page,
-                                             @RequestParam(required = false, defaultValue = "6") final int size) {
-        return this.locationService.findAll(PageRequest.of(page, size));
+                                             @RequestParam(required = false, defaultValue = "6") final int size,
+                                             @RequestParam(required = false, defaultValue = "id") final String sort) {
+        return this.locationService.findAll(PageRequest.of(page, size, Sort.by(sort)));
     }
 
     /**
      * Get list of all {@link LocationEntity} in specified county from database.
      *
+     * @param country  of {@link CategoryEntity}
+     * @param page is the page of {@link CategoryEntity} that needs to pagination
+     * @param size is the count of {@link CategoryEntity} that needs to pagination
+     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
      * @return a list of {@link LocationEntity} in specified county from database.
      */
     @Operation(summary = "This is to fetch all stored locations in specified country")
@@ -194,13 +203,19 @@ public class LocationController {
                     content = @Content)
     })
     @RequestMapping(method = RequestMethod.GET, value = "/locations/country")
-    public Page<LocationEntity> findByCountry(@RequestParam final String country, final Pageable pageable) {
-        return this.locationService.findByCountry(country, pageable);
+    public Page<LocationEntity> findByCountry(@RequestParam final String country,
+                                              @RequestParam(required = false, defaultValue = "0") final int page,
+                                              @RequestParam(required = false, defaultValue = "6") final int size,
+                                              @RequestParam(required = false, defaultValue = "id") final String sort) {
+        return this.locationService.findByCountry(country, PageRequest.of(page, size, Sort.by(sort)));
     }
 
     /**
      * Get list of all {@link LocationEntity} from database which name starts from specified text.
      *
+     * @param page is the page of {@link CategoryEntity} that needs to pagination
+     * @param size is the count of {@link CategoryEntity} that needs to pagination
+     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
      * @return a list of {@link LocationEntity} in specified county from database.
      */
     @Operation(summary = "This is to fetch all stored locations which name starts with filter mask")
