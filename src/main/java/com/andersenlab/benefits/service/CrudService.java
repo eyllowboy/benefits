@@ -23,7 +23,7 @@ public interface CrudService<T> {
 	 * @param id  the id of record in the database, not null
 	 * @return the entity corresponding given id from database, error if id not found
 	 */
-	Optional<T> findById(final Long id);
+	T findById(final Long id);
 	/**
 	 * @param entity contains information to create a new record in the database, not null
 	 * @return the entity corresponding new record in the database, error if consistency conditions are not met

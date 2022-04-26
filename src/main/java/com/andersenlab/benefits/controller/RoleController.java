@@ -15,10 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -125,9 +123,8 @@ public class RoleController {
                     content = @Content)
     })
     @GetMapping("/roles/{id}")
-    public RoleEntity getRole(@PathVariable @DecimalMin("1") final Long id) {
+    public RoleEntity getRoleById(@PathVariable @DecimalMin("1") final Long id) {
         final Optional<RoleEntity> roleEntity = this.roleService.findById(id);
-
         return roleEntity.orElseThrow(
                 () -> new IllegalStateException("Role with this id was not found in the database"));
     }

@@ -17,9 +17,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     Optional<UserEntity> findByLogin(final String login);
 
     @Modifying
-    @Transactional
     @Query("update UserEntity u set u.login = :login, u.roleEntity = :roleEntity, u.location = :location where u.id = :id")
-    void updateUserEntity(@Param(value = "id") final Long id,
+    UserEntity updateUserEntity(@Param(value = "id") final Long id,
                           @Param(value = "login") final String login,
                           @Param(value = "roleEntity") final RoleEntity roleEntity,
                           @Param(value = "location") final LocationEntity location);

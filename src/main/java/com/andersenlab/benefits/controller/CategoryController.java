@@ -15,9 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -26,6 +24,17 @@ import java.util.Optional;
  * @author Denis Popov
  * @version 1.0
  */
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "401",
+                description = "Unauthorized",
+                content = @Content),
+        @ApiResponse(responseCode = "403",
+                description = "Forbidden",
+                content = @Content),
+        @ApiResponse(responseCode = "500",
+                description = "Internal Server Error",
+                content = @Content)
+})
 @Tag(name = "Category controller", description = "Controller for performing operations on categories.")
 @RestController
 @SecurityRequirement(name = "benefits")

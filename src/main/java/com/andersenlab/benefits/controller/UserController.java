@@ -12,19 +12,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * A controller for handling requests for {@link UserEntity}.
@@ -47,19 +42,17 @@ import java.util.Optional;
 @RestController
 @SecurityRequirement(name = "benefits")
 public class UserController {
+
     private final UserService userService;
-    private final RoleService roleService;
-    private final LocationService locationService;
 
     @Autowired
-    public UserController(final UserService userService, final RoleService roleService,
-                          final LocationService locationService) {
+    public UserController(final UserService userService) {
         this.userService = userService;
-        this.roleService = roleService;
-        this.locationService = locationService;
     }
 
     /**
+     *  Get page of  {@link UserEntity} from database.
+     *
      * @return a list of {@link UserEntity} from database.
      */
     @Operation(summary = "This is to fetch all the users stored in DB")
@@ -100,20 +93,7 @@ public class UserController {
     @PatchMapping("/users/{id}")
     public ResponseEntity<UserEntity> updateUser(@PathVariable final Long id,
                                                  @RequestBody final UserEntity userEntity) {
-        final UserEntity existingUser = this.userService.findById(userEntity.getId()).orElseThrow(() ->
-            new IllegalStateException("User with this id was not found in the database"));
-        this.roleService.findById(userEntity.getRoleEntity().getId()).orElseThrow(() ->
-            new IllegalStateException("Role with this id was not found in the database"));
-        this.userService.findByLogin(userEntity.getLogin()).ifPresent(foundUser -> {
-            throw new IllegalStateException("User with such 'login' is already exists");});
-        this.locationService.findById(userEntity.getLocation().getId()).orElseThrow(() ->
-            new IllegalStateException("Location with this id was not found in the database"));
-        BeanUtils.copyProperties(userEntity, existingUser, "id");
-        this.userService.updateUserEntity(id,
-                    existingUser.getLogin(),
-                    existingUser.getRoleEntity(),
-                    existingUser.getLocation());
-        return ResponseEntity.ok(existingUser);
+        return ResponseEntity.ok(this.userService.update(id, userEntity));
     }
 
     /**
@@ -137,19 +117,8 @@ public class UserController {
                     content = @Content)
     })
     @PostMapping("/users")
-    @Transactional
     public ResponseEntity<UserEntity> addUser(@Valid @RequestBody final UserEntity user) {
-        this.userService.findByLogin(user.getLogin()).ifPresent(foundUser -> {
-            throw new IllegalStateException("User with such 'login' is already exists");}
-        );
-        this.roleService.findById(user.getRoleEntity().getId()).orElseThrow(() -> {
-            throw new IllegalStateException("Role with this id was not found in the database");}
-        );
-        this.locationService.findById(user.getLocation().getId()).orElseThrow(() -> {
-            throw new IllegalStateException("Location with this id was not found in the database");}
-        );
-        final UserEntity savedUserEntity = this.userService.save(user);
-        return new ResponseEntity<>(savedUserEntity, HttpStatus.CREATED);
+        return new ResponseEntity<>(this.userService.save(user), HttpStatus.CREATED);
     }
 
     /**
@@ -168,11 +137,8 @@ public class UserController {
                     content = @Content)
     })
     @GetMapping("/users/{id}")
-    public UserEntity getUser(@PathVariable @DecimalMin("1") final Long id) {
-        final Optional<UserEntity> userEntity = this.userService.findById(id);
-
-        return userEntity.orElseThrow(
-                () -> new IllegalStateException("User with this id was not found in the database"));
+    public UserEntity getUserById(@PathVariable @DecimalMin("1") final Long id) {
+        return this.userService.findById(id);
     }
 
     /**
@@ -192,10 +158,7 @@ public class UserController {
     })
     @DeleteMapping("/users/{id}")
     public void deleteUser(@PathVariable @DecimalMin("1") final Long id) {
-        this.userService.findById(id)
-                .orElseThrow(
-                        () -> new IllegalStateException("User with this id was not found in the database"));
-
+        this.userService.findById(id);
         this.userService.delete(id);
     }
 }

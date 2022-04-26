@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,6 +53,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Transactional
     public void updateRoleEntity(final Long id, final String name, final String code) {
         final RoleEntity role = new RoleEntity(id, name, code);
         validateEntityFieldsAnnotations(role, false);
@@ -64,6 +66,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Transactional
     public Optional<RoleEntity> findWithAssociatedUsers(final Long id) {
         return this.roleRepository.findWithAssociatedUsers(id);
     }

@@ -4,7 +4,6 @@ import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import org.springframework.stereotype.Service;
-
 import java.util.Optional;
 
 /**
@@ -23,10 +22,9 @@ public interface UserService extends CrudService<UserEntity> {
     Optional<UserEntity> findByLogin(final String login);
     
     /**
-     * @param id the id of {@link UserEntity} in the database, not null
-     * @param login the login of {@link UserEntity} stored in the database, not null
-     * @param roleEntity the {@link RoleEntity} assigned to the {@link UserEntity}, not null
-     * @param location the {@link LocationEntity} assigned to the {@link UserEntity}, not null
+     * @param id the id of of {@link UserEntity} stored in the database, not null
+     * @param userEntity for search {@link UserEntity} in the database, not null
+     * @return
      */
-    void updateUserEntity(final Long id, final String login, final RoleEntity roleEntity, final LocationEntity location);
+    UserEntity update(final Long id, final UserEntity userEntity);
 }
