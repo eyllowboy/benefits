@@ -43,7 +43,7 @@ public class LocationServiceTest {
         final Page<LocationEntity> pageOfLocation = new PageImpl<>(locations);
         // when
         when(this.locationRepository.findAll(PageRequest.of(0,3))).thenReturn(pageOfLocation);
-        final Page<LocationEntity> foundLocations = locationService.findAll(PageRequest.of(0,3));
+        final Page<LocationEntity> foundLocations = this.locationService.findAll(PageRequest.of(0,3));
 
         // then
         assertEquals(pageOfLocation, foundLocations);
@@ -57,10 +57,10 @@ public class LocationServiceTest {
 
         // when
         when(this.locationRepository.findById(1L)).thenReturn(Optional.of(locationEntity));
-        Optional<LocationEntity> foundLocation = this.locationService.findById(1L);
+        final LocationEntity foundLocation = this.locationService.findById(1L);
 
         // then
-        assertEquals(Optional.of(locationEntity), foundLocation);
+        assertEquals(locationEntity, foundLocation);
         verify(this.locationRepository, times(1)).findById(1L);
     }
 
@@ -71,7 +71,7 @@ public class LocationServiceTest {
 
         // when
         when(this.locationRepository.findByCity("Россия", "Казань")).thenReturn(Optional.of(locationEntity));
-        Optional<LocationEntity> foundLocation = this.locationService.findByCity("Россия", "Казань");
+        final Optional<LocationEntity> foundLocation = this.locationService.findByCity("Россия", "Казань");
 
         // then
         assertEquals(Optional.of(locationEntity), foundLocation);

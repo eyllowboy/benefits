@@ -48,8 +48,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Optional<CategoryEntity> findById(final Long id) {
-        return this.categoryRepository.findById(id);
+    public CategoryEntity findById(final Long id) {
+        return this.categoryRepository.findById(id).orElseThrow(
+                () -> new IllegalStateException("Category with this id was not found in the database"));
     }
 
     @Override

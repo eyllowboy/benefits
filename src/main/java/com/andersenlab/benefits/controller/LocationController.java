@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.controller;
 
+import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.service.LocationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,13 +12,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -80,8 +84,9 @@ public class LocationController {
     })
     @GetMapping("/locations/{id}")
     public LocationEntity getLocationById(@PathVariable final Long id) {
-        return (this.locationService.findById(id)).orElseThrow(
-                () -> new IllegalStateException("Location with this id was not found in the database"));
+        return (this.locationService.findById(id));
+//                .orElseThrow(
+//                () -> new IllegalStateException("Location with this id was not found in the database"));
     }
 
     /**
@@ -125,8 +130,13 @@ public class LocationController {
     @PatchMapping("/locations/{id}")
     public ResponseEntity<LocationEntity> updateLocation(@PathVariable final Long id,
                                                          @RequestBody final LocationEntity location) {
-        final LocationEntity existingLocation = this.locationService.findById(id)
-            .orElseThrow(() -> new IllegalStateException("Location with this id was not found in the database"));
+        if (!Objects.isNull(location.getCity())) {
+            final Optional<LocationEntity> theSameLocation = this.locationService.findByCity(location.getCountry(), location.getCity());
+            if (theSameLocation.isPresent() && !theSameLocation.get().getId().equals(id))
+                throw new IllegalStateException("Location with city '" + location.getCity() + "' already exists");
+        }
+        final LocationEntity existingLocation = this.locationService.findById(id);
+//                .orElseThrow(() -> new IllegalStateException("Location with this id was not found in the database"));
         BeanUtils.copyProperties(location, existingLocation, "id");
         this.locationService.updateLocationEntity(id, existingLocation.getCountry(), existingLocation.getCity());
         return ResponseEntity.ok(existingLocation);
@@ -149,8 +159,9 @@ public class LocationController {
     })
     @DeleteMapping("/locations/{id}")
     public void deleteLocation(@PathVariable final Long id) {
-        this.locationService.findById(id).orElseThrow(() ->
-                new IllegalStateException("Location with id: '" + id + "' was not found in the database"));
+        this.locationService.findById(id);
+//                .orElseThrow(() ->
+//                new IllegalStateException("Location with id: '" + id + "' was not found in the database"));
         final Optional<LocationEntity> locationEntity = this.locationService.findWithAssociatedDiscounts(id);
         if (locationEntity.isPresent() && locationEntity.get().getDiscounts().size() > 0)
             throw new IllegalStateException("There is active discounts in this Location in database");
@@ -160,6 +171,9 @@ public class LocationController {
     /**
      * Get list of all {@link LocationEntity} from database.
      *
+     * @param page is the page of {@link CategoryEntity} that needs to pagination
+     * @param size is the count of {@link CategoryEntity} that needs to pagination
+     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
      * @return a list of {@link LocationEntity} from database.
      */
     @Operation(summary = "This is to fetch all the stored locations")
@@ -172,13 +186,19 @@ public class LocationController {
                     content = @Content)
     })
     @GetMapping(value = "/locations")
-    public Page<LocationEntity> getLocations(final Pageable pageable) {
-        return this.locationService.findAll(pageable);
+    public Page<LocationEntity> getLocations(@RequestParam(required = false, defaultValue = "0") final int page,
+                                             @RequestParam(required = false, defaultValue = "6") final int size,
+                                             @RequestParam(required = false, defaultValue = "id") final String sort) {
+        return this.locationService.findAll(PageRequest.of(page, size, Sort.by(sort)));
     }
 
     /**
      * Get list of all {@link LocationEntity} in specified county from database.
      *
+     * @param country  of {@link CategoryEntity}
+     * @param page is the page of {@link CategoryEntity} that needs to pagination
+     * @param size is the count of {@link CategoryEntity} that needs to pagination
+     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
      * @return a list of {@link LocationEntity} in specified county from database.
      */
     @Operation(summary = "This is to fetch all stored locations in specified country")
@@ -191,13 +211,19 @@ public class LocationController {
                     content = @Content)
     })
     @RequestMapping(method = RequestMethod.GET, value = "/locations/country")
-    public Page<LocationEntity> findByCountry(@RequestParam final String country,final Pageable pageable) {
-        return this.locationService.findByCountry(country,pageable);
+    public Page<LocationEntity> findByCountry(@RequestParam final String country,
+                                              @RequestParam(required = false, defaultValue = "0") final int page,
+                                              @RequestParam(required = false, defaultValue = "6") final int size,
+                                              @RequestParam(required = false, defaultValue = "id") final String sort) {
+        return this.locationService.findByCountry(country, PageRequest.of(page, size, Sort.by(sort)));
     }
 
     /**
      * Get list of all {@link LocationEntity} from database which name starts from specified text.
      *
+     * @param page is the page of {@link CategoryEntity} that needs to pagination
+     * @param size is the count of {@link CategoryEntity} that needs to pagination
+     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
      * @return a list of {@link LocationEntity} in specified county from database.
      */
     @Operation(summary = "This is to fetch all stored locations which name starts with filter mask")
@@ -211,8 +237,10 @@ public class LocationController {
     })
     @RequestMapping(method = RequestMethod.GET, value = "/locations/filter", params = {"country", "filterMask"})
     public Page<LocationEntity> findByFirstLetters(@RequestParam final String country,
-                                                             @RequestParam final String filterMask,
-                                                             final Pageable pageable) {
-        return this.locationService.findByFirstLetters(country, filterMask,pageable);
+                                                   @RequestParam final String filterMask,
+                                                   @RequestParam(required = false, defaultValue = "0") final int page,
+                                                   @RequestParam(required = false, defaultValue = "6") final int size,
+                                                   @RequestParam(required = false, defaultValue = "id") final String sort) {
+        return this.locationService.findByFirstLetters(country, filterMask, PageRequest.of(page, size, Sort.by(sort)));
     }
 }

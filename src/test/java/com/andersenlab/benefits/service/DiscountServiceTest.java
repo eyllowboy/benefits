@@ -76,7 +76,7 @@ class DiscountServiceTest {
         ));
     }
 
-    private DiscountEntity getDiscount(long num) {
+    private DiscountEntity getDiscount(final long num) {
         return new DiscountEntity(
                 num,
                 "Type" + num,
@@ -92,8 +92,8 @@ class DiscountServiceTest {
                 getCompany());
     }
 
-    private List<DiscountEntity> getDiscountList(int discountsCount) {
-        List<DiscountEntity> result = new ArrayList<>();
+    private List<DiscountEntity> getDiscountList(final int discountsCount) {
+        final List<DiscountEntity> result = new ArrayList<>();
         for (long i = 1; i <= discountsCount; i++) {
             result.add(getDiscount(i));
         }
@@ -130,7 +130,7 @@ class DiscountServiceTest {
         if (result == item) {
             collection.add(item);
             try {
-                Method setId = Arrays.stream(item.getClass().getMethods()).filter(method ->
+                final Method setId = Arrays.stream(item.getClass().getMethods()).filter(method ->
                         Objects.equals(method.getName(), "setId")).findFirst().orElse(null);
                 if (!Objects.isNull(setId))
                     setId.invoke(item, (long) collection.size());
@@ -160,7 +160,7 @@ class DiscountServiceTest {
         when(this.discountRepository.save(any())).thenAnswer(invocation ->
                 saveItem(this.discounts, invocation.getArgument(0), this::isDiscountsEquals));
         when(this.discountRepository.saveAll(anyList())).thenAnswer(invocation -> {
-                List<DiscountEntity> discountsToSave = invocation.getArgument(0);
+            final List<DiscountEntity> discountsToSave = invocation.getArgument(0);
                 discountsToSave.forEach(item -> saveItem(this.discounts, item, this::isDiscountsEquals));
                 return discountsToSave;
         });
@@ -168,18 +168,18 @@ class DiscountServiceTest {
         when(this.discountRepository.findById(anyLong())).thenAnswer(invocation ->
             this.discounts.stream().filter(discount ->
                 Objects.equals(discount.getId(), invocation.getArgument(0))).findFirst());
-        doAnswer(invocation -> discounts.remove(this.discounts.stream().filter(discount ->
+        doAnswer(invocation -> this.discounts.remove(this.discounts.stream().filter(discount ->
                     Objects.equals(discount.getId(), invocation.getArgument(0))).findFirst().orElseThrow()))
             .when(this.discountRepository).deleteById(anyLong());
         when(this.discountRepository.findAll(any(Specification.class))).thenAnswer(invocation -> {
-            Object parameters = invocation.getArgument(0);
-            Field argument = parameters.getClass().getDeclaredField("arg$1");
+            final Object parameters = invocation.getArgument(0);
+            final Field argument = parameters.getClass().getDeclaredField("arg$1");
             argument.setAccessible(true);
-            Object location = argument.get(parameters);
-            Field value = location.getClass().getDeclaredField("val$location");
+            final Object location = argument.get(parameters);
+            final Field value = location.getClass().getDeclaredField("val$location");
             value.setAccessible(true);
-            String mask = (value.get(location)).toString();
-            List<DiscountEntity> result = new ArrayList<>(discounts.size());
+            final String mask = (value.get(location)).toString();
+            final List<DiscountEntity> result = new ArrayList<>(this.discounts.size());
             this.discounts.forEach(discount -> discount.getArea().stream()
                     .filter(area -> area.getCity().startsWith(mask)).findFirst()
                     .ifPresent(item -> result.add(discount)));
@@ -210,7 +210,7 @@ class DiscountServiceTest {
         System.out.println(discountList.toString());
 
         //when
-        Optional<DiscountEntity> foundDiscount = this.discountService.findByIdDiscount(discount.getId());
+        final Optional<DiscountEntity> foundDiscount = this.discountService.findByIdDiscount(discount.getId());
 
         //then
         assertEquals(discount, foundDiscount.orElseThrow());
@@ -225,7 +225,7 @@ class DiscountServiceTest {
         final long id = discountList.get(listLength - 1).getId() + 1;
 
         //when
-        Optional<DiscountEntity> foundDiscount = this.discountService.findByIdDiscount(id);
+        final Optional<DiscountEntity> foundDiscount = this.discountService.findByIdDiscount(id);
 
         //then
         assertEquals(Optional.empty(), foundDiscount);
@@ -284,8 +284,8 @@ class DiscountServiceTest {
     public void whenFindWithCriteria() {
         // given
         final int listLength = 10;
-        List<DiscountEntity> discountEntities = this.discountRepository.saveAll(getDiscountList(listLength));
-        Page<DiscountEntity> pageOfDiscounts = new PageImpl<>(discountEntities);
+        final List<DiscountEntity> discountEntities = this.discountRepository.saveAll(getDiscountList(listLength));
+        final Page<DiscountEntity> pageOfDiscounts = new PageImpl<>(discountEntities);
         final Specification<DiscountEntity> spec = Specification.where(
                 DiscountSpec.getByLocation("City").and(getLastAdded()));
 
@@ -301,8 +301,8 @@ class DiscountServiceTest {
     @Test
     public void whenFindWithCriteriaEmptyResponse() {
 
-        List<DiscountEntity> listOfDiscount = List.of(new DiscountEntity());
-        Page<DiscountEntity> pageOfDiscounts = new PageImpl<>(listOfDiscount);
+        final List<DiscountEntity> listOfDiscount = List.of(new DiscountEntity());
+        final Page<DiscountEntity> pageOfDiscounts = new PageImpl<>(listOfDiscount);
         final Specification<DiscountEntity> spec = Specification.where(
                 DiscountSpec.getByLocation("unknownCity").and(getLastAdded()));
 

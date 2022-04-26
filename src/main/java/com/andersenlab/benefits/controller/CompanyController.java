@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.controller;
 
+import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.CompanyEntity;
 import com.andersenlab.benefits.service.CompanyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,13 +12,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -87,6 +89,9 @@ public class CompanyController {
     /**
      * This method return all companies.
      *
+     * @param page is the page of {@link CategoryEntity} that needs to pagination
+     * @param size is the count of {@link CategoryEntity} that needs to pagination
+     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
      * @return a list of {@link CompanyEntity} from database.
      */
     @Operation(summary = "This is to fetch all companies from the database.")
@@ -99,8 +104,10 @@ public class CompanyController {
                     content = @Content)
     })
     @GetMapping("/companies")
-    public Page<CompanyEntity> getAllCompany(final Pageable pageable) {
-        return this.companyService.findAllCompany(pageable);
+    public Page<CompanyEntity> getAllCompany(@RequestParam(required = false, defaultValue = "0") final int page,
+                                             @RequestParam(required = false, defaultValue = "6") final int size,
+                                             @RequestParam(required = false, defaultValue = "id") final String sort) {
+        return this.companyService.findAllCompany(PageRequest.of(page, size, Sort.by(sort)));
     }
 
 
@@ -123,6 +130,11 @@ public class CompanyController {
     @PatchMapping("/companies/{id}")
     public ResponseEntity<CompanyEntity> updatedCompany(@PathVariable final Long id,
                                                         @RequestBody final CompanyEntity company) {
+        if (!Objects.isNull(company.getTitle())) {
+            final Optional<CompanyEntity> theSameCompany = this.companyService.findByTitle(company.getTitle());
+            if (theSameCompany.isPresent() && !theSameCompany.get().getId().equals(id))
+                throw new IllegalStateException("Company with title '" + company.getTitle() + "' already exists");
+        }
         final CompanyEntity existingCompany = this.companyService.findByIdCompany(id).orElseThrow(() ->
             new IllegalStateException("The company with id: " + id + " was not found in the database."));
         BeanUtils.copyProperties(company, existingCompany, "id");

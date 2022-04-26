@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.controller;
 
+import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
@@ -12,14 +13,22 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A controller for handling requests for {@link UserEntity}.
@@ -42,17 +51,22 @@ import javax.validation.constraints.DecimalMin;
 @RestController
 @SecurityRequirement(name = "benefits")
 public class UserController {
-
     private final UserService userService;
+    private final RoleService roleService;
+    private final LocationService locationService;
 
     @Autowired
-    public UserController(final UserService userService) {
+    public UserController(final UserService userService, final RoleService roleService,
+                          final LocationService locationService) {
         this.userService = userService;
+        this.roleService = roleService;
+        this.locationService = locationService;
     }
 
     /**
-     *  Get page of  {@link UserEntity} from database.
-     *
+     * @param page the page of Pagination that needs to get {@link UserEntity}
+     * @param size the size of Pagination that needs to get {@link UserEntity}
+     * @param sort the sorting of Pagination that needs to get {@link UserEntity}
      * @return a list of {@link UserEntity} from database.
      */
     @Operation(summary = "This is to fetch all the users stored in DB")
@@ -65,8 +79,10 @@ public class UserController {
                     content = @Content)
     })
     @GetMapping("/users")
-    public Page<UserEntity> getUsers(final Pageable pageable) {
-        return this.userService.findAll(pageable);
+    public Page<UserEntity> getUsers(@RequestParam(required = false, defaultValue = "0") final int page,
+                                     @RequestParam(required = false, defaultValue = "6") final int size,
+                                     @RequestParam(required = false, defaultValue = "id") final String sort) {
+        return this.userService.findAll(PageRequest.of(page, size, Sort.by(sort)));
     }
 
     /**
@@ -93,8 +109,22 @@ public class UserController {
     @PatchMapping("/users/{id}")
     public ResponseEntity<UserEntity> updateUser(@PathVariable final Long id,
                                                  @RequestBody final UserEntity userEntity) {
-        return ResponseEntity.ok(this.userService.update(id, userEntity));
+
+        if (!Objects.isNull(userEntity.getRoleEntity()))
+            this.roleService.findById(userEntity.getRoleEntity().getId());
+        if (!Objects.isNull(userEntity.getLocation()))
+            this.locationService.findById(userEntity.getLocation().getId());
+        if (!Objects.isNull(userEntity.getLogin())) {
+            final Optional<UserEntity> theSameUser = this.userService.findByLogin(userEntity.getLogin());
+            if (theSameUser.isPresent() && !theSameUser.get().getId().equals(id))
+                throw new IllegalStateException("User with such 'login' is already exists");
+        }
+        final UserEntity existingUser = this.userService.findById(userEntity.getId());
+        BeanUtils.copyProperties(userEntity, existingUser, "id", "login");
+        this.userService.update(id, existingUser);
+        return ResponseEntity.ok(existingUser);
     }
+
 
     /**
      * Create {@link UserEntity} in the database.
@@ -117,8 +147,16 @@ public class UserController {
                     content = @Content)
     })
     @PostMapping("/users")
+    @Transactional
     public ResponseEntity<UserEntity> addUser(@Valid @RequestBody final UserEntity user) {
-        return new ResponseEntity<>(this.userService.save(user), HttpStatus.CREATED);
+        this.userService.findByLogin(user.getLogin()).ifPresent(foundUser -> {
+                    throw new IllegalStateException("User with such 'login' is already exists");
+                }
+        );
+        this.roleService.findById(user.getRoleEntity().getId());
+        this.locationService.findById(user.getLocation().getId());
+        final UserEntity savedUserEntity = this.userService.save(user);
+        return new ResponseEntity<>(savedUserEntity, HttpStatus.CREATED);
     }
 
     /**

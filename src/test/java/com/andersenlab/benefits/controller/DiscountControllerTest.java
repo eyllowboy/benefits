@@ -75,14 +75,14 @@ public class DiscountControllerTest {
     @Order(1)
     public void whenGetSomeSizeDiscountsSuccess() throws Exception {
         // given
-        final List<DiscountEntity> discounts = this.discountRepository.saveAll(ctu.getDiscountList());
+        final List<DiscountEntity> discounts = this.discountRepository.saveAll(this.ctu.getDiscountList());
         final int rndSize = (int) (random() * (10 - 1) + 1);
         final MvcResult result;
         final List<DiscountEntity> discountsResult;
 
         // when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/discounts?page=0&size="+rndSize)
+                        .get("/discounts?page=0&size=" + rndSize)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -91,7 +91,8 @@ public class DiscountControllerTest {
         // then
 
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(rndSize, pageResult.getContent().size());
     }
@@ -125,7 +126,7 @@ public class DiscountControllerTest {
         final long id = this.ctu.getRndEntityPos();
 
         // when
-        NestedServletException NestedServletException = assertThrows(NestedServletException.class,
+        final NestedServletException NestedServletException = assertThrows(NestedServletException.class,
                 () -> this.mockMvc.perform(get("/discounts/{id}", id).with(csrf())));
 
         // then
@@ -165,7 +166,7 @@ public class DiscountControllerTest {
         final DiscountEntity discount = this.discountRepository.save(this.ctu.getDiscount(this.ctu.getRndEntityPos()));
 
         // when
-        NestedServletException NestedServletException = assertThrows(NestedServletException.class,
+        final NestedServletException NestedServletException = assertThrows(NestedServletException.class,
                 () -> this.mockMvc.perform(
                         post("/discounts")
                                 .with(csrf())
@@ -287,9 +288,10 @@ public class DiscountControllerTest {
         // then
         assertEquals(200, result.getResponse().getStatus());
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
-        pageResult.getContent().forEach(item ->assertTrue(item.getArea().stream()
-                .anyMatch(areaCity ->areaCity.getCity().equals(city))));
+                new TypeReference<>() {
+                });
+        pageResult.getContent().forEach(item -> assertTrue(item.getArea().stream()
+                .anyMatch(areaCity -> areaCity.getCity().equals(city))));
     }
 
     @Test
@@ -312,9 +314,10 @@ public class DiscountControllerTest {
 
         // then
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
-        pageResult.getContent().forEach(item ->assertTrue(item.getCategories().stream()
-                .anyMatch(areaCategory ->areaCategory.getTitle().equals(category))));
+                new TypeReference<>() {
+                });
+        pageResult.getContent().forEach(item -> assertTrue(item.getCategories().stream()
+                .anyMatch(areaCategory -> areaCategory.getTitle().equals(category))));
     }
 
     @Test
@@ -330,6 +333,8 @@ public class DiscountControllerTest {
                         .get("/discounts/filter-by-type")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("type", discount.getType())
+                        .param("page", "0")
+                        .param("size", "6")
                         .with(csrf()))
                 .andDo(print())
                 .andReturn();
@@ -337,8 +342,9 @@ public class DiscountControllerTest {
         // then
         assertEquals(200, result.getResponse().getStatus());
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
-        pageResult.getContent().forEach(item ->assertEquals(item.getType(), discount.getType()));
+                new TypeReference<>() {
+                });
+        pageResult.getContent().forEach(item -> assertEquals(item.getType(), discount.getType()));
     }
 
     @Test
@@ -353,7 +359,7 @@ public class DiscountControllerTest {
         result = this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/discounts/filter-by-size")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("size", discount.getSizeDiscount())
+                        .param("sizeDiscount", discount.getSizeDiscount())
                         .with(csrf()))
                 .andDo(print())
                 .andReturn();
@@ -361,8 +367,9 @@ public class DiscountControllerTest {
         // then
         assertEquals(200, result.getResponse().getStatus());
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
-        pageResult.getContent().forEach(item ->assertEquals(item.getSizeDiscount(), discount.getSizeDiscount()));
+                new TypeReference<>() {
+                });
+        pageResult.getContent().forEach(item -> assertEquals(item.getSizeDiscount(), discount.getSizeDiscount()));
     }
 
     @Test
@@ -384,7 +391,8 @@ public class DiscountControllerTest {
 
         // then
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, pageResult.getContent().size());
     }
@@ -408,7 +416,8 @@ public class DiscountControllerTest {
 
         // then
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, pageResult.getContent().size());
     }
@@ -418,7 +427,7 @@ public class DiscountControllerTest {
     void whenFindByTypeAndDateEmptyResponse() throws Exception {
         // given
         this.discountRepository.saveAll(this.ctu.getDiscountList());
-        String type = "Unknown Type";
+        final String type = "Unknown Type";
         final MvcResult result;
 
         //when
@@ -432,7 +441,8 @@ public class DiscountControllerTest {
 
         // then
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, pageResult.getContent().size());
     }
@@ -442,21 +452,25 @@ public class DiscountControllerTest {
     void whenFindBySizeDiscountEmptyResponse() throws Exception {
         // given
         this.discountRepository.saveAll(this.ctu.getDiscountList());
-        String discountSize = "Empty Discount Size";
+        final String discountSize = "Empty Discount Size";
         final MvcResult result;
 
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/discounts/filter-by-size")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("size", discountSize)
+                        .param("sizeDiscount", discountSize)
+                        .param("size", "3")
+                        .param("page", "0")
+                        .param("sort", "id")
                         .with(csrf()))
                 .andDo(print())
                 .andReturn();
 
         // then
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, pageResult.getContent().size());
     }

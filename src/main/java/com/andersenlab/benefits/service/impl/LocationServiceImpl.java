@@ -60,8 +60,9 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public Optional<LocationEntity> findById(final Long id) {
-        return this.locationRepository.findById(id);
+    public LocationEntity findById(final Long id) {
+        return this.locationRepository.findById(id).orElseThrow(() ->
+                new IllegalStateException("Location with id: '" + id + "' was not found in the database"));
     }
 
     @Override
