@@ -15,7 +15,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,8 +75,10 @@ public class UserController {
                     content = @Content)
     })
     @GetMapping("/users")
-    public Page<UserEntity> getUsers(final Pageable pageable) {
-        return this.userService.findAll(pageable);
+    public Page<UserEntity> getUsers(@RequestParam(required = false, defaultValue = "0") final int page,
+                                     @RequestParam(required = false, defaultValue = "6") final int size,
+                                     @RequestParam(required = false, defaultValue = "id") final String sort) {
+        return this.userService.findAll(PageRequest.of(page, size, Sort.by(sort)));
     }
 
     /**
