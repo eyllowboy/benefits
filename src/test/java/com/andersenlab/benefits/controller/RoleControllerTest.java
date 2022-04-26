@@ -81,7 +81,7 @@ public class RoleControllerTest {
 	@Test
 	public void whenGetAllRolesSuccess() throws Exception {
 		// given
-		final List<RoleEntity> roles = this.roleRepository.saveAll(ctu.getRoleList());
+		final List<RoleEntity> roles = this.roleRepository.saveAll(this.ctu.getRoleList());
 
 		// when
 		this.mockMvc.perform(MockMvcRequestBuilders

@@ -87,7 +87,7 @@ public class LocationControllerTest {
     private void createAndSaveLocationInContainer() {
         final int size = 5;
         for (long i = 1; i <= size; i++) {
-            LocationEntity location = new LocationEntity("Country" + i, "City" + i);
+            final LocationEntity location = new LocationEntity("Country" + i, "City" + i);
             this.locationRepository.save(location);
         }
     }
@@ -99,8 +99,8 @@ public class LocationControllerTest {
         final Page<LocationEntity> foundCompany = this.locationRepository.findAll(PageRequest.of(0, rndSize));
         final MvcResult result;
         // when
-        result=mockMvc.perform(MockMvcRequestBuilders
-                        .get("/locations?page=0&size="+rndSize)
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/locations?page=0&size=" + rndSize)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andDo(print())
@@ -108,7 +108,8 @@ public class LocationControllerTest {
                 .andReturn();
         // then
         final RestResponsePage<LocationEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(foundCompany, pageResult);
     }
@@ -148,7 +149,7 @@ public class LocationControllerTest {
     public void whenGetLocationByIdFailIdNotExists() throws Exception {
         // given
         final LocationEntity lastLocationFromContainer = this.locationRepository.findByCity("Country5", "City5").get();
-        long notExistId = lastLocationFromContainer.getId()+1;
+        final long notExistId = lastLocationFromContainer.getId() + 1;
         // when
         final NestedServletException NestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(get("/locations/{id}", notExistId).with(csrf())));
@@ -162,8 +163,8 @@ public class LocationControllerTest {
     public void whenGetLocationByCitySuccess() throws Exception {
         // given
         final LocationEntity lastLocationFromContainer = this.locationRepository.findByCity("Country5", "City5").get();
-        String country = lastLocationFromContainer.getCountry();
-        String city = lastLocationFromContainer.getCity();
+        final String country = lastLocationFromContainer.getCountry();
+        final String city = lastLocationFromContainer.getCity();
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/locations/{country}/{city}", "Country5", "City5")
@@ -255,7 +256,7 @@ public class LocationControllerTest {
     public void whenUpdateLocationFailIdNotExists() throws Exception {
         // given
         final LocationEntity lastLocationFromContainer = this.locationRepository.findByCity("Country5", "City5").get();
-        lastLocationFromContainer.setId(lastLocationFromContainer.getId()+1);
+        lastLocationFromContainer.setId(lastLocationFromContainer.getId() + 1);
         lastLocationFromContainer.setCity(lastLocationFromContainer.getCity() + 1);
         final String locationEntity = this.objectMapper.writeValueAsString(lastLocationFromContainer);
         // when
@@ -309,7 +310,7 @@ public class LocationControllerTest {
     public void whenDeleteLocationFailIdNotExists() throws Exception {
         // given
         final LocationEntity lastLocationFromContainer = this.locationRepository.findByCity("Country5", "City5").get();
-        final Long id = lastLocationFromContainer.getId()+1;
+        final Long id = lastLocationFromContainer.getId() + 1;
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders

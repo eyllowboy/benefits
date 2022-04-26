@@ -11,7 +11,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -60,8 +62,10 @@ public class RoleController {
                     content = @Content(mediaType = "application/json"))
     })
     @GetMapping("/roles")
-    public Page<RoleEntity> getRoles(final Pageable pageable) {
-        return this.roleService.findAll(pageable);
+    public Page<RoleEntity> getRoles(@RequestParam(required = false, defaultValue = "0") final int page,
+                                     @RequestParam(required = false, defaultValue = "6") final int size,
+                                     @RequestParam(required = false, defaultValue = "id") final String sort) {
+        return this.roleService.findAll(PageRequest.of(page, size, Sort.by(sort)));
     }
 
     /**

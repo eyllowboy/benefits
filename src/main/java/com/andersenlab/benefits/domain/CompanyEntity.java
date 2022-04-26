@@ -60,7 +60,7 @@ public class CompanyEntity {
     @JsonIgnore
     private List<DiscountEntity> discounts;
 
-    public CompanyEntity(String title, String description, String address, String phone, String link) {
+    public CompanyEntity(final String title,final String description,final String address,final String phone,final String link) {
         this.title = title;
         this.description = description;
         this.address = address;
@@ -68,7 +68,7 @@ public class CompanyEntity {
         this.link = link;
     }
 
-    public CompanyEntity(Long id, String title, String description, String address, String phone, String link) {
+    public CompanyEntity(final Long id,final String title,final String description,final String address,final String phone,final String link) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -80,12 +80,12 @@ public class CompanyEntity {
     @Override
     public String toString() {
         return "CompanyEntity{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", address='" + address + '\'' +
-                ", phone='" + phone + '\'' +
-                ", link='" + link + '\'' +
+                "id=" + this.id +
+                ", title='" + this.title + '\'' +
+                ", description='" + this.description + '\'' +
+                ", address='" + this.address + '\'' +
+                ", phone='" + this.phone + '\'' +
+                ", link='" + this.link + '\'' +
                 '}';
     }
 }

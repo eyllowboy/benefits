@@ -52,27 +52,27 @@ public class ControllerTestUtils {
     }
 
     public int getRndEntityPos() {
-        return (int) (random() * (listLength - 1) + 1);
+        return (int) (random() * (this.listLength - 1) + 1);
     }
 
     public CompanyEntity getCompany(final long num) {
         return (this.companyRepository.findAll().stream().filter(item ->
-                    Objects.equals(item.getTitle(), "Company" + num)).findFirst()
+                        Objects.equals(item.getTitle(), "Company" + num)).findFirst()
                 .orElse(
-                    this.companyRepository.save(new CompanyEntity(
-                    "Company" + num,
-                    "Description" + num,
-                    "Address" + num,
-                    "Phone" + num,
-                    "Link" + num)
-        )));
+                        this.companyRepository.save(new CompanyEntity(
+                                "Company" + num,
+                                "Description" + num,
+                                "Address" + num,
+                                "Phone" + num,
+                                "Link" + num)
+                        )));
     }
 
     public Set<CategoryEntity> getCategoryList() {
-        Set<CategoryEntity> result = new LinkedHashSet<>();
-        final int size = (int) (random() * (this.listLength - 1)  + 1);
+        final Set<CategoryEntity> result = new LinkedHashSet<>();
+        final int size = (int) (random() * (this.listLength - 1) + 1);
         for (long i = 1; i <= size; i++) {
-            CategoryEntity category = this.categoryRepository.findByTitle("Category" + i)
+            final CategoryEntity category = this.categoryRepository.findByTitle("Category" + i)
                     .orElse(new CategoryEntity("Category" + i));
             if (Objects.isNull(category.getId()))
                 this.categoryRepository.save(category);
@@ -91,8 +91,8 @@ public class ControllerTestUtils {
     }
 
     public Set<LocationEntity> getLocationList() {
-        Set<LocationEntity> result = new LinkedHashSet<>();
-        final int size = (int) (random() * (this.listLength - 1)  + 1);
+        final Set<LocationEntity> result = new LinkedHashSet<>();
+        final int size = (int) (random() * (this.listLength - 1) + 1);
         for (long i = 1; i <= size; i++)
             result.add(getLocation(i));
         return result;
@@ -104,7 +104,7 @@ public class ControllerTestUtils {
     }
 
     public List<RoleEntity> getRoleList() {
-        List<RoleEntity> result = new ArrayList<>(this.listLength);
+        final List<RoleEntity> result = new ArrayList<>(this.listLength);
         for (long i = 1; i <= this.listLength; i++)
             result.add(getRole(i));
         return result;
@@ -112,7 +112,7 @@ public class ControllerTestUtils {
 
     public UserEntity getUser(final long num) {
         return (this.userRepository.findByLogin("userLogin" + num).orElseGet(() -> {
-            UserEntity newUser = new UserEntity("userLogin" + num, getRole(num), getLocation(num));
+            final UserEntity newUser = new UserEntity("userLogin" + num, getRole(num), getLocation(num));
             if (Objects.isNull(newUser.getRoleEntity().getId()))
                 this.roleRepository.save(newUser.getRoleEntity());
             return newUser;
@@ -120,7 +120,7 @@ public class ControllerTestUtils {
     }
 
     public List<UserEntity> getUserList() {
-        List<UserEntity> result = new ArrayList<>(this.listLength);
+        final List<UserEntity> result = new ArrayList<>(this.listLength);
         for (long i = 1; i <= this.listLength; i++)
             result.add(getUser(i));
         return result;
@@ -146,7 +146,7 @@ public class ControllerTestUtils {
     }
 
     public List<DiscountEntity> getDiscountList() {
-        List<DiscountEntity> result = new ArrayList<>();
+        final List<DiscountEntity> result = new ArrayList<>();
         for (long i = 1; i <= this.listLength; i++) {
             result.add(getDiscount(i));
         }
@@ -175,7 +175,7 @@ public class ControllerTestUtils {
     }
 
     public MockMultipartFile newMockMultipartFile(final List<DiscountEntity> discounts) {
-        StringBuilder contents = new StringBuilder("number;company_title;type;category;image;company_description;company_address;company_phone;links;size;discount_type;discount_description;discount_condition;start_date;end_date;location");
+        final StringBuilder contents = new StringBuilder("number;company_title;type;category;image;company_description;company_address;company_phone;links;size;discount_type;discount_description;discount_condition;start_date;end_date;location");
         discounts.forEach(discount -> contents.append("\n").append(discountToString(discount)));
         return (new MockMultipartFile(
                 "file",
@@ -212,47 +212,47 @@ public class ControllerTestUtils {
     }
 
     public RoleEntity getRoleFromJson(final JSONObject role) throws JSONException {
-        Long roleId = Long.parseLong(role.getString("id"));
-        String roleName = role.getString("name");
-        String roleCode = role.getString("code");
+        final Long roleId = Long.parseLong(role.getString("id"));
+        final String roleName = role.getString("name");
+        final String roleCode = role.getString("code");
         return this.roleRepository.findById(roleId)
                 .orElse(new RoleEntity(roleId, roleName, roleCode));
     }
 
     public List<RoleEntity> getRolesFromJson(final String json) throws JSONException {
-        JSONArray jsonObjects = new JSONArray(json);
-        List<RoleEntity> result = new ArrayList<>(jsonObjects.length());
+        final JSONArray jsonObjects = new JSONArray(json);
+        final List<RoleEntity> result = new ArrayList<>(jsonObjects.length());
         for (int i = 0; i < jsonObjects.length(); i++)
             result.add(getRoleFromJson(jsonObjects.getJSONObject(i)));
         return result;
     }
 
     public LocationEntity getLocationFromJson(final JSONObject location) throws JSONException {
-        Long locationId = Long.parseLong(location.getString("id"));
-        String locationCountry = location.getString("country");
-        String locationCity = location.getString("city");
+        final Long locationId = Long.parseLong(location.getString("id"));
+        final String locationCountry = location.getString("country");
+        final String locationCity = location.getString("city");
         return this.locationRepository.findById(locationId)
                 .orElse(new LocationEntity(locationId, locationCountry, locationCity));
     }
 
     public Set<LocationEntity> getLocationsFromJson(final JSONObject json) throws JSONException {
-        JSONArray jsonObjects = new JSONArray(json);
-        Set<LocationEntity> result = new LinkedHashSet<>(jsonObjects.length());
+        final JSONArray jsonObjects = new JSONArray(json);
+        final Set<LocationEntity> result = new LinkedHashSet<>(jsonObjects.length());
         for (int i = 0; i < jsonObjects.length(); i++)
             result.add(getLocationFromJson(jsonObjects.getJSONObject(i)));
         return result;
     }
 
     public UserEntity getUserFromJson(final JSONObject user) throws JSONException {
-        Long userId = Long.parseLong(user.getString("id"));
+        final Long userId = Long.parseLong(user.getString("id"));
         return this.userRepository.findById(userId).orElseGet(() -> {
             try {
-                String userLogin = user.getString("login");
+                final String userLogin = user.getString("login");
                 return (new UserEntity(
                         userLogin,
                         getRoleFromJson(user.getJSONObject("roleEntity")),
                         getLocationFromJson(user.getJSONObject("location"))));
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 e.printStackTrace();
             }
             return null;
@@ -260,15 +260,15 @@ public class ControllerTestUtils {
     }
 
     public List<UserEntity> getUsersFromJson(final String json) throws JSONException {
-        JSONArray jsonObjects = new JSONArray(json);
-        List<UserEntity> result = new ArrayList<>(jsonObjects.length());
+        final JSONArray jsonObjects = new JSONArray(json);
+        final List<UserEntity> result = new ArrayList<>(jsonObjects.length());
         for (int i = 0; i < jsonObjects.length(); i++)
             result.add(getUserFromJson(jsonObjects.getJSONObject(i)));
         return result;
     }
 
     public CategoryEntity getCategoryFromJson(final JSONObject category) throws JSONException {
-        Long categoryId = Long.parseLong(category.getString("id"));
+        final Long categoryId = Long.parseLong(category.getString("id"));
         return this.categoryRepository.findById(categoryId).orElseGet(() -> {
             try {
                 return (new CategoryEntity(
@@ -276,7 +276,7 @@ public class ControllerTestUtils {
                         category.getString("title"),
                         null
                 ));
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 e.printStackTrace();
             }
             return null;
@@ -284,8 +284,8 @@ public class ControllerTestUtils {
     }
 
     public Set<CategoryEntity> getCategoriesFromJson(final JSONObject json) throws JSONException {
-        JSONArray jsonObjects = new JSONArray(json);
-        Set<CategoryEntity> result = new LinkedHashSet<>(jsonObjects.length());
+        final JSONArray jsonObjects = new JSONArray(json);
+        final Set<CategoryEntity> result = new LinkedHashSet<>(jsonObjects.length());
         for (int i = 0; i < jsonObjects.length(); i++) {
             result.add(getCategoryFromJson(jsonObjects.getJSONObject(i)));
         }
@@ -293,7 +293,7 @@ public class ControllerTestUtils {
     }
 
     public CompanyEntity getCompanyFromJson(final JSONObject company) throws JSONException {
-        Long companyId = Long.parseLong(company.getString("id"));
+        final Long companyId = Long.parseLong(company.getString("id"));
         return this.companyRepository.findById(companyId).orElseGet(() -> {
             try {
                 return (new CompanyEntity(
@@ -304,7 +304,7 @@ public class ControllerTestUtils {
                         company.getString("phone"),
                         company.getString("link")
                 ));
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 e.printStackTrace();
             }
             return null;
@@ -312,7 +312,7 @@ public class ControllerTestUtils {
     }
 
     public DiscountEntity getDiscountFromJson(final JSONObject discount) throws JSONException {
-        Long discountId = Long.parseLong(discount.getString("id"));
+        final Long discountId = Long.parseLong(discount.getString("id"));
         return this.discountRepository.findById(discountId).orElseGet(() -> {
             try {
                 return (new DiscountEntity(
@@ -329,7 +329,7 @@ public class ControllerTestUtils {
                         getCategoriesFromJson(discount.getJSONObject("categories")),
                         getCompanyFromJson(discount.getJSONObject("company_id")
                         )));
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 e.printStackTrace();
             }
             return null;
@@ -337,8 +337,8 @@ public class ControllerTestUtils {
     }
 
     public List<DiscountEntity> getDiscountsFromJson(final String json) throws JSONException {
-        JSONArray jsonObjects = new JSONArray(json);
-        List<DiscountEntity> result = new ArrayList<>(jsonObjects.length());
+        final JSONArray jsonObjects = new JSONArray(json);
+        final List<DiscountEntity> result = new ArrayList<>(jsonObjects.length());
         for (int i = 0; i < jsonObjects.length(); i++) {
             result.add(getDiscountFromJson(jsonObjects.getJSONObject(i)));
         }

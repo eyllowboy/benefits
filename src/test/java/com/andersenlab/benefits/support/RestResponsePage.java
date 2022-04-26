@@ -13,20 +13,19 @@ import java.util.List;
 public class RestResponsePage<T> extends PageImpl<T> {
 
 
-
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public RestResponsePage(@JsonProperty("content") List<T> content, @JsonProperty("number") int number, @JsonProperty("size") int size,
-                            @JsonProperty("totalElements") Long totalElements, @JsonProperty("pageable") JsonNode pageable, @JsonProperty("last") boolean last,
-                            @JsonProperty("totalPages") int totalPages, @JsonProperty("sort") JsonNode sort, @JsonProperty("first") boolean first,
-                            @JsonProperty("numberOfElements") int numberOfElements) {
+    public RestResponsePage(@JsonProperty("content") final List<T> content, @JsonProperty("number") final int number, @JsonProperty("size") final int size,
+                            @JsonProperty("totalElements") final Long totalElements, @JsonProperty("pageable") final JsonNode pageable, @JsonProperty("last") final boolean last,
+                            @JsonProperty("totalPages") final int totalPages, @JsonProperty("sort") final JsonNode sort, @JsonProperty("first") final boolean first,
+                            @JsonProperty("numberOfElements") final int numberOfElements) {
         super(content, PageRequest.of(number, size), totalElements);
     }
 
-    public RestResponsePage(List<T> content, Pageable pageable, long total) {
+    public RestResponsePage(final List<T> content, final Pageable pageable, final long total) {
         super(content, pageable, total);
     }
 
-    public RestResponsePage(List<T> content) {
+    public RestResponsePage(final List<T> content) {
         super(content);
     }
 
