@@ -107,23 +107,23 @@ public class UserController {
                                                  @RequestBody final UserEntity userEntity) {
 
         if (!Objects.isNull(userEntity.getRoleEntity()))
-            this.roleService.findById(userEntity.getRoleEntity().getId()).orElseThrow(() ->
-                new IllegalStateException("Role with this id was not found in the database"));
+            this.roleService.findById(userEntity.getRoleEntity().getId());
+//        .orElseThrow(() ->
+//                new IllegalStateException("Role with this id was not found in the database"));
         if (!Objects.isNull(userEntity.getLocation()))
-            this.locationService.findById(userEntity.getLocation().getId()).orElseThrow(() ->
-                    new IllegalStateException("Location with this id was not found in the database"));
+            this.locationService.findById(userEntity.getLocation().getId());
+//        .orElseThrow(() ->
+//                    new IllegalStateException("Location with this id was not found in the database"));
         if (!Objects.isNull(userEntity.getLogin())) {
             final Optional<UserEntity> theSameUser = this.userService.findByLogin(userEntity.getLogin());
             if (theSameUser.isPresent() && !theSameUser.get().getId().equals(id))
                 throw new IllegalStateException("User with such 'login' is already exists");
         }
-        final UserEntity existingUser = this.userService.findById(userEntity.getId()).orElseThrow(() ->
-                new IllegalStateException("User with this id was not found in the database"));
+        final UserEntity existingUser = this.userService.findById(userEntity.getId());
+//                .orElseThrow(() ->
+//                new IllegalStateException("User with this id was not found in the database"));
         BeanUtils.copyProperties(userEntity, existingUser, "id", "login");
-        this.userService.updateUserEntity(id,
-                    existingUser.getLogin(),
-                    existingUser.getRoleEntity(),
-                    existingUser.getLocation());
+        this.userService.update(id, existingUser);
         return ResponseEntity.ok(existingUser);
     }
 
@@ -153,12 +153,12 @@ public class UserController {
         this.userService.findByLogin(user.getLogin()).ifPresent(foundUser -> {
             throw new IllegalStateException("User with such 'login' is already exists");}
         );
-        this.roleService.findById(user.getRoleEntity().getId()).orElseThrow(() -> {
-            throw new IllegalStateException("Role with this id was not found in the database");}
-        );
-        this.locationService.findById(user.getLocation().getId()).orElseThrow(() -> {
-            throw new IllegalStateException("Location with this id was not found in the database");}
-        );
+        this.roleService.findById(user.getRoleEntity().getId());
+//        .orElseThrow(() -> {
+//            throw new IllegalStateException("Role with this id was not found in the database");});
+        this.locationService.findById(user.getLocation().getId());
+//        .orElseThrow(() -> {
+//            throw new IllegalStateException("Location with this id was not found in the database");});
         final UserEntity savedUserEntity = this.userService.save(user);
         return new ResponseEntity<>(savedUserEntity, HttpStatus.CREATED);
     }
@@ -180,10 +180,9 @@ public class UserController {
     })
     @GetMapping("/users/{id}")
     public UserEntity getUser(@PathVariable @DecimalMin("1") final Long id) {
-        final Optional<UserEntity> userEntity = this.userService.findById(id);
-
-        return userEntity.orElseThrow(
-                () -> new IllegalStateException("User with this id was not found in the database"));
+        return this.userService.findById(id);
+//        return userEntity.orElseThrow(
+//                () -> new IllegalStateException("User with this id was not found in the database"));
     }
 
     /**
@@ -203,9 +202,9 @@ public class UserController {
     })
     @DeleteMapping("/users/{id}")
     public void deleteUser(@PathVariable @DecimalMin("1") final Long id) {
-        this.userService.findById(id)
-                .orElseThrow(
-                        () -> new IllegalStateException("User with this id was not found in the database"));
+        this.userService.findById(id);
+//                .orElseThrow(
+//                        () -> new IllegalStateException("User with this id was not found in the database"));
 
         this.userService.delete(id);
     }

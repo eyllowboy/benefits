@@ -28,20 +28,17 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import static com.andersenlab.benefits.service.impl.ValidateUtils.*;
 import static java.lang.Math.random;
 
-import java.util.Objects;
+import java.util.Optional;
 
-import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @Testcontainers
@@ -81,73 +78,73 @@ class CompanyControllerTest {
     }
 
     @BeforeEach
-    private void deleteAndSaveCompanyInContainer() {
+    public void clearData() {
         this.ctu.clearTables();
-        createAndSaveCompanyInContainer();
-    }
-
-    private void createAndSaveCompanyInContainer() {
-        final int size = 5;
-        for (long i = 1; i <= size; i++) {
-            final CompanyEntity company = new CompanyEntity("title" + i, "description" + i, "address" + i, "phone" + i, "title" + i);
-            this.companyRepository.save(company);
-        }
     }
 
     @Test
-    void whenAddCompanyWithPositiveScenario() throws Exception {
+    void whenAddCompanySuccess() throws Exception {
         // given
-        final CompanyEntity company = new CompanyEntity(6L, "company6", "description6", "address6", "8900-00-00", "link06");
+        final CompanyEntity company = new CompanyEntity("title6", "description6", "address6", "phone6", "link6");
+        final MvcResult result;
+
         // when
-        this.mockMvc.perform(
-                        post("/companies")
-                                .content(this.objectMapper.writeValueAsString(company))
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .with(csrf()))
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                .post("/companies")
+                .content(this.objectMapper.writeValueAsString(company))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf()))
                 .andDo(print())
-                // then
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$", notNullValue()))
-                .andExpect(jsonPath("$.id", isA(Number.class)))
-                .andExpect(jsonPath("$.title", is("company6")));
+                .andReturn();
+
+        // then
+        assertEquals(201, result.getResponse().getStatus());
+        assertEquals(1, this.companyRepository.findAll().size());
+        assertTrue(this.ctu.isCompaniesEquals(
+                company,
+                this.ctu.getCompanyFromJson(new JSONObject(result.getResponse().getContentAsString()))));
     }
 
     @Test
-    void whenGetCompanyByIdIsOk() throws Exception {
+    void whenGetCompanyByIdSuccess() throws Exception {
         // given
-        final String companyTitle = "title6";
-        final CompanyEntity company = new CompanyEntity(companyTitle, "description6", "address6", "phone6", "title6");
-        final CompanyEntity saveEntity = this.companyRepository.save(company);
+        final CompanyEntity company = this.ctu.getCompanyList().get(this.ctu.getRndEntityPos() - 1);
+        final MvcResult result;
+
         // when
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/companies/{id}", saveEntity.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .with(csrf()))
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                .get("/companies/{id}", company.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf()))
                 .andDo(print())
-                // then
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", notNullValue()))
-                .andExpect(jsonPath("$.id", is(saveEntity.getId().intValue())))
-                .andExpect(jsonPath("$.title", is(companyTitle)));
+                .andReturn();
+
+        // then
+        assertEquals(200, result.getResponse().getStatus());
+        assertTrue(this.ctu.isCompaniesEquals(
+                company,
+                this.ctu.getCompanyFromJson(new JSONObject(result.getResponse().getContentAsString()))));
     }
 
     @Test
     void whenGetSomeSizeCompanyIsOk() throws Exception {
         // given
+        this.ctu.getCompanyList();
         final int rndSize = (int) (random() * (5 - 1) + 1);
         final Page<CompanyEntity> foundCompany = this.companyRepository.findAll(PageRequest.of(0, rndSize));
         final MvcResult result;
+
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/companies?page=0&size=" + rndSize)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .with(csrf()))
+                .get("/companies?page=0&size=" + rndSize)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf()))
                 .andDo(print())
                 .andReturn();
+
         // then
         final RestResponsePage<CompanyEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
+                new TypeReference<>() {});
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(foundCompany, pageResult);
     }
@@ -155,124 +152,139 @@ class CompanyControllerTest {
     @Test
     void whenGetCompanyWithIncorrectId() {
         //given
-        final CompanyEntity company = new CompanyEntity("title6", "description6", "address6", "phone6", "title6");
-        final CompanyEntity saveEntity = this.companyRepository.save(company);
-        final long notExistId = saveEntity.getId() + 1;
+        final Long id = 0L;
+
         //when
         final NestedServletException NestedServletException = assertThrows(NestedServletException.class,
-                () -> this.mockMvc.perform(get("/companies/{id}", notExistId).with(csrf())));
+                () -> this.mockMvc.perform(get("/companies/{id}", id).with(csrf())));
         //then
         assertEquals(IllegalStateException.class,
                 NestedServletException.getCause().getClass());
-        assertEquals("Company with this id was not found in the database.",
+        assertEquals(errIdNotFoundMessage("Company", id),
                 NestedServletException.getCause().getMessage());
     }
 
     @Test
-    void whenUpdatedCompanyPositiveScenario() throws Exception {
+    void whenUpdateCompanySuccess() throws Exception {
         //given
-        final CompanyEntity company = new CompanyEntity("title6", "description6", "address6", "phone6", "title6");
-        final CompanyEntity saveEntity = this.companyRepository.save(company);
-        final CompanyEntity updateCompany = new CompanyEntity(saveEntity.getId(), "company22", "description22", "address22", "8911-11-11", "link22");
-        final String companyEntity = this.objectMapper.writeValueAsString(updateCompany);
+        final CompanyEntity company = this.ctu.getCompanyList().get(this.ctu.getRndEntityPos() - 1);
+        company.setTitle("New Title");
+        final MvcResult result;
+
         //when
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .patch("/companies/{id}", saveEntity.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(companyEntity)
-                        .with(csrf()))
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                .patch("/companies/{id}", company.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(this.objectMapper.writeValueAsString(company))
+                .with(csrf()))
                 .andDo(print())
-                //then
-                .andExpect(status().isOk());
+                .andReturn();
+
+        //then
+        assertEquals(200, result.getResponse().getStatus());
+        assertTrue(this.ctu.isCompaniesEquals(
+                company,
+                this.companyRepository.findById(company.getId()).orElseThrow()));
     }
 
     @Test
-    void whenUpdatedCompanyNegativeScenario() throws Exception {
+    void whenUpdateCompanyTitleExists() {
         // when
-        final CompanyEntity company = new CompanyEntity("title6", "description6", "address6", "phone6", "title6");
-        final CompanyEntity saveEntity = this.companyRepository.save(company);
-        final long notExistId = saveEntity.getId() + 1;
-        final CompanyEntity updatedCompany = new CompanyEntity(notExistId, "company9", "description9", "address9", "8911-11-11", "link9");
-        final String companyEntity = this.objectMapper.writeValueAsString(updatedCompany);
+        this.ctu.getCompany(1);
+        final CompanyEntity company = this.ctu.getCompany(2);
+        company.setTitle("Company1");
+
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
                 () -> this.mockMvc.perform(MockMvcRequestBuilders
-                        .patch("/companies/{id}", notExistId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(companyEntity)
-                        .with(csrf())));
+                    .patch("/companies/{id}", company.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(this.objectMapper.writeValueAsString(company))
+                    .with(csrf())));
+
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-        assertEquals("The company with id: " + notExistId + " was not found in the database.", nestedServletException.getCause().getMessage());
+        assertEquals(errAlreadyExistMessage("Company", "title", company.getTitle()),
+                nestedServletException.getCause().getMessage());
     }
 
     @Test
-    public void whenDeletePositiveScenarioWithoutDiscount() throws Exception {
+    public void whenDeleteCompanySuccess() throws Exception {
         // given
-        final CompanyEntity company = new CompanyEntity("title6", "description6", "address6", "phone6", "title6");
-        final CompanyEntity saveEntity = this.companyRepository.save(company);
+        final CompanyEntity company = this.ctu.getCompanyList().get(this.ctu.getRndEntityPos() - 1);
+        final int sizeBeforeDelete = this.companyRepository.findAll().size();
+        final MvcResult result;
+
         // when
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/companies/{id}", saveEntity.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .with(csrf()))
-                .andDo(print())
-                // then
-                .andExpect(status().isOk());
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                    .delete("/companies/{id}", company.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(csrf()))
+                    .andDo(print())
+                    .andReturn();
+
+        // then
+        assertEquals(200, result.getResponse().getStatus());
+        assertEquals(sizeBeforeDelete - 1, this.companyRepository.findAll().size());
+        assertEquals(Optional.empty(), this.companyRepository.findById(company.getId()));
     }
 
     @Test
-    public void whenDeleteNegativeScenario() {
+    public void whenDeleteCompanyIdNotExists() {
+        // given
+        final Long id = Long.MAX_VALUE;
+
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
                 () -> this.mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/companies/{id}", Long.MAX_VALUE)
+                        .delete("/companies/{id}", id)
                         .with(csrf())));
+
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-        assertEquals("The company with id: " + Long.MAX_VALUE + " was not found in the database.",
+        assertEquals(errIdNotFoundMessage("Company", id),
                 nestedServletException.getCause().getMessage());
     }
 
     @Test
     public void whenDeleteCompanyFailHasActiveDiscounts() {
         // given
-        final CompanyEntity companyWithActiveDiscount = this.companyRepository.save(this.ctu.getCompany(6));
         final DiscountEntity discount = this.ctu.getDiscount(this.ctu.getRndEntityPos());
-        discount.setCompany(companyWithActiveDiscount);
+        final CompanyEntity company = this.companyRepository.save(discount.getCompany());
         this.discountRepository.save(discount);
-        final Long id = companyWithActiveDiscount.getId();
+
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/companies/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .with(csrf())));
+                    .delete("/companies/{id}", company.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(csrf())));
+
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-        assertEquals("There is active discounts in this Category in database",
+        assertEquals(errAssociatedEntity("discounts", "Company"),
                 nestedServletException.getCause().getMessage());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "    "})
-    public void whenAddCompanyWrongObligatoryFields(final String title) throws Exception {
+    public void whenAddCompanyWrongObligatoryFields(final String title) {
         // given
         final CompanyEntity company = new CompanyEntity(title, "description6", "address6", "phone6", "link6");
-        final MvcResult result;
+        company.setTitle(title);
 
         // when
-        result = this.mockMvc.perform(MockMvcRequestBuilders
-                        .post("/companies")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(this.objectMapper.writeValueAsString(company))
-                        .with(csrf()))
-                .andReturn();
+        final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
+                this.mockMvc.perform(MockMvcRequestBuilders
+                    .post("/companies")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(this.objectMapper.writeValueAsString(company))
+                    .with(csrf()))
+                    .andReturn());
 
-        // then*
-        assertEquals(400, result.getResponse().getStatus());
-        final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
-        assertTrue(errorResult.contains("must not be blank"));
+        // then
+        assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
+        assertTrue(nestedServletException.getCause().getMessage().contains("has no data"));
     }
 
     @ParameterizedTest
@@ -286,11 +298,11 @@ class CompanyControllerTest {
 
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                        .post("/companies")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(this.objectMapper.writeValueAsString(company))
-                        .with(csrf()))
-                .andReturn();
+                    .post("/companies")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(this.objectMapper.writeValueAsString(company))
+                    .with(csrf()))
+                    .andReturn();
 
         // then
         assertEquals(201, result.getResponse().getStatus());
@@ -302,33 +314,32 @@ class CompanyControllerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"0", "101"})
-    public void whenAddCompanyWrongFieldSize(final Integer stringSize) throws Exception {
+    @ValueSource(strings = {"101"})
+    public void whenAddCompanyWrongFieldSize(final Integer stringSize) {
         // given
         final String fieldValue = "a".repeat(stringSize);
         final CompanyEntity company = this.ctu.getCompany(this.ctu.getRndEntityPos());
         company.setTitle(fieldValue);
-        final MvcResult result;
 
         // when
-        result = this.mockMvc.perform(MockMvcRequestBuilders
-                        .post("/companies")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(this.objectMapper.writeValueAsString(company))
-                        .with(csrf()))
-                .andReturn();
+        final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
+                this.mockMvc.perform(MockMvcRequestBuilders
+                    .post("/companies")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(this.objectMapper.writeValueAsString(company))
+                    .with(csrf()))
+                    .andReturn());
 
         // then
-        assertEquals(400, result.getResponse().getStatus());
-        final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
-        assertTrue(errorResult.contains("must be between"));
+        assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
+        assertTrue(nestedServletException.getCause().getMessage().contains("must be between"));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"51", "101"})
-    public void whenUpdateCompanyWrongFieldSize(final Integer stringSize) throws Exception {
+    public void whenUpdateCompanyWrongFieldSize(final Integer stringSize) {
         // given
-        final CompanyEntity company = this.companyRepository.save(this.ctu.getCompany(this.ctu.getRndEntityPos()));
+        final CompanyEntity company = this.ctu.getCompany(this.ctu.getRndEntityPos());
         final String fieldValue = "a".repeat(stringSize);
         company.setTitle(fieldValue);
 

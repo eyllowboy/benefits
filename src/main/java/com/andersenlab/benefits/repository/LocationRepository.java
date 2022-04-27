@@ -17,29 +17,19 @@ import java.util.Optional;
 
 @Repository
 public interface LocationRepository extends JpaRepository<LocationEntity, Long> {
+    @QueryHints(@QueryHint(name = org.hibernate.annotations.QueryHints.CACHEABLE, value = "true"))
+    Page<LocationEntity> findByCountry(final String country, final Pageable pageable);
 
     @QueryHints(@QueryHint(name = org.hibernate.annotations.QueryHints.CACHEABLE, value = "true"))
-    @Query("FROM LocationEntity loc WHERE (loc.country = :country)")
-    Page<LocationEntity> findByCountry(@Param(value = "country") final String country, final Pageable pageable);
+    Optional<LocationEntity> findByCity(final String city);
 
     @QueryHints(@QueryHint(name = org.hibernate.annotations.QueryHints.CACHEABLE, value = "true"))
-    @Query("FROM LocationEntity loc WHERE (loc.country = :country) AND (loc.city = :city)")
-    Optional<LocationEntity> findByCity(@Param(value = "country") final String country,
-                                        @Param(value = "city") final String city);
+    Optional<LocationEntity> findByCountryAndCity(final String country, final String city);
 
     @QueryHints(@QueryHint(name = org.hibernate.annotations.QueryHints.CACHEABLE, value = "true"))
-    @Query("FROM LocationEntity loc WHERE (loc.country = :country) AND (LOWER(loc.city) LIKE LOWER(CONCAT(:filterMask, '%'))) ORDER BY loc.city")
-    Page<LocationEntity> findByFirstLetters(@Param(value = "country") final String country,
-                                            @Param(value = "filterMask") final String filterMask,
-                                            final Pageable pageable);
+    Page<LocationEntity> findByCountryAndCityStartsWith(final String country, final String cityMask, final Pageable pageable);
 
+    @QueryHints(@QueryHint(name = org.hibernate.annotations.QueryHints.CACHEABLE, value = "true"))
     @Query("FROM LocationEntity loc JOIN FETCH loc.discounts WHERE loc.id = :id")
     Optional<LocationEntity> findWithAssociatedDiscounts(@Param(value = "id") final Long id);
-
-    @Modifying
-    @Query("UPDATE LocationEntity loc SET loc.country = :country, loc.city = :city where loc.id = :id")
-    void updateLocationEntity(@Param(value = "id") final Long id,
-                              @Param(value = "country") final String country,
-                              @Param(value = "city") final String city);
-
 }

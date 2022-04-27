@@ -25,12 +25,6 @@ public interface CategoryService extends CrudService<CategoryEntity>{
     Optional<CategoryEntity> findByTitle(final String title);
 
     /**
-     * @param id the id of {@link CategoryEntity} in the database, not null
-     * @param title the title of {@link CategoryEntity} stored in the database, not null
-     */
-    void updateCategoryEntity(final Long id, final String title);
-
-    /**
      * Method to get {@link CategoryEntity} with EAGER fetch associated {@link DiscountEntity}
      * @param id the id of {@link CategoryEntity} need to load, not null
      * @return {@link CategoryEntity} with given id, error if id role found

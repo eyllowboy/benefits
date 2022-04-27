@@ -61,7 +61,7 @@ public class RoleServiceTest {
         });
 
         // when
-        final RoleEntity foundRoleEntity = this.roleService.findById((long) rolePos).orElseThrow();
+        final RoleEntity foundRoleEntity = this.roleService.findById((long) rolePos);
 
         // then
         assertEquals(rolesList.get(rolePos), foundRoleEntity);
@@ -118,7 +118,7 @@ public class RoleServiceTest {
         }).when(this.roleRepository).updateRoleEntity(anyLong(), anyString(), anyString());
 
         // when
-        this.roleService.updateRoleEntity((long) rolePos, role.getName(), role.getCode());
+        this.roleService.update((long) rolePos, role);
 
         // then
         assertEquals(role, rolesList.get(rolePos));

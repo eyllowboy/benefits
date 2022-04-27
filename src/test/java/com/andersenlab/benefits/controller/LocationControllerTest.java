@@ -1,6 +1,5 @@
 package com.andersenlab.benefits.controller;
 
-import com.andersenlab.benefits.domain.CompanyEntity;
 import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.repository.*;
@@ -28,9 +27,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.Objects;
 import java.util.Set;
 
+import static com.andersenlab.benefits.service.impl.ValidateUtils.*;
 import static java.lang.Math.random;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -108,8 +107,7 @@ public class LocationControllerTest {
                 .andReturn();
         // then
         final RestResponsePage<LocationEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
+                new TypeReference<>() {});
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(foundCompany, pageResult);
     }
@@ -130,41 +128,48 @@ public class LocationControllerTest {
 
     @Test
     public void whenGetLocationByIdSuccess() throws Exception {
-        final LocationEntity lastLocationFromContainer = this.locationRepository.findByCity("Country5", "City5").get();
+        // given
+        final LocationEntity location = this.locationRepository
+                .findByCountryAndCity("Country5", "City5").orElseThrow();
+
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/locations/{id}", lastLocationFromContainer.getId())
+                        .get("/locations/{id}", location.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andDo(print())
                 // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
-                .andExpect(jsonPath("$.id", is(lastLocationFromContainer.getId().intValue())))
-                .andExpect(jsonPath("$.country", is(lastLocationFromContainer.getCountry())))
-                .andExpect(jsonPath("$.city", is(lastLocationFromContainer.getCity())));
+                .andExpect(jsonPath("$.id", is(location.getId().intValue())))
+                .andExpect(jsonPath("$.country", is(location.getCountry())))
+                .andExpect(jsonPath("$.city", is(location.getCity())));
     }
 
     @Test
-    public void whenGetLocationByIdFailIdNotExists() throws Exception {
+    public void whenGetLocationByIdFailIdNotExists() {
         // given
-        final LocationEntity lastLocationFromContainer = this.locationRepository.findByCity("Country5", "City5").get();
-        final long notExistId = lastLocationFromContainer.getId() + 1;
+        final LocationEntity location = this.locationRepository
+                .findByCountryAndCity("Country5", "City5").orElseThrow();
+        final long notExistId = location.getId() + 1;
+
         // when
         final NestedServletException NestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(get("/locations/{id}", notExistId).with(csrf())));
         // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
-        assertEquals("Location with this id was not found in the database",
+        assertEquals(errIdNotFoundMessage("Location", notExistId),
                 NestedServletException.getCause().getMessage());
     }
 
     @Test
     public void whenGetLocationByCitySuccess() throws Exception {
         // given
-        final LocationEntity lastLocationFromContainer = this.locationRepository.findByCity("Country5", "City5").get();
-        final String country = lastLocationFromContainer.getCountry();
-        final String city = lastLocationFromContainer.getCity();
+        final LocationEntity location = this.locationRepository
+                .findByCountryAndCity("Country5", "City5").orElseThrow();
+        final String country = location.getCountry();
+        final String city = location.getCity();
+
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/locations/{country}/{city}", "Country5", "City5")
@@ -179,7 +184,7 @@ public class LocationControllerTest {
     }
 
     @Test
-    public void whenGetLocationByCityFailNotExists() throws Exception {
+    public void whenGetLocationByCityFailNotExists() {
         // given
         final String country = "Россия";
         final String city = "Тьмутаракань";
@@ -193,7 +198,7 @@ public class LocationControllerTest {
                         .andDo(print()));
         // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
-        assertEquals("Location with city name '" + city + "' and country '" + country + "' was not found in the database",
+        assertEquals(errEntityNotFoundMessage("Location", "city name", city),
                 NestedServletException.getCause().getMessage());
     }
 
@@ -217,9 +222,10 @@ public class LocationControllerTest {
     }
 
     @Test
-    public void whenAddLocationFailLocationExists() throws Exception {
+    public void whenAddLocationFailLocationExists() {
         // given
-        final LocationEntity location = this.locationRepository.findByCity("Country5", "City5").get();
+        final LocationEntity location = this.locationRepository
+                .findByCountryAndCity("Country5", "City5").orElseThrow();
 
         // when
         final NestedServletException NestedServletException = assertThrows(NestedServletException.class, () ->
@@ -231,19 +237,21 @@ public class LocationControllerTest {
 
         // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
-        assertEquals("Location with city name '" + location.getCity() + "' and country '" + location.getCountry() + "' already exists",
+        assertEquals(errAlreadyExistMessage("Location", "city name", location.getCity()),
                 NestedServletException.getCause().getMessage());
     }
 
     @Test
     public void whenUpdateLocationSuccess() throws Exception {
         // given
-        final LocationEntity lastLocationFromContainer = this.locationRepository.findByCity("Country5", "City5").get();
-        lastLocationFromContainer.setCountry("Россия");
-        final String locationEntity = this.objectMapper.writeValueAsString(lastLocationFromContainer);
+        final LocationEntity location = this.locationRepository
+                .findByCountryAndCity("Country5", "City5").orElseThrow();
+        location.setCountry("Россия");
+        final String locationEntity = this.objectMapper.writeValueAsString(location);
+
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .patch("/locations/{id}", lastLocationFromContainer.getId())
+                        .patch("/locations/{id}", location.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(locationEntity)
                         .with(csrf()))
@@ -253,33 +261,34 @@ public class LocationControllerTest {
     }
 
     @Test
-    public void whenUpdateLocationFailIdNotExists() throws Exception {
+    public void whenUpdateLocationFailIdNotExists() {
         // given
-        final LocationEntity lastLocationFromContainer = this.locationRepository.findByCity("Country5", "City5").get();
-        lastLocationFromContainer.setId(lastLocationFromContainer.getId() + 1);
-        lastLocationFromContainer.setCity(lastLocationFromContainer.getCity() + 1);
-        final String locationEntity = this.objectMapper.writeValueAsString(lastLocationFromContainer);
+        final LocationEntity location = this.locationRepository
+                .findByCountryAndCity("Country5", "City5").orElseThrow();
+        location.setCity("New City");
+        location.setId(location.getId() + 1);
+
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders
-                        .patch("/locations/{id}", lastLocationFromContainer.getId())
+                        .patch("/locations/{id}", location.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(locationEntity)
+                        .content(this.objectMapper.writeValueAsString(location))
                         .with(csrf())));
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-        assertEquals("Location with this id was not found in the database",
+        assertEquals(errIdNotFoundMessage("Location", location.getId()),
                 nestedServletException.getCause().getMessage());
     }
 
     @Test
     public void whenDeleteLocationWithoutDiscountsSuccess() throws Exception {
         // given
-        final LocationEntity lastLocationFromContainer = this.locationRepository.findByCity("Country5", "City5").get();
-        final Long id = lastLocationFromContainer.getId();
+        final LocationEntity location = this.ctu.getLocation(this.ctu.getRndEntityPos());
+
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/locations/{id}", id)
+                        .delete("/locations/{id}", location.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andDo(print())
@@ -288,9 +297,9 @@ public class LocationControllerTest {
     }
 
     @Test
-    public void whenDeleteLocationFailHasActiveDiscounts() throws Exception {
+    public void whenDeleteLocationFailHasActiveDiscounts() {
         // given
-        final LocationEntity location = this.locationRepository.save(this.ctu.getLocation(this.ctu.getRndEntityPos()));
+        final LocationEntity location = this.ctu.getLocation(this.ctu.getRndEntityPos());
         final DiscountEntity discount = this.ctu.getDiscount(this.ctu.getRndEntityPos());
         discount.setArea(Set.of(location));
         this.discountRepository.save(discount);
@@ -302,15 +311,17 @@ public class LocationControllerTest {
                         .with(csrf())));
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-        assertEquals("There is active discounts in this Location in database",
+        assertEquals(errAssociatedEntity("discounts", "Location"),
                 nestedServletException.getCause().getMessage());
     }
 
     @Test
-    public void whenDeleteLocationFailIdNotExists() throws Exception {
+    public void whenDeleteLocationFailIdNotExists() {
         // given
-        final LocationEntity lastLocationFromContainer = this.locationRepository.findByCity("Country5", "City5").get();
-        final Long id = lastLocationFromContainer.getId() + 1;
+        final LocationEntity location = this.locationRepository
+                .findByCountryAndCity("Country5", "City5").orElseThrow();
+        final Long id = location.getId() + 1;
+
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders
@@ -319,7 +330,7 @@ public class LocationControllerTest {
                         .with(csrf())));
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-        assertEquals("Location with id: '" + id + "' was not found in the database",
+        assertEquals(errIdNotFoundMessage("Location", id),
                 nestedServletException.getCause().getMessage());
     }
 
@@ -340,23 +351,21 @@ public class LocationControllerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "    "})
-    public void whenAddLocationWrongObligatoryFields(final String city) throws Exception {
+    public void whenAddLocationWrongObligatoryFields(final String city) {
         final LocationEntity location = this.ctu.getLocation(this.ctu.getRndEntityPos());
         location.setCity(city);
-        final MvcResult result;
 
         // when
-        result = this.mockMvc.perform(MockMvcRequestBuilders
+        final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
+                this.mockMvc.perform(MockMvcRequestBuilders
                         .post("/locations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(location))
-                        .with(csrf()))
-                .andReturn();
+                        .with(csrf())));
 
         // then
-        assertEquals(400, result.getResponse().getStatus());
-        final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
-        assertTrue(errorResult.contains("must not be blank"));
+        assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
+        assertTrue(nestedServletException.getCause().getMessage().contains("has no data"));
     }
 
     @ParameterizedTest
@@ -386,40 +395,17 @@ public class LocationControllerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"0", "150"})
-    public void whenAddLocationWrongFieldSize(final Integer stringSize) throws Exception {
+    @ValueSource(strings = {"50", "150"})
+    public void whenAddLocationWrongFieldSize(final Integer stringSize) {
         // given
         final String fieldValue = "a".repeat(stringSize);
         final LocationEntity location = this.ctu.getLocation(this.ctu.getRndEntityPos());
-        location.setCountry(fieldValue);
-        final MvcResult result;
-
-        // when
-        result = this.mockMvc.perform(MockMvcRequestBuilders
-                        .post("/locations")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(this.objectMapper.writeValueAsString(location))
-                        .with(csrf()))
-                .andReturn();
-
-        // then
-        assertEquals(400, result.getResponse().getStatus());
-        final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
-        assertTrue(errorResult.contains("must be between"));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"50", "150"})
-    public void whenUpdateLocationWrongFieldSize(final Integer stringSize) {
-        // given
-        final LocationEntity location = this.locationRepository.save(this.ctu.getLocation(this.ctu.getRndEntityPos()));
-        final String fieldValue = "a".repeat(stringSize);
-        location.setCountry(fieldValue);
+        location.setCity(fieldValue);
 
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders
-                        .patch("/locations/{id}", location.getId())
+                        .post("/locations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(location))
                         .with(csrf())));

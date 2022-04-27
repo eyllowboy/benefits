@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static com.andersenlab.benefits.service.impl.ValidateUtils.errIdNotFoundMessage;
 import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntityFieldsAnnotations;
 
 /**
@@ -37,8 +38,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<UserEntity> findById(final Long id) {
-        return this.userRepository.findById(id);
+    public UserEntity findById(final Long id) {
+        return this.userRepository.findById(id).orElseThrow(() ->
+                new IllegalStateException(errIdNotFoundMessage("User", id)));
     }
 
     @Override
@@ -54,10 +56,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUserEntity(final Long id, final String login, final RoleEntity roleEntity, final LocationEntity location) {
-        final UserEntity user = new UserEntity(id, login, roleEntity, location);
+    public UserEntity update(final Long id, final UserEntity user) {
         validateEntityFieldsAnnotations(user, false);
         this.userRepository.updateUserEntity(user.getId(), user.getLogin(), user.getRoleEntity(), user.getLocation());
+        return user;
     }
 
     @Override

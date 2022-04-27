@@ -21,12 +21,4 @@ public interface UserService extends CrudService<UserEntity> {
      * @return the {@link UserEntity} corresponding given login from database, error if the login not found
      */
     Optional<UserEntity> findByLogin(final String login);
-    
-    /**
-     * @param id the id of {@link UserEntity} in the database, not null
-     * @param login the login of {@link UserEntity} stored in the database, not null
-     * @param roleEntity the {@link RoleEntity} assigned to the {@link UserEntity}, not null
-     * @param location the {@link LocationEntity} assigned to the {@link UserEntity}, not null
-     */
-    void updateUserEntity(final Long id, final String login, final RoleEntity roleEntity, final LocationEntity location);
 }

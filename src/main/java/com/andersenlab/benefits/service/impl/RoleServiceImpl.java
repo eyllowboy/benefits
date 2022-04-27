@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static com.andersenlab.benefits.service.impl.ValidateUtils.errIdNotFoundMessage;
 import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntityFieldsAnnotations;
 
 /**
@@ -35,8 +36,9 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Optional<RoleEntity> findById(final Long id) {
-        return this.roleRepository.findById(id);
+    public RoleEntity findById(final Long id) {
+        return this.roleRepository.findById(id).orElseThrow(() ->
+                new IllegalStateException(errIdNotFoundMessage("Role", id)));
     }
 
     @Override
@@ -52,10 +54,10 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public void updateRoleEntity(final Long id, final String name, final String code) {
-        final RoleEntity role = new RoleEntity(id, name, code);
+    public RoleEntity update(final Long id, final RoleEntity role) {
         validateEntityFieldsAnnotations(role, false);
         this.roleRepository.updateRoleEntity(role.getId(), role.getName(), role.getCode());
+        return role;
     }
 
     @Override

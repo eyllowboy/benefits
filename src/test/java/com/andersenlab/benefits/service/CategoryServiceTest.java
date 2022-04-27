@@ -57,9 +57,9 @@ public class CategoryServiceTest {
         final CategoryEntity categoryEntity = new CategoryEntity("Категория 10");
         // when
         when(this.categoryRepository.findById(1L)).thenReturn(Optional.of(categoryEntity));
-        final Optional<CategoryEntity> foundCategory = this.categoryService.findById(1L);
+        final CategoryEntity foundCategory = this.categoryService.findById(1L);
         // then
-        assertEquals(Optional.of(categoryEntity), foundCategory);
+        assertEquals(categoryEntity, foundCategory);
         verify(this.categoryRepository, times(1)).findById(1L);
     }
 
@@ -69,7 +69,7 @@ public class CategoryServiceTest {
         final CategoryEntity categoryEntity = new CategoryEntity("Категория 100");
         // when
         when(this.categoryRepository.save(any(CategoryEntity.class))).thenReturn(categoryEntity);
-        final CategoryEntity savedCategory = (CategoryEntity) this.categoryService.save(categoryEntity);
+        final CategoryEntity savedCategory = this.categoryService.save(categoryEntity);
         // then
         assertEquals(categoryEntity, savedCategory);
         verify(this.categoryRepository, times(1)).save(categoryEntity);
