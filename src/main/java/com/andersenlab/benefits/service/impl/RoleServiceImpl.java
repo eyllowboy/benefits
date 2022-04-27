@@ -3,12 +3,16 @@ package com.andersenlab.benefits.service.impl;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.repository.RoleRepository;
 import com.andersenlab.benefits.service.RoleService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import javax.transaction.Transactional;
+import java.util.Objects;
 import java.util.Optional;
+
 import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntityFieldsAnnotations;
 
 /**
@@ -47,19 +51,34 @@ public class RoleServiceImpl implements RoleService {
     public RoleEntity save(final RoleEntity role) {
         role.setId(null);
         validateEntityFieldsAnnotations(role, true);
+        this.findByCode(role.getCode()).ifPresent(roleEntity -> {
+            throw new IllegalStateException("Role with such 'code' is already exists");}
+        );
         return this.roleRepository.save(role);
     }
 
     @Override
     @Transactional
-    public void updateRoleEntity(final Long id, final String name, final String code) {
-        final RoleEntity role = new RoleEntity(id, name, code);
+    public RoleEntity update(final Long id, final RoleEntity roleEntity) {
+        if (!Objects.isNull(roleEntity.getCode())) {
+            final Optional<RoleEntity> theSameCodeRole = this.findByCode(roleEntity.getCode());
+            if (theSameCodeRole.isPresent() && (!theSameCodeRole.get().getId().equals(id)))
+                throw new IllegalStateException("Role with such 'code' is already exists");
+        }
+        final RoleEntity existingRole = this.findById(id);
+        BeanUtils.copyProperties(roleEntity, existingRole, "id");
+        final RoleEntity role = new RoleEntity(id, existingRole.getName(), existingRole.getCode());
         validateEntityFieldsAnnotations(role, false);
         this.roleRepository.updateRoleEntity(role.getId(), role.getName(), role.getCode());
+        return role;
     }
 
     @Override
     public void delete(final Long id) {
+        this.findById(id);
+        final Optional<RoleEntity> roleEntity = this.findWithAssociatedUsers(id);
+        if (roleEntity.isPresent() && roleEntity.get().getUsers().size() > 0)
+            throw new IllegalStateException("There is active users with this Role in database");
         this.roleRepository.deleteById(id);
     }
 

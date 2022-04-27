@@ -23,10 +23,10 @@ public interface RoleService extends CrudService<RoleEntity> {
     
     /**
      * @param id the id of {@link RoleEntity} in the database, not null
-     * @param name the name of {@link RoleEntity} stored in the database, not null
-     * @param code the unique string representation for a {@link RoleEntity}, not null
+     * @param {@link RoleEntity} stored in the database, not null
+     * @return {@link RoleEntity} corresponding given code from database, error if the code not found
      */
-    void updateRoleEntity(final Long id, final String name, final String code);
+    RoleEntity update(final Long id, final RoleEntity roleEntity);
 
     /**
      * Method to get {@link RoleEntity} with EAGER fetch associated {@link UserEntity}

@@ -3,6 +3,7 @@ package com.andersenlab.benefits.service.impl;
 import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.repository.CategoryRepository;
 import com.andersenlab.benefits.service.CategoryService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,10 +37,16 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public void updateCategoryEntity(final Long id, final String title) {
-        final CategoryEntity validatedCategory = new CategoryEntity(id, title);
+    public CategoryEntity update(final Long id, final CategoryEntity category) {
+        final Optional<CategoryEntity> theSameTitle = this.findByTitle(category.getTitle());
+        if (theSameTitle.isPresent() && !theSameTitle.get().getId().equals(id))
+            throw new IllegalStateException("Category with title '" + category.getTitle() + "' already exists");
+        final CategoryEntity existingCategory = this.findById(id);
+        BeanUtils.copyProperties(category, existingCategory, "id");
+        final CategoryEntity validatedCategory = new CategoryEntity(id, existingCategory.getTitle());
         validateEntityFieldsAnnotations(validatedCategory, false);
         this.categoryRepository.updateCategoryEntity(validatedCategory.getId(), validatedCategory.getTitle());
+        return validatedCategory;
     }
 
     @Override
@@ -54,14 +61,22 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryEntity save(final CategoryEntity entity) {
-        entity.setId(null);
-        validateEntityFieldsAnnotations(entity, true);
-        return this.categoryRepository.save(entity);
+    @Transactional
+    public CategoryEntity save(final CategoryEntity category) {
+        this.findByTitle(category.getTitle()).ifPresent(categoryEntity -> {
+            throw new IllegalStateException("Category with title '" + category.getTitle() + "' already exists");
+        });
+        category.setId(null);
+        validateEntityFieldsAnnotations(category, true);
+        return this.categoryRepository.save(category);
     }
 
     @Override
     public void delete(final Long id) {
+        this.findById(id);
+        final Optional<CategoryEntity> categoryEntity = this.findWithAssociatedDiscounts(id);
+        if (categoryEntity.isPresent() && categoryEntity.get().getDiscounts().size() > 0)
+            throw new IllegalStateException("There is active discounts in this Category in database");
         this.categoryRepository.deleteById(id);
     }
 

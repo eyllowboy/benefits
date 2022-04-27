@@ -23,6 +23,7 @@ public interface UserService extends CrudService<UserEntity> {
     /**
      * @param id the id of {@link UserEntity} in the database, not null
      * @param  {@link UserEntity} stored in the database, not null
+     * @return the {@link UserEntity}  from database, error if the login not found
      */
     UserEntity update(final Long id, final UserEntity userEntity);
 }
