@@ -15,16 +15,16 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class ValidateUtils {
-    public static String errNotFoundMessage(final String entityName, final Long id) {
+    public static String errIdNotFoundMessage(final String entityName, final Long id) {
         return String.format("%s with id: %d was not found in the database", entityName, id);
     }
 
-    public static String errAlreadyExistMessage(final String entityName, final String prefix, final String value) {
-        return String.format("%s with %s: %s already exist in database", entityName, prefix, value);
+    public static String errEntityNotFoundMessage(final String entityName, final String searchCriteria, final String value) {
+        return String.format("%s with %s: %s was not found in the database", entityName, searchCriteria, value);
     }
 
-    public static String errIllegalSpaces(final String value) {
-        return String.format("'%s' contain illegal spaces", value);
+    public static String errAlreadyExistMessage(final String entityName, final String searchCriteria, final String value) {
+        return String.format("%s with %s: %s already exist in database", entityName, searchCriteria, value);
     }
 
     public static String errAssociatedEntity(final String associatedEntity, final String parentEntity) {

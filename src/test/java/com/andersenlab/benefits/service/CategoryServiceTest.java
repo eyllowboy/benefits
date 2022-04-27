@@ -69,7 +69,7 @@ public class CategoryServiceTest {
         final CategoryEntity categoryEntity = new CategoryEntity("Категория 100");
         // when
         when(this.categoryRepository.save(any(CategoryEntity.class))).thenReturn(categoryEntity);
-        final CategoryEntity savedCategory = (CategoryEntity) this.categoryService.save(categoryEntity);
+        final CategoryEntity savedCategory =this.categoryService.save(categoryEntity);
         // then
         assertEquals(categoryEntity, savedCategory);
         verify(this.categoryRepository, times(1)).save(categoryEntity);
@@ -77,16 +77,25 @@ public class CategoryServiceTest {
 
     @Test
     public void whenUpdateCategory() {
+        final CategoryEntity category = new CategoryEntity("Category55");
         // when
-        this.categoryRepository.updateCategoryEntity(anyLong(), anyString());
+        when(this.categoryRepository.findById(anyLong())).thenReturn(Optional.of(category));
+        when(this.categoryRepository.findByTitle(anyString())).thenReturn(Optional.of(category));
+        //when(this.categoryRepository.save(any(CategoryEntity.class))).thenReturn(category);
+
+
+        this.categoryService.update(anyLong(),any(CategoryEntity.class));
         // then
-        verify(this.categoryRepository, times(1)).updateCategoryEntity(anyLong(), anyString());
+
+        verify(this.categoryRepository, times(1)).save(any(CategoryEntity.class));
     }
 
     @Test
     public void whenDeleteCategory() {
+        final CategoryEntity category = new CategoryEntity("Category55");
         // when
+        when(this.categoryRepository.findById(anyLong())).thenReturn(Optional.of(category));
         this.categoryService.delete(anyLong());
-        verify(this.categoryRepository, times(1)).deleteById(anyLong());
+        verify(this.categoryRepository, times(1)).delete(eq(category));
     }
 }

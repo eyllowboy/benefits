@@ -12,12 +12,6 @@ import java.util.Optional;
 public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
     Optional<RoleEntity> findByCode(final String code);
 
-    @Modifying
-    @Query("update RoleEntity r set r.name = :name, r.code = :code where r.id = :id")
-    void updateRoleEntity(@Param(value = "id") final Long id,
-                          @Param(value = "name") final String name,
-                          @Param(value = "code") final String code);
-
     @Query("from RoleEntity r join fetch r.users where r.id = :id")
     Optional<RoleEntity> findWithAssociatedUsers(@Param(value = "id") final Long id);
 }

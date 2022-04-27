@@ -1,20 +1,18 @@
 package com.andersenlab.benefits.service.impl;
 
 import com.andersenlab.benefits.domain.UserEntity;
+import com.andersenlab.benefits.repository.LocationRepository;
+import com.andersenlab.benefits.repository.RoleRepository;
 import com.andersenlab.benefits.repository.UserRepository;
-import com.andersenlab.benefits.service.LocationService;
-import com.andersenlab.benefits.service.RoleService;
 import com.andersenlab.benefits.service.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.Optional;
-
-import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntityFieldsAnnotations;
+import static com.andersenlab.benefits.service.impl.ValidateUtils.*;
 
 /**
  * An implementation for performing operations on a {@link UserEntity}.
@@ -27,14 +25,14 @@ import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntity
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final RoleService roleService;
-    private final LocationService locationService;
+    private final RoleRepository roleRepository;
+    private final LocationRepository locationRepository;
 
     @Autowired
-    public UserServiceImpl(final UserRepository userRepository, final RoleService roleService, final LocationService locationService) {
+    public UserServiceImpl(final UserRepository userRepository, final RoleRepository roleRepository, final LocationRepository locationRepository) {
         this.userRepository = userRepository;
-        this.roleService = roleService;
-        this.locationService = locationService;
+        this.roleRepository = roleRepository;
+        this.locationRepository = locationRepository;
     }
 
     @Override
@@ -45,48 +43,50 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity findById(final Long id) {
         return this.userRepository.findById(id).orElseThrow(() ->
-                new IllegalStateException("User with this id was not found in the database"));
+                new IllegalStateException(errIdNotFoundMessage("user",  id)));
     }
 
     @Override
-    public Optional<UserEntity> findByLogin(final String login) {
-        return this.userRepository.findByLogin(login);
-    }
+    public UserEntity save(final UserEntity entity) {
 
-    @Override
-    public UserEntity save(final UserEntity user) {
-        user.setId(null);
-        validateEntityFieldsAnnotations(user, true);
-        findByLogin(user.getLogin()).ifPresent(foundUser -> {
-                    throw new IllegalStateException("User with such 'login' is already exists");
-                }
+        this.userRepository.findByLogin(entity.getLogin()).ifPresent(foundUser -> {
+            throw new IllegalStateException(errAlreadyExistMessage("User", "user login", entity.getLogin()));}
         );
-        this.roleService.findById(user.getRoleEntity().getId());
-        this.locationService.findById(user.getLocation().getId());
-        return this.userRepository.save(user);
+        this.roleRepository.findById(entity.getRoleEntity().getId()).orElseThrow(() -> {
+            throw new IllegalStateException(errIdNotFoundMessage("role",  entity.getRoleEntity().getId()));}
+        );
+        this.locationRepository.findById(entity.getLocation().getId()).orElseThrow(() -> {
+            throw new IllegalStateException(errIdNotFoundMessage("location",  entity.getLocation().getId()));}
+        );
+        entity.setId(null);
+        validateEntityFieldsAnnotations(entity, true);
+        return this.userRepository.save(entity);
     }
 
     @Override
     public UserEntity update(final Long id, final UserEntity userEntity) {
-        validateEntityFieldsAnnotations(userEntity, false);
+
         if (!Objects.isNull(userEntity.getRoleEntity()))
-            this.roleService.findById(userEntity.getRoleEntity().getId());
+            this.roleRepository.findById(userEntity.getRoleEntity().getId()).orElseThrow(() ->
+                    new IllegalStateException(errIdNotFoundMessage("role",  userEntity.getRoleEntity().getId())));
         if (!Objects.isNull(userEntity.getLocation()))
-            this.locationService.findById(userEntity.getLocation().getId());
+            this.locationRepository.findById(userEntity.getLocation().getId()).orElseThrow(() ->
+                    new IllegalStateException(errIdNotFoundMessage("location",  userEntity.getLocation().getId())));
         if (!Objects.isNull(userEntity.getLogin())) {
-            final Optional<UserEntity> theSameUser = findByLogin(userEntity.getLogin());
+            final Optional<UserEntity> theSameUser = this.userRepository.findByLogin(userEntity.getLogin());
             if (theSameUser.isPresent() && !theSameUser.get().getId().equals(id))
-                throw new IllegalStateException("User with such 'login' is already exists");
+                throw new IllegalStateException(errAlreadyExistMessage("user", "user login", userEntity.getLogin()));
         }
-        final UserEntity existingUser = findById(userEntity.getId());
+        final UserEntity existingUser = this.userRepository.findById(userEntity.getId()).orElseThrow(() ->
+                new IllegalStateException(errIdNotFoundMessage("user",  userEntity.getId())));
         BeanUtils.copyProperties(userEntity, existingUser, "id", "login");
-        return this.userRepository.updateUserEntity(
-                existingUser.getId(), existingUser.getLogin(), existingUser.getRoleEntity(), existingUser.getLocation());
+        validateEntityFieldsAnnotations(userEntity, false);
+        return this.userRepository.save(existingUser);
     }
 
     @Override
     public void delete(final Long id) {
-        this.findById(id);
-        this.userRepository.deleteById(id);
+        final UserEntity existingUser = findById(id);
+        this.userRepository.delete(existingUser);
     }
 }

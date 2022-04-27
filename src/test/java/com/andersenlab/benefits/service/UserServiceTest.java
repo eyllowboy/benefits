@@ -1,6 +1,8 @@
 package com.andersenlab.benefits.service;
 
 import com.andersenlab.benefits.domain.UserEntity;
+import com.andersenlab.benefits.repository.LocationRepository;
+import com.andersenlab.benefits.repository.RoleRepository;
 import com.andersenlab.benefits.repository.UserRepository;
 import com.andersenlab.benefits.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -22,16 +24,22 @@ import static com.andersenlab.benefits.service.ServiceTestUtils.*;
 @SpringBootTest(properties = "spring.main.lazy-initialization=true",
         classes = {UserService.class, UserServiceImpl.class})
 public class UserServiceTest {
-    private final UserService userService;
+    private final UserServiceImpl userService;
 
     @MockBean
     private final UserRepository userRepository;
+    @MockBean
+    private final RoleRepository roleRepository;
+    @MockBean
+    private final LocationRepository locationRepository;
 
     @Autowired
-    public UserServiceTest(final UserService userService,
-                           final UserRepository userRepository) {
+    public UserServiceTest(final UserServiceImpl userService,final UserRepository userRepository,
+                           final RoleRepository roleRepository, final LocationRepository locationRepository) {
         this.userService = userService;
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.locationRepository = locationRepository;
     }
 
     @Test
@@ -113,7 +121,7 @@ public class UserServiceTest {
                 Objects.equals(item.getLogin(), invocation.getArgument(0))).findFirst());
 
         // when
-        final Optional<UserEntity> foundUser = this.userService.findByLogin(usersList.get(userPos).getLogin());
+        final Optional<UserEntity> foundUser = this.userRepository.findByLogin(usersList.get(userPos).getLogin());
 
         // then
         assertEquals(Optional.of(usersList.get(userPos)), foundUser);
@@ -135,7 +143,7 @@ public class UserServiceTest {
             final Long idx = invocation.getArgument(0);
             usersList.set(idx.intValue(), newUser);
             return null;
-        }).when(this.userRepository).updateUserEntity(anyLong(), anyString(), any(), any());
+        }).when(this.userRepository).save(any());
 
         // when
         this.userService.update((long) userPos, user);
@@ -143,6 +151,6 @@ public class UserServiceTest {
         // then
         assertEquals(user, usersList.get(userPos));
         verify(this.userRepository, times(1))
-                .updateUserEntity((long) userPos, user.getLogin(), user.getRoleEntity(), user.getLocation());
+                .save(user);
     }
 }

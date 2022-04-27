@@ -8,12 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import javax.transaction.Transactional;
 import java.util.Objects;
 import java.util.Optional;
-
-import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntityFieldsAnnotations;
+import static com.andersenlab.benefits.service.impl.ValidateUtils.*;
 
 /**
  * An implementation for performing operations on a {@link RoleEntity}.
@@ -39,21 +37,17 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RoleEntity findById(final Long id) {
         return this.roleRepository.findById(id).orElseThrow(
-                () -> new IllegalStateException("Role with this id was not found in the database"));
-    }
-
-    @Override
-    public Optional<RoleEntity> findByCode(final String code) {
-        return this.roleRepository.findByCode(code);
+                () -> new IllegalStateException(errIdNotFoundMessage("Role", id)));
     }
 
     @Override
     public RoleEntity save(final RoleEntity role) {
+        this.roleRepository.findByCode(role.getCode()).ifPresent(roleEntity -> {
+                    throw new IllegalStateException(errAlreadyExistMessage("Role", "role code", roleEntity.getCode()));
+                }
+        );
         role.setId(null);
         validateEntityFieldsAnnotations(role, true);
-        this.findByCode(role.getCode()).ifPresent(roleEntity -> {
-            throw new IllegalStateException("Role with such 'code' is already exists");}
-        );
         return this.roleRepository.save(role);
     }
 
@@ -61,25 +55,25 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public RoleEntity update(final Long id, final RoleEntity roleEntity) {
         if (!Objects.isNull(roleEntity.getCode())) {
-            final Optional<RoleEntity> theSameCodeRole = this.findByCode(roleEntity.getCode());
+            final Optional<RoleEntity> theSameCodeRole = this.roleRepository.findByCode(roleEntity.getCode());
             if (theSameCodeRole.isPresent() && (!theSameCodeRole.get().getId().equals(id)))
-                throw new IllegalStateException("Role with such 'code' is already exists");
+                throw new IllegalStateException(errAlreadyExistMessage("Role", "role code", roleEntity.getCode()));
         }
-        final RoleEntity existingRole = this.findById(id);
+        final RoleEntity existingRole = this.roleRepository.findById(id).orElseThrow(() ->
+                new IllegalStateException(errIdNotFoundMessage("Role", roleEntity.getId())));
         BeanUtils.copyProperties(roleEntity, existingRole, "id");
         final RoleEntity role = new RoleEntity(id, existingRole.getName(), existingRole.getCode());
         validateEntityFieldsAnnotations(role, false);
-        this.roleRepository.updateRoleEntity(role.getId(), role.getName(), role.getCode());
-        return role;
+        return this.roleRepository.save(existingRole);
     }
 
     @Override
     public void delete(final Long id) {
-        this.findById(id);
+        final RoleEntity existingRole = findById(id);
         final Optional<RoleEntity> roleEntity = this.findWithAssociatedUsers(id);
         if (roleEntity.isPresent() && roleEntity.get().getUsers().size() > 0)
-            throw new IllegalStateException("There is active users with this Role in database");
-        this.roleRepository.deleteById(id);
+            throw new IllegalStateException(errAssociatedEntity("role", "discount"));
+        this.roleRepository.delete(existingRole);
     }
 
     @Override

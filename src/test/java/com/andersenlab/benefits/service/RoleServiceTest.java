@@ -13,9 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import java.util.*;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
@@ -78,7 +76,7 @@ public class RoleServiceTest {
                         Objects.equals(item.getCode(), invocation.getArgument(0))).findFirst());
 
         // when
-        final Optional<RoleEntity> foundRole = this.roleService.findByCode(rolesList.get(rolePos).getCode());
+        final Optional<RoleEntity> foundRole = this.roleRepository.findByCode(rolesList.get(rolePos).getCode());
 
         // then
         assertEquals(Optional.of(rolesList.get(rolePos)), foundRole);
@@ -115,15 +113,15 @@ public class RoleServiceTest {
             final Long idx = invocation.getArgument(0);
             rolesList.set(idx.intValue(), newRole);
             return null;
-        }).when(this.roleRepository).updateRoleEntity(anyLong(), anyString(), anyString());
+        }).when(this.roleRepository).save(any());
 
         // when
-        this.roleService.updateRoleEntity((long) rolePos, role.getName(), role.getCode());
+        this.roleService.update((long) rolePos, role);
 
         // then
         assertEquals(role, rolesList.get(rolePos));
         verify(this.roleRepository, times(1))
-                .updateRoleEntity((long) rolePos, role.getName(), role.getCode());
+                .save(role);
     }
 
     @Test

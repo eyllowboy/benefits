@@ -9,11 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 import java.util.Optional;
-
-import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntityFieldsAnnotations;
+import static com.andersenlab.benefits.service.impl.ValidateUtils.*;
 
 /***
  * Implementation for performing operations on a {@link CategoryEntity}
@@ -31,22 +28,17 @@ public class CategoryServiceImpl implements CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    public Optional<CategoryEntity> findByTitle(final String title) {
-        return this.categoryRepository.findByTitle(title);
-    }
-
     @Override
     @Transactional
-    public CategoryEntity update(final Long id, final CategoryEntity category) {
-        final Optional<CategoryEntity> theSameTitle = this.findByTitle(category.getTitle());
+    public CategoryEntity update(final Long id, final CategoryEntity categoryEntity) {
+        final Optional<CategoryEntity> theSameTitle = this.categoryRepository.findByTitle(categoryEntity.getTitle());
         if (theSameTitle.isPresent() && !theSameTitle.get().getId().equals(id))
-            throw new IllegalStateException("Category with title '" + category.getTitle() + "' already exists");
-        final CategoryEntity existingCategory = this.findById(id);
-        BeanUtils.copyProperties(category, existingCategory, "id");
+            throw new IllegalStateException(errAlreadyExistMessage("category", "category title", categoryEntity.getTitle()));
+        final CategoryEntity existingCategory = findById(id);
+        BeanUtils.copyProperties(categoryEntity, existingCategory, "id");
         final CategoryEntity validatedCategory = new CategoryEntity(id, existingCategory.getTitle());
         validateEntityFieldsAnnotations(validatedCategory, false);
-        this.categoryRepository.updateCategoryEntity(validatedCategory.getId(), validatedCategory.getTitle());
-        return validatedCategory;
+        return this.categoryRepository.save(existingCategory);
     }
 
     @Override
@@ -57,27 +49,28 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryEntity findById(final Long id) {
         return this.categoryRepository.findById(id).orElseThrow(
-                () -> new IllegalStateException("Category with this id was not found in the database"));
+                () -> new IllegalStateException(errIdNotFoundMessage("category", id)));
     }
 
     @Override
     @Transactional
-    public CategoryEntity save(final CategoryEntity category) {
-        this.findByTitle(category.getTitle()).ifPresent(categoryEntity -> {
-            throw new IllegalStateException("Category with title '" + category.getTitle() + "' already exists");
+    public CategoryEntity save(final CategoryEntity entity) {
+        this.categoryRepository.findByTitle(entity.getTitle()).ifPresent(categoryEntity -> {
+            throw new IllegalStateException(
+                    errAlreadyExistMessage("category", "category title", entity.getTitle()));
         });
-        category.setId(null);
-        validateEntityFieldsAnnotations(category, true);
-        return this.categoryRepository.save(category);
+        entity.setId(null);
+        validateEntityFieldsAnnotations(entity, true);
+        return this.categoryRepository.save(entity);
     }
 
     @Override
     public void delete(final Long id) {
-        this.findById(id);
+        final CategoryEntity existingCategory = findById(id);
         final Optional<CategoryEntity> categoryEntity = this.findWithAssociatedDiscounts(id);
         if (categoryEntity.isPresent() && categoryEntity.get().getDiscounts().size() > 0)
-            throw new IllegalStateException("There is active discounts in this Category in database");
-        this.categoryRepository.deleteById(id);
+            throw new IllegalStateException(errAssociatedEntity("category","discount"));
+        this.categoryRepository.delete(existingCategory);
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.andersenlab.benefits.service;
 import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.DiscountEntity;
 import org.springframework.stereotype.Service;
-
 import java.util.Optional;
 
 /**
@@ -17,13 +16,6 @@ import java.util.Optional;
 
 @Service
 public interface CategoryService extends CrudService<CategoryEntity> {
-
-    /***
-     * Method to find {@link CategoryEntity} with specified title
-     * @param title of category, not null
-     * @return {@link CategoryEntity} with specified title, error if nothing found
-     */
-    Optional<CategoryEntity> findByTitle(final String title);
 
     /**
      * @param id the id of {@link CategoryEntity} in the database, not null
