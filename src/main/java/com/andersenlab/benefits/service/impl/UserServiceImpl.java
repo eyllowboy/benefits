@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
     public UserEntity save(final UserEntity entity) {
 
         this.userRepository.findByLogin(entity.getLogin()).ifPresent(foundUser -> {
-            throw new IllegalStateException(errAlreadyExistMessage("User", "user login", entity.getLogin()));}
+            throw new IllegalStateException(errAlreadyExistMessage("user", "user login", entity.getLogin()));}
         );
         this.roleRepository.findById(entity.getRoleEntity().getId()).orElseThrow(() -> {
             throw new IllegalStateException(errIdNotFoundMessage("role",  entity.getRoleEntity().getId()));}

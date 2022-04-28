@@ -16,7 +16,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({SpringExtension.class})
@@ -69,33 +69,48 @@ public class CategoryServiceTest {
         final CategoryEntity categoryEntity = new CategoryEntity("Категория 100");
         // when
         when(this.categoryRepository.save(any(CategoryEntity.class))).thenReturn(categoryEntity);
-        final CategoryEntity savedCategory =this.categoryService.save(categoryEntity);
+        final CategoryEntity savedCategory = this.categoryService.save(categoryEntity);
         // then
         assertEquals(categoryEntity, savedCategory);
         verify(this.categoryRepository, times(1)).save(categoryEntity);
     }
 
     @Test
-    public void whenUpdateCategory() {
+    public void whenUpdateCategorySuccess() {
+        // given
         final CategoryEntity category = new CategoryEntity("Category55");
+        category.setId(10L);
         // when
+        when(this.categoryRepository.findByTitle(anyString())).thenReturn(Optional.empty());
         when(this.categoryRepository.findById(anyLong())).thenReturn(Optional.of(category));
-        when(this.categoryRepository.findByTitle(anyString())).thenReturn(Optional.of(category));
-        //when(this.categoryRepository.save(any(CategoryEntity.class))).thenReturn(category);
-
-
-        this.categoryService.update(anyLong(),any(CategoryEntity.class));
+        this.categoryService.update(category.getId(), category);
         // then
+        verify(this.categoryRepository, times(1)).save(eq(category));
+    }
 
-        verify(this.categoryRepository, times(1)).save(any(CategoryEntity.class));
+    @Test
+    public void whenUpdateCategoryTheSameTitile() {
+        // given
+        final CategoryEntity category = new CategoryEntity("Category55");
+        category.setId(10L);
+        final CategoryEntity categorytheSameTitle = new CategoryEntity("Category55");
+        categorytheSameTitle.setId(11L);
+        // when
+        when(this.categoryRepository.findByTitle(anyString())).thenReturn(Optional.of(categorytheSameTitle));
+        final IllegalStateException exception = assertThrows(IllegalStateException.class, () -> this.categoryService.update(category.getId(), category));
+        // then
+        assertTrue(exception.getMessage().contains(category.getTitle() + " already exist in database"));
     }
 
     @Test
     public void whenDeleteCategory() {
+        // given
         final CategoryEntity category = new CategoryEntity("Category55");
+        category.setId(10L);
         // when
         when(this.categoryRepository.findById(anyLong())).thenReturn(Optional.of(category));
-        this.categoryService.delete(anyLong());
+        this.categoryService.delete(10L);
+        // then
         verify(this.categoryRepository, times(1)).delete(eq(category));
     }
 }

@@ -1,5 +1,6 @@
 package com.andersenlab.benefits.controller;
 
+import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.service.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import javax.validation.constraints.DecimalMin;
 
 /**
@@ -70,6 +72,7 @@ public class RoleController {
     /**
      * Updates {@link RoleEntity} in the database.
      *
+     * @param id         is the id of {@link RoleEntity} that needs to update
      * @param roleEntity the {@link RoleEntity} that needs to update
      * @throws IllegalStateException if:
      *                               <ul>
@@ -97,7 +100,10 @@ public class RoleController {
      *
      * @param role new {@link RoleEntity} to be added
      * @return post {@link RoleEntity}
-     * @throws IllegalStateException if {@link RoleEntity} with {@link RoleEntity#getCode()} field is already exists
+     * @throws IllegalStateException if:<ul>
+     *                               <li>{@link RoleEntity} with given id was not found in the database
+     *                               <li>{@link RoleEntity} with {@link RoleEntity#getCode()} field is already exists
+     *                               </ul>
      */
     @Operation(summary = "This is to create new role")
     @ApiResponses(value = {

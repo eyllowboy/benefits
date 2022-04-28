@@ -72,7 +72,7 @@ public class UserController {
 
     /**
      * Updates {@link UserEntity} in the database.
-     *
+     * @param id is the id of {@link UserEntity} that needs to update
      * @param userEntity the {@link UserEntity} that needs to update
      * @return ResponseEntity containing {@link UserEntity}
      * @throws IllegalStateException if:

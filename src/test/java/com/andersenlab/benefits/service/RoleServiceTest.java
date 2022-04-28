@@ -1,9 +1,9 @@
 package com.andersenlab.benefits.service;
 
+import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.repository.RoleRepository;
 import com.andersenlab.benefits.service.impl.RoleServiceImpl;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +14,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 import static com.andersenlab.benefits.service.ServiceTestUtils.*;
 
@@ -105,23 +106,28 @@ public class RoleServiceTest {
         final int rolePos = getRndEntityPos();
         final List<RoleEntity> rolesList = getRoleList();
         final RoleEntity role = rolesList.get(rolePos);
-        doAnswer(invocation -> {
-            final RoleEntity newRole = new RoleEntity(
-                    invocation.getArgument(0),
-                    invocation.getArgument(1),
-                    invocation.getArgument(2));
-            final Long idx = invocation.getArgument(0);
-            rolesList.set(idx.intValue(), newRole);
-            return null;
-        }).when(this.roleRepository).save(any());
+        when(this.roleRepository.findByCode(anyString())).thenReturn(Optional.empty());
+        when(this.roleRepository.findById(anyLong())).thenReturn(Optional.of(role));
 
-        // when
-        this.roleService.update((long) rolePos, role);
+        //when
+        this.roleService.update(role.getId(), role);
 
         // then
-        assertEquals(role, rolesList.get(rolePos));
-        verify(this.roleRepository, times(1))
-                .save(role);
+        verify(this.roleRepository, times(1)).save(eq(role));
+    }
+    @Test
+    public void whenUpdateTheSameCode() {
+        // given
+        final int rolePos = getRndEntityPos();
+        final List<RoleEntity> rolesList = getRoleList();
+        final RoleEntity role = rolesList.get(rolePos);
+        final RoleEntity roletheSameCode = new RoleEntity(role.getName(),role.getCode());
+        roletheSameCode.setId(99L);
+        // when
+        when(this.roleRepository.findByCode(anyString())).thenReturn(Optional.of(roletheSameCode));
+        final IllegalStateException exception = assertThrows(IllegalStateException.class, () -> this.roleService.update(role.getId(), role));
+        // then
+        assertTrue(exception.getMessage().contains(role.getCode() + " already exist in database"));
     }
 
     @Test
@@ -130,20 +136,13 @@ public class RoleServiceTest {
         final int rolePos = getRndEntityPos();
         final List<RoleEntity> rolesList = getRoleList();
         final RoleEntity role = rolesList.get(rolePos);
-        doAnswer(invocation -> {
-            rolesList.remove(rolesList.stream()
-                    .filter(item -> Objects.equals(item.getId(), invocation.getArgument(0)))
-                    .findFirst().orElse(null));
-            return null;
-        })
-                .when(this.roleRepository).deleteById(anyLong());
+        when(this.roleRepository.findById(anyLong())).thenReturn(Optional.of(role));
 
         // when
         this.roleService.delete(role.getId());
 
         // then
-        Assertions.assertFalse(rolesList.contains(role));
-        verify(this.roleRepository, times(1)).deleteById(role.getId());
+        verify(this.roleRepository, times(1)).delete(eq(role));
     }
 
     @Test

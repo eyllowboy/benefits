@@ -1,11 +1,11 @@
 package com.andersenlab.benefits.service;
 
+import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import com.andersenlab.benefits.repository.LocationRepository;
 import com.andersenlab.benefits.repository.RoleRepository;
 import com.andersenlab.benefits.repository.UserRepository;
 import com.andersenlab.benefits.service.impl.UserServiceImpl;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,15 +80,15 @@ public class UserServiceTest {
         // given
         final List<UserEntity> usersList = getUserList();
         final UserEntity user = getUser(getRndEntityPos());
-        when(this.userRepository.save(any(UserEntity.class))).thenAnswer(invocation ->
-                saveItem(usersList, invocation.getArgument(0), Objects::equals));
-
+        final LocationEntity location = new LocationEntity(10L,"Россия","Москва");
+        user.setLocation(location);
+        when(this.roleRepository.findById(anyLong())).thenReturn(Optional.of(user.getRoleEntity()));
+        when(this.userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+        when(this.locationRepository.findById(anyLong())).thenReturn(Optional.of(user.getLocation()));
         // when
-        final UserEntity savedUser = this.userService.save(user);
-
+        this.userService.save(user);
         // then
-        assertEquals(user, savedUser);
-        verify(this.userRepository, times(1)).save(user);
+        verify(this.userRepository, times(1)).save(eq(user));
     }
 
     @Test
@@ -97,19 +97,11 @@ public class UserServiceTest {
         final int userPos = getRndEntityPos();
         final List<UserEntity> usersList = getUserList();
         final UserEntity user = usersList.get(userPos);
-        doAnswer(invocation -> {
-            usersList.remove(usersList.stream()
-                    .filter(item -> Objects.equals(item.getId(), invocation.getArgument(0)))
-                    .findFirst().orElse(null));
-            return null;
-        }).when(this.userRepository).deleteById(anyLong());
-
+        when(this.userRepository.findById(anyLong())).thenReturn(Optional.of(user));
         // when
         this.userService.delete(user.getId());
-
         // then
-        Assertions.assertFalse(usersList.contains(user));
-        verify(this.userRepository, times(1)).deleteById(user.getId());
+        verify(this.userRepository, times(1)).delete(eq(user));
     }
 
     @Test
@@ -134,23 +126,14 @@ public class UserServiceTest {
         final int userPos = getRndEntityPos();
         final List<UserEntity> usersList = getUserList();
         final UserEntity user = usersList.get(userPos);
-        doAnswer(invocation -> {
-            final UserEntity newUser = new UserEntity(
-                    invocation.getArgument(0),
-                    invocation.getArgument(1),
-                    invocation.getArgument(2),
-                    invocation.getArgument(3));
-            final Long idx = invocation.getArgument(0);
-            usersList.set(idx.intValue(), newUser);
-            return null;
-        }).when(this.userRepository).save(any());
-
+        final LocationEntity location = new LocationEntity(10L,"Россия","Москва");
+        user.setLocation(location);
+        when(this.roleRepository.findById(anyLong())).thenReturn(Optional.of(user.getRoleEntity()));
+        when(this.userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+        when(this.locationRepository.findById(anyLong())).thenReturn(Optional.of(user.getLocation()));
         // when
         this.userService.update((long) userPos, user);
-
         // then
-        assertEquals(user, usersList.get(userPos));
-        verify(this.userRepository, times(1))
-                .save(user);
+        verify(this.userRepository, times(1)).save(eq(user));
     }
 }

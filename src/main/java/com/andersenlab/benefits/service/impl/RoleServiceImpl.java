@@ -37,13 +37,13 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RoleEntity findById(final Long id) {
         return this.roleRepository.findById(id).orElseThrow(
-                () -> new IllegalStateException(errIdNotFoundMessage("Role", id)));
+                () -> new IllegalStateException(errIdNotFoundMessage("role", id)));
     }
 
     @Override
     public RoleEntity save(final RoleEntity role) {
         this.roleRepository.findByCode(role.getCode()).ifPresent(roleEntity -> {
-                    throw new IllegalStateException(errAlreadyExistMessage("Role", "role code", roleEntity.getCode()));
+                    throw new IllegalStateException(errAlreadyExistMessage("role", "role code", roleEntity.getCode()));
                 }
         );
         role.setId(null);
@@ -57,10 +57,10 @@ public class RoleServiceImpl implements RoleService {
         if (!Objects.isNull(roleEntity.getCode())) {
             final Optional<RoleEntity> theSameCodeRole = this.roleRepository.findByCode(roleEntity.getCode());
             if (theSameCodeRole.isPresent() && (!theSameCodeRole.get().getId().equals(id)))
-                throw new IllegalStateException(errAlreadyExistMessage("Role", "role code", roleEntity.getCode()));
+                throw new IllegalStateException(errAlreadyExistMessage("role", "role code", roleEntity.getCode()));
         }
         final RoleEntity existingRole = this.roleRepository.findById(id).orElseThrow(() ->
-                new IllegalStateException(errIdNotFoundMessage("Role", roleEntity.getId())));
+                new IllegalStateException(errIdNotFoundMessage("role", roleEntity.getId())));
         BeanUtils.copyProperties(roleEntity, existingRole, "id");
         final RoleEntity role = new RoleEntity(id, existingRole.getName(), existingRole.getCode());
         validateEntityFieldsAnnotations(role, false);

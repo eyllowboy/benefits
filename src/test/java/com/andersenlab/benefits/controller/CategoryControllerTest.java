@@ -160,13 +160,13 @@ public class CategoryControllerTest {
         // when
         final NestedServletException NestedServletException = assertThrows(NestedServletException.class, () -> {
             this.mockMvc.perform(MockMvcRequestBuilders
-                    .get("/categories/{id}", lastCategoryFromContainer.getId() + 1)
+                    .get("/categories/{id}", (lastCategoryFromContainer.getId() + 1))
                     .contentType(MediaType.APPLICATION_JSON)
                     .with(csrf()));
         });
         // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
-        assertEquals("Category with this id was not found in the database", NestedServletException.getCause().getMessage());
+        assertEquals("category with id: " + (lastCategoryFromContainer.getId() + 1) + " was not found in the database", NestedServletException.getCause().getMessage());
     }
 
 
@@ -176,14 +176,15 @@ public class CategoryControllerTest {
         final CategoryEntity category = new CategoryEntity("Category3");
         // when
         final NestedServletException NestedServletException = assertThrows(NestedServletException.class, () -> {
-            this.mockMvc.perform(MockMvcRequestBuilders.post("/categories")
+            this.mockMvc.perform(MockMvcRequestBuilders
+                    .post("/categories")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(this.objectMapper.writeValueAsString(category))
                     .with(csrf()));
         });
         // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
-        assertEquals("Category with title '" + category.getTitle() + "' already exists", NestedServletException.getCause().getMessage());
+        assertEquals("category with category title: Category3 already exist in database", NestedServletException.getCause().getMessage());
     }
 
     @Test
@@ -222,7 +223,7 @@ public class CategoryControllerTest {
         });
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-        assertEquals("Category with this id was not found in the database", nestedServletException.getCause().getMessage());
+        assertEquals("category with id: " + category.getId() + " was not found in the database", nestedServletException.getCause().getMessage());
     }
 
     @Test
@@ -259,7 +260,7 @@ public class CategoryControllerTest {
         nestedServletException.printStackTrace();
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-        assertEquals("There is active discounts in this Category in database", nestedServletException.getCause().getMessage());
+        assertEquals("There is active category in this discount in database", nestedServletException.getCause().getMessage());
     }
 
     @Test
@@ -276,28 +277,25 @@ public class CategoryControllerTest {
         });
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-        assertEquals("Category with id: '" + (lastIdEntity + 1) + "' was not found in the database", nestedServletException.getCause().getMessage());
+        assertEquals("category with id: " + (lastIdEntity + 1) + " was not found in the database", nestedServletException.getCause().getMessage());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "    "})
-    public void whenAddCategoryWrongObligatoryFields(final String title) throws Exception {
+    public void whenAddCategoryWrongObligatoryFields(final String title) {
         // given
         final CategoryEntity category = new CategoryEntity(title);
-        final MvcResult result;
-
         // when
-        result = this.mockMvc.perform(MockMvcRequestBuilders
-                        .post("/categories")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(this.objectMapper.writeValueAsString(category))
-                        .with(csrf()))
-                .andReturn();
-
+        final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
+            this.mockMvc.perform(MockMvcRequestBuilders
+                    .post("/categories")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(this.objectMapper.writeValueAsString(category))
+                    .with(csrf()));
+        });
         // then
-        assertEquals(400, result.getResponse().getStatus());
-        final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
-        assertTrue(errorResult.contains("must not be blank"));
+        assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
+        assertEquals("Adding CategoryEntity haven't done. Obligatory field 'title' has no data", nestedServletException.getCause().getMessage());
     }
 
     @ParameterizedTest
@@ -335,17 +333,16 @@ public class CategoryControllerTest {
         final MvcResult result;
 
         // when
-        result = this.mockMvc.perform(MockMvcRequestBuilders
+        final NestedServletException exception = assertThrows(NestedServletException.class, () ->
+                this.mockMvc.perform(MockMvcRequestBuilders
                         .post("/categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(category))
-                        .with(csrf()))
-                .andReturn();
+                        .with(csrf())));
 
         // then
-        assertEquals(400, result.getResponse().getStatus());
-        final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
-        assertTrue(errorResult.contains("must be between"));
+        assertEquals(IllegalStateException.class, exception.getCause().getClass());
+        assertTrue(exception.getMessage().contains("Incorrect field title data size - must be between 3 and 20"));
     }
 
     @ParameterizedTest
@@ -365,6 +362,6 @@ public class CategoryControllerTest {
 
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-        assertTrue(nestedServletException.getCause().getMessage().contains("must be between"));
+        assertTrue(nestedServletException.getCause().getMessage().contains("Incorrect field title data size - must be between 3 and 20"));
     }
 }

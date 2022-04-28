@@ -125,7 +125,7 @@ public class RoleControllerTest {
 		
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-		assertEquals("Role with this id was not found in the database",
+		assertEquals("role with id: "+Long.MAX_VALUE+" was not found in the database",
 				nestedServletException.getCause().getMessage());
 	}
 	
@@ -164,7 +164,7 @@ public class RoleControllerTest {
 
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-		assertEquals("Role with such 'code' is already exists",
+		assertEquals("role with role code: "+role.getCode()+" already exist in database",
 				nestedServletException.getCause().getMessage());
 	}
 	
@@ -208,7 +208,7 @@ public class RoleControllerTest {
 		
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-		assertEquals("Role with such 'code' is already exists",
+		assertEquals("role with role code: "+role.getCode()+" already exist in database",
 				nestedServletException.getCause().getMessage());
 	}
 
@@ -229,7 +229,7 @@ public class RoleControllerTest {
 		
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-		assertEquals("Role with this id was not found in the database",
+		assertEquals("role with id: "+role.getId()+" was not found in the database",
 				nestedServletException.getCause().getMessage());
 	}
 	
@@ -247,7 +247,7 @@ public class RoleControllerTest {
 		
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-		assertEquals("Role with this id was not found in the database",
+		assertEquals("role with id: "+role.getId()+" was not found in the database",
 				nestedServletException.getCause().getMessage());
 	}
 
@@ -290,7 +290,7 @@ public class RoleControllerTest {
 
 		// then
 		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-		assertEquals("There is active users with this Role in database",
+		assertEquals("There is active role in this discount in database",
 				nestedServletException.getCause().getMessage());
 	}
 
@@ -301,17 +301,17 @@ public class RoleControllerTest {
 		final MvcResult result;
 
 		// when
-		result = this.mockMvc.perform(MockMvcRequestBuilders
+		final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
+		 this.mockMvc.perform(MockMvcRequestBuilders
 						.post("/roles")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(this.objectMapper.writeValueAsString(role))
-						.with(csrf()))
-				.andReturn();
+						.with(csrf()));
+		});
 
 		// then
-		assertEquals(400, result.getResponse().getStatus());
-		final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
-		assertTrue(errorResult.contains("must not be blank"));
+		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
+		assertEquals("Adding RoleEntity haven't done. Obligatory field 'name' has no data", nestedServletException.getCause().getMessage());
 	}
 
 	@ParameterizedTest
@@ -340,26 +340,23 @@ public class RoleControllerTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = {"0", "150"})
+	@ValueSource(strings = {"1", "150"})
 	public void whenAddRoleWrongFieldSize(final Integer stringSize) throws Exception {
 		// given
 		final String fieldValue = "a".repeat(stringSize);
 		final RoleEntity role = this.ctu.getRole(this.ctu.getRndEntityPos());
 		role.setName(fieldValue);
-		final MvcResult result;
-
 		// when
-		result = this.mockMvc.perform(MockMvcRequestBuilders
+		final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () -> {
+		this.mockMvc.perform(MockMvcRequestBuilders
 						.post("/roles")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(this.objectMapper.writeValueAsString(role))
-						.with(csrf()))
-				.andReturn();
-
+						.with(csrf()));
+		});
 		// then
-		assertEquals(400, result.getResponse().getStatus());
-		final String errorResult = Objects.requireNonNull(result.getResolvedException()).getMessage();
-		assertTrue(errorResult.contains("must be between"));
+		assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
+		assertEquals("Incorrect field name data size - must be between 3 and 25", nestedServletException.getCause().getMessage());
 	}
 
 	@ParameterizedTest

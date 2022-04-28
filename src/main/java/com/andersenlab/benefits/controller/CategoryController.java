@@ -50,7 +50,10 @@ public class CategoryController {
      *
      * @param category new {@link CategoryEntity} to be added
      * @return {@link CategoryEntity}
-     * @throws IllegalStateException if {@link CategoryEntity} with these parameters already exists.
+     * @throws IllegalStateException if: <ul>
+     *                               <li>{@link CategoryEntity} with given id was not found in the database
+     *                               <li>{@link CategoryEntity} with {@link CategoryEntity#getTitle()} ()} field is already exists
+     *                               </ul>
      */
     @Operation(summary = "This is to create new category")
     @ApiResponses(value = {
@@ -90,9 +93,13 @@ public class CategoryController {
     /**
      * Updates {@link CategoryEntity} in the database.
      *
+     * @param id       is the id of {@link CategoryEntity} that needs to update
      * @param category the {@link CategoryEntity} that needs to update
      * @return {@link CategoryEntity}
-     * @throws IllegalStateException if the {@link CategoryEntity} with given id was not found in the database.
+     * @throws IllegalStateException if: <ul>
+     *                               <li>{@link CategoryEntity} with given id was not found in the database
+     *                               <li>{@link CategoryEntity} with {@link CategoryEntity#getTitle()} field is already exists
+     *                               </ul>
      */
     @Operation(summary = "This is to update the category")
     @ApiResponses(value = {
