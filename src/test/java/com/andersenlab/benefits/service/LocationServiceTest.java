@@ -3,6 +3,7 @@ package com.andersenlab.benefits.service;
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.repository.LocationRepository;
 import com.andersenlab.benefits.service.impl.LocationServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +12,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.util.List;
-import java.util.Optional;
-
+import java.util.*;
+import static com.andersenlab.benefits.service.ServiceTestUtils.*;
+import static com.andersenlab.benefits.service.impl.ValidateUtils.errIdNotFoundMessage;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
@@ -24,6 +27,7 @@ import static org.mockito.Mockito.*;
         classes = {LocationService.class, LocationServiceImpl.class})
 public class LocationServiceTest {
     private final LocationService locationService;
+    private final List<LocationEntity> locations = new ArrayList<>();
 
     @MockBean
     private LocationRepository locationRepository;
@@ -33,14 +37,40 @@ public class LocationServiceTest {
         this.locationService = locationService;
     }
 
+    @BeforeEach
+    public void ResetData() {
+        when(this.locationRepository.findAll(any(Pageable.class))).thenAnswer(invocation ->
+                new PageImpl<>(this.locations, invocation.getArgument(0), 100));
+        when(this.locationRepository.findAll()).thenReturn(this.locations);
+        when(this.locationRepository.findById(anyLong())).thenAnswer(invocation ->
+                this.locations.stream().filter(location ->
+                        Objects.equals(location.getId(), invocation.getArgument(0))).findFirst());
+        when(this.locationRepository.findByCountryAndCity(anyString(), anyString())).thenAnswer(invocation ->
+                this.locations.stream().filter(location ->
+                        location.getCountry().equals(invocation.getArgument(0))
+                        && location.getCity().equals(invocation.getArgument(1))).findFirst());
+        when(this.locationRepository.save(any(LocationEntity.class))).thenAnswer(invocation -> {
+            final LocationEntity savedLocation = invocation.getArgument(0);
+            savedLocation.setId((long) this.locations.size());
+            this.locations.add(savedLocation);
+            return invocation.getArgument(0);
+        });
+        when(this.locationRepository.saveAll(anyList())).thenAnswer(invocation -> {
+            final List<LocationEntity> locationsToSave = invocation.getArgument(0);
+            locationsToSave.forEach(item -> saveItem(this.locations, item, Objects::equals));
+            return locationsToSave;
+        });
+        doAnswer(invocation -> this.locations.remove((LocationEntity) invocation.getArgument(0)))
+                .when(this.locationRepository).delete(any(LocationEntity.class));
+        this.locations.clear();
+        this.locationRepository.saveAll(getLocationList(10));
+    }
+
     @Test
     public void whenFindAll() {
         // given
-        final List<LocationEntity> locations = List.of(
-                new LocationEntity("Россия", "Москва"),
-                new LocationEntity("Украина", "Киев"),
-                new LocationEntity("Белоруссия", "Минск"));
-        final Page<LocationEntity> pageOfLocation = new PageImpl<>(locations);
+        final Page<LocationEntity> pageOfLocation = new PageImpl<>(this.locations);
+
         // when
         when(this.locationRepository.findAll(PageRequest.of(0,3))).thenReturn(pageOfLocation);
         final Page<LocationEntity> foundLocations = this.locationService.findAll(PageRequest.of(0,3));
@@ -53,61 +83,83 @@ public class LocationServiceTest {
     @Test
     public void whenFindById() {
         // given
-        final LocationEntity locationEntity = new LocationEntity("Россия", "Москва");
+        final LocationEntity location = this.locations.get(getRndEntityPos() - 1);
 
         // when
-        when(this.locationRepository.findById(1L)).thenReturn(Optional.of(locationEntity));
-        final LocationEntity foundLocation = this.locationService.findById(1L);
+        final LocationEntity foundLocation = this.locationService.findById(location.getId());
 
         // then
-        assertEquals(locationEntity, foundLocation);
-        verify(this.locationRepository, times(1)).findById(1L);
+        assertEquals(location, foundLocation);
+        verify(this.locationRepository, times(1)).findById(location.getId());
     }
 
     @Test
     public void whenFindByCity() {
         // given
-        final LocationEntity locationEntity = new LocationEntity("Россия", "Казань");
+        final LocationEntity location = this.locations.get(getRndEntityPos() - 1);
 
         // when
-        when(this.locationRepository.findByCity("Россия", "Казань")).thenReturn(Optional.of(locationEntity));
-        final Optional<LocationEntity> foundLocation = this.locationService.findByCity("Россия", "Казань");
+        final LocationEntity foundLocation = this.locationService.findByCity(location.getCountry(), location.getCity());
 
         // then
-        assertEquals(Optional.of(locationEntity), foundLocation);
-        verify(this.locationRepository, times(1)).findByCity("Россия", "Казань");
+        assertEquals(location, foundLocation);
+        verify(this.locationRepository, times(1)).findByCountryAndCity(location.getCountry(), location.getCity());
     }
 
     @Test
     public void whenAddLocation() {
         // given
-        final LocationEntity locationEntity = new LocationEntity("Россия", "Казань");
+        final int sizeBeforeSave = this.locations.size();
+        final LocationEntity location = getLocation(getRndEntityPos() - 1);
 
         // when
-        when(this.locationRepository.save(any(LocationEntity.class))).thenReturn(locationEntity);
-        final LocationEntity savedLocation = this.locationService.save(locationEntity);
+        final LocationEntity savedLocation = this.locationService.save(location);
 
         // then
-        assertEquals(locationEntity, savedLocation);
-        verify(this.locationRepository, times(1)).save(locationEntity);
+        assertEquals(location, savedLocation);
+        assertEquals(sizeBeforeSave + 1, this.locationRepository.findAll().size());
+        verify(this.locationRepository, times(1)).save(location);
     }
 
     @Test
-    public void whenUpdateLocation() {
-        // when
-        this.locationRepository.updateLocationEntity(anyLong(), anyString(), anyString());
+    void whenUpdateLocation() {
+        //given
+        final LocationEntity location = this.locations.get(getRndEntityPos() - 1);
+        location.setCity("New City");
 
-        // then
-        verify(this.locationRepository, times(1)).updateLocationEntity(anyLong(), anyString(), anyString());
+        //when
+        final LocationEntity updatedLocation = this.locationService.update(location.getId(), location);
+
+        //then
+        assertThat(updatedLocation.getCity()).isEqualTo("New City");
+    }
+
+
+    @Test
+    void whenDeleteLocationSuccess() {
+        final int sizeBeforeDelete = this.locations.size();
+        final LocationEntity location = this.locations.get(getRndEntityPos() - 1);
+
+        //when
+        this.locationService.delete(location.getId());
+
+        //then
+        assertEquals(sizeBeforeDelete - 1, this.locationRepository.findAll().size());
+        assertEquals(Optional.empty(), this.locationRepository.findById(location.getId()));
+        verify(this.locationRepository, times(1)).delete(location);
     }
 
     @Test
-    public void whenDeleteLocation() {
-        // when
-        this.locationService.delete(anyLong());
+    public void whenDeleteLocationFail() {
+        // given
+        final LocationEntity location = getLocation(getRndEntityPos());
 
-        // then
-        verify(this.locationRepository, times(1)).deleteById(anyLong());
+        // when
+        final Exception ex = assertThrows(IllegalStateException.class, () ->
+                this.locationService.delete(location.getId()));
+
+        assertEquals(errIdNotFoundMessage("Location", location.getId()), ex.getMessage());
+        verify(this.locationRepository, times(0)).delete(location);
     }
 
 }

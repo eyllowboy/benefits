@@ -3,7 +3,11 @@ package com.andersenlab.benefits.service.impl;
 import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.repository.DiscountRepository;
 import com.andersenlab.benefits.repository.DiscountSpec;
+import com.andersenlab.benefits.service.CategoryService;
+import com.andersenlab.benefits.service.CompanyService;
 import com.andersenlab.benefits.service.DiscountService;
+import com.andersenlab.benefits.service.LocationService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,10 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
-import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntityFieldsAnnotations;
+import static com.andersenlab.benefits.service.impl.ValidateUtils.*;
 
 /**
  * The implementation for performing operations on a {@link DiscountEntity}.
@@ -29,41 +31,32 @@ import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntity
 
 @Service
 public class DiscountServiceImpl implements DiscountService {
-
     private final DiscountRepository discountRepository;
+    private final CompanyService companyService;
+    private final LocationService locationService;
+    private final CategoryService categoryService;
 
 
     @Autowired
-    public DiscountServiceImpl(final DiscountRepository discountRepository) {
+    public DiscountServiceImpl(final DiscountRepository discountRepository,
+                               final CompanyService companyService,
+                               final LocationService locationService,
+                               final CategoryService categoryService) {
         this.discountRepository = discountRepository;
+        this.companyService = companyService;
+        this.locationService = locationService;
+        this.categoryService = categoryService;
     }
 
     @Override
-    public Optional<DiscountEntity> findByIdDiscount(final Long id) {
-        return this.discountRepository.findById(id);
+    public DiscountEntity findById(final Long id) {
+        return this.discountRepository.findById(id).orElseThrow(() ->
+                new IllegalStateException(errIdNotFoundMessage("Discount", id)));
     }
 
     @Override
-    public Page<DiscountEntity> findAllDiscounts(final Pageable pageable) {
+    public Page<DiscountEntity> findAll(final Pageable pageable) {
         return this.discountRepository.findAll(pageable);
-    }
-
-    @Override
-    public Optional<DiscountEntity> createDiscount(final DiscountEntity discount) {
-        discount.setId(null);
-        validateEntityFieldsAnnotations(discount, true);
-        return Optional.of(this.discountRepository.save(discount));
-    }
-
-    @Override
-    public Optional<DiscountEntity> updateDiscountById(final Long id, final DiscountEntity newDiscount) {
-        validateEntityFieldsAnnotations(newDiscount, false);
-        return Optional.of(this.discountRepository.save(newDiscount));
-    }
-
-    @Override
-    public void deleteDiscountById(final Long id) {
-        this.discountRepository.deleteById(id);
     }
 
     @Override
@@ -88,5 +81,34 @@ public class DiscountServiceImpl implements DiscountService {
         return discounts.stream().filter(discount ->
                 (discount.getSizeDiscount().contains(sizeDiscount)
                         || sizeDiscount.contains(discount.getSizeDiscount()))).limit(limit).toList();
+    }
+
+    @Override
+    public DiscountEntity update(final Long id, final DiscountEntity discount) {
+        final DiscountEntity existingDiscount = findById(id);
+        validateCompanyLocationCategory(discount);
+        validateEntityFieldsAnnotations(discount, false);
+        BeanUtils.copyProperties(discount, existingDiscount, "id");
+        return this.discountRepository.save(discount);
+    }
+
+    @Override
+    public DiscountEntity save(final DiscountEntity discount) {
+        validateCompanyLocationCategory(discount);
+        discount.setId(null);
+        validateEntityFieldsAnnotations(discount, true);
+        return this.discountRepository.save(discount);
+    }
+
+    @Override
+    public void delete(final Long id) {
+        final DiscountEntity discount = findById(id);
+        this.discountRepository.delete(discount);
+    }
+
+    private void validateCompanyLocationCategory(final DiscountEntity discount) {
+        this.companyService.findById(discount.getCompany().getId());
+        discount.getArea().forEach(location -> this.locationService.findById(location.getId()));
+        discount.getCategories().forEach(category -> this.categoryService.findById(category.getId()));
     }
 }

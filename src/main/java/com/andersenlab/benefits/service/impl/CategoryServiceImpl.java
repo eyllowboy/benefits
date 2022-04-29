@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import static com.andersenlab.benefits.service.impl.ValidateUtils.*;
 
+
 /***
  * Implementation for performing operations on a {@link CategoryEntity}
  * @author Denis Popov

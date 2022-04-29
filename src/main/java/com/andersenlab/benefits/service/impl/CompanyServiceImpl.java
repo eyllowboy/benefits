@@ -3,12 +3,15 @@ package com.andersenlab.benefits.service.impl;
 import com.andersenlab.benefits.domain.CompanyEntity;
 import com.andersenlab.benefits.repository.CompanyRepository;
 import com.andersenlab.benefits.service.CompanyService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import java.util.Objects;
 import java.util.Optional;
-import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntityFieldsAnnotations;
+import static com.andersenlab.benefits.service.impl.ValidateUtils.*;
+
 
 /**
  * The implementation for performing operations on a {@link CompanyEntity}
@@ -30,40 +33,48 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public Page<CompanyEntity> findAllCompany(final Pageable pageable) {
+    public CompanyEntity findById(final Long id) {
+        return this.companyRepository.findById(id).orElseThrow(() ->
+                new IllegalStateException(errIdNotFoundMessage("Company", id)));
+    }
+
+    @Override
+    public Page<CompanyEntity> findAll(final Pageable pageable) {
         return this.companyRepository.findAll(pageable);
     }
 
     @Override
-    public Optional<CompanyEntity> findByIdCompany(final Long id) {
-        return this.companyRepository.findById(id);
+    public CompanyEntity update(final Long id, final CompanyEntity company) {
+        if (!Objects.isNull(company.getTitle())) {
+            this.companyRepository.findByTitle(company.getTitle()).ifPresent(foundCompany -> {
+                throw new IllegalStateException(
+                    errAlreadyExistMessage("Company", "title", company.getTitle()));});
+        }
+        final CompanyEntity existingCompany = findById(id);
+        BeanUtils.copyProperties(company, existingCompany, "id");
+        validateEntityFieldsAnnotations(company, false);
+        return this.companyRepository.save(company);
     }
 
     @Override
-    public Optional<CompanyEntity> findByTitle(final String title) {
-        return this.companyRepository.findCompanyEntityByTitle(title);
-    }
-
-    @Override
-    public Optional<CompanyEntity> createCompany(final CompanyEntity company) {
+    public CompanyEntity save(final CompanyEntity company) {
+        this.companyRepository.findByTitle(company.getTitle()).ifPresent(foundCompany -> {
+            throw new IllegalStateException(
+                    errAlreadyExistMessage("Company", "title", company.getTitle()));}
+        );
         company.setId(null);
         validateEntityFieldsAnnotations(company, true);
-        return Optional.of(this.companyRepository.save(company));
+        return this.companyRepository.save(company);
     }
 
     @Override
-    public Optional<CompanyEntity> updateCompanyById(final Long id, final CompanyEntity newCompany) {
-        validateEntityFieldsAnnotations(newCompany, false);
-        return Optional.of(this.companyRepository.save(newCompany));
-    }
-
-    @Override
-    public void deleteCompanyById(final Long id) {
-        this.companyRepository.deleteById(id);
-    }
-
-    @Override
-    public Optional<CompanyEntity> findWithAssociatedDiscount(final Long id) {
-        return this.companyRepository.findWithAssociatedDiscounts(id);
+    public void delete(final Long id) {
+        final CompanyEntity existingCompany = findById(id);
+        final Optional<CompanyEntity> company = this.companyRepository.findWithAssociatedDiscounts(id);
+        if (company.isPresent() && company.get().getDiscounts().size() > 0) {
+            throw new IllegalStateException(
+                    errAssociatedEntity("discounts", "Company"));
+        }
+        this.companyRepository.delete(existingCompany);
     }
 }

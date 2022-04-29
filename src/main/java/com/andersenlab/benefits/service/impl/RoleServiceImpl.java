@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Optional;
 import static com.andersenlab.benefits.service.impl.ValidateUtils.*;
 
+
 /**
  * An implementation for performing operations on a {@link RoleEntity}.
  *

@@ -49,8 +49,15 @@ public class ServiceTestUtils {
         return result;
     }
 
-    public static CompanyEntity getCompany() {
-        final long num = (long) (random() * 9 + 1);
+    public static List<LocationEntity> getLocationList(final int size) {
+        final List<LocationEntity> result = new ArrayList<>();
+        for (long i = 1; i <= size; i++) {
+            result.add(getLocation(i));
+        }
+        return result;
+    }
+
+    public static CompanyEntity getCompany(final long num) {
         return (new CompanyEntity(
                 "Company" + num,
                 "Description" + num,
@@ -58,6 +65,14 @@ public class ServiceTestUtils {
                 "Phone" + num,
                 "Link" + num
         ));
+    }
+
+    public static List<CompanyEntity> getCompanyList() {
+        final List<CompanyEntity> result = new ArrayList<>(listLength);
+        for (int i = 1; i <= listLength; i++) {
+            result.add(getCompany(i));
+        }
+        return result;
     }
 
     public static RoleEntity getRole(final long num) {
@@ -88,22 +103,26 @@ public class ServiceTestUtils {
         return result;
     }
 
+    public static DiscountEntity getDiscount(final long num) {
+        return new DiscountEntity(
+                num,
+                "Type" + num,
+                "Description" + num,
+                "Condition" + num,
+                "Size" + num,
+                DiscountType.DISCOUNT,
+                valueOf("2022-01-01 00:00:00"),
+                valueOf("2022-12-31 00:00:00"),
+                "Image" + num,
+                getLocationList(),
+                getCategoryList(),
+                getCompany(getRndEntityPos()));
+    }
+
     public static List<DiscountEntity> getDiscountList() {
         final List<DiscountEntity> result = new ArrayList<>();
         for (long i = 1; i <= listLength; i++) {
-            result.add(new DiscountEntity(
-                    i,
-                    "Type" + i,
-                    "Description" + i,
-                    "Condition" + i,
-                    "Size" + i,
-                    DiscountType.DISCOUNT,
-                    valueOf("2022-01-01 00:00:00"),
-                    valueOf("2022-12-31 00:00:00"),
-                    "Image" + i,
-                    getLocationList(),
-                    getCategoryList(),
-                    getCompany()));
+            result.add(getDiscount(i));
         }
         return result;
     }

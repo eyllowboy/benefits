@@ -1,9 +1,7 @@
 package com.andersenlab.benefits.controller;
 
 
-import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.DiscountEntity;
-import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.repository.DiscountSpec;
 import com.andersenlab.benefits.service.impl.DiscountServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,11 +10,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -24,10 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 import static com.andersenlab.benefits.repository.DiscountSpec.getLastAdded;
 
@@ -65,31 +58,16 @@ public class DiscountController {
     }
 
     /**
-     * Find all {@link DiscountEntity} from the database.
-     *
-     * @param page is the page of {@link CategoryEntity} that needs to pagination
-     * @param size is the count of {@link CategoryEntity} that needs to pagination
-     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
-     * @return a list of {@link DiscountEntity} from database.
-     */
-    @Operation(summary = "This is to fetch all discounts from database.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Details of all the discounts",
-                    content = @Content(mediaType = "application/json"))
-    })
-    @GetMapping("/discounts")
-    public Page<DiscountEntity> allDiscount(@RequestParam(required = false, defaultValue = "0") final int page,
-                                            @RequestParam(required = false, defaultValue = "6") final int size,
-                                            @RequestParam(required = false, defaultValue = "dateBegin") final String sort) {
-        return this.discountService.findAllDiscounts(PageRequest.of(page, size, Sort.by(sort)));
-    }
-
-    /**
      * Create {@link DiscountEntity} in the database.
      *
-     * @param newDiscount new {@link DiscountEntity} to be added
-     * @throws IllegalStateException if {@link DiscountEntity} with this id was not saved in the database.
+     * @param discount new {@link DiscountEntity} to be added
+     * @throws IllegalStateException if:
+     *      <ul>
+     *      <li>company from {@link DiscountEntity#getCompany()} was not found in the database
+     *      <li>some location from {@link DiscountEntity#getArea()} was not found in the database
+     *      <li>some category from {@link DiscountEntity#getCategories()} was not found in the database
+     *      </ul>
+     * @return created {@link DiscountEntity}
      */
     @Operation(summary = "This is create the new discount.")
     @ApiResponses(value = {
@@ -98,44 +76,185 @@ public class DiscountController {
                     content = @Content)
     })
     @PostMapping("/discounts")
-    public ResponseEntity<DiscountEntity> newDiscount(@Valid @RequestBody final DiscountEntity newDiscount) {
-        if (!Objects.isNull(newDiscount.getId()))
-            this.discountService.findByIdDiscount(newDiscount.getId()).ifPresent(discount -> {
-                throw new IllegalStateException("The discount with id: " +
-                        newDiscount.getId() + " already saved in the database");
-            });
-        final DiscountEntity savedDiscount = this.discountService.createDiscount(newDiscount)
-                .orElseThrow(() -> new IllegalStateException("The discount with id: " +
-                        newDiscount.getId() + " was not saved in the database"));
-        return new ResponseEntity<>(savedDiscount, HttpStatus.CREATED);
+    public ResponseEntity<DiscountEntity> addDiscount(@RequestBody final DiscountEntity discount) {
+        return new ResponseEntity<>(this.discountService.save(discount), HttpStatus.CREATED);
     }
 
     /**
-     * Gets {@link DiscountEntity} from the database.
+     * Gets {@link DiscountEntity} from the database with specified id.
      *
-     * @param id the id of {@link DiscountEntity} that needs to get.
-     * @throws IllegalStateException if the given id was not found in the database.
+     * @param id of {@link DiscountEntity} that needs to get
+     * @throws IllegalStateException if the given id was not found in the database
+     * @return found {@link DiscountEntity}
      */
-    @Operation(summary = "This is to get the discount.")
+    @Operation(summary = "This is to get the discount by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Discount has been received",
                     content = @Content)
     })
     @GetMapping("/discounts/{id}")
-    public Optional<DiscountEntity> oneDiscount(@PathVariable final Long id) {
-        final Optional<DiscountEntity> discount = this.discountService.findByIdDiscount(id);
-        return Optional.ofNullable(discount.orElseThrow(() -> new IllegalStateException("The discount with id: " + id + " was not found in the database")));
+    public DiscountEntity getDiscountById(@PathVariable final Long id) {
+        return this.discountService.findById(id);
+    }
+
+    /**
+     * Gets all {@link DiscountEntity} from the database
+     *
+     * @param page is number of page to start returned result from
+     * @param size is number of elements per page that needs to return
+     * @param sort is the field by which to sort elements in returned list
+     * @return a list of {@link DiscountEntity} from database.
+     */
+    @Operation(summary = "This is to get all discounts from database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Details of all discounts",
+                    content = @Content(mediaType = "application/json"))
+    })
+    @GetMapping("/discounts")
+    public Page<DiscountEntity> getDiscounts(@RequestParam(required = false, defaultValue = "0") final int page,
+                                             @RequestParam(required = false, defaultValue = "6") final int size,
+                                             @RequestParam(required = false, defaultValue = "dateBegin") final String sort) {
+        return this.discountService.findAll(PageRequest.of(page, size, Sort.by(sort)));
+    }
+
+    /**
+     * Find {@link DiscountEntity} with {@link DiscountEntity#area} city like "%city%"
+     * in descending order by {@link DiscountEntity#dateBegin}
+     *
+     * @param city is partial mask of city name which mast be contained in
+     *              {@link DiscountEntity#area} city. Default - all
+     * @param page is number of page to start returned result from
+     * @param size is number of elements per page that needs to return
+     * @param sort is the field by which to sort elements in returned list
+     * @return a list of found {@link DiscountEntity}
+     */
+    @Operation(summary = "This is method to get discounts by %city% mask ordered by descending beginDate")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Discounts have been received",
+                    content = @Content)
+    })
+
+    @GetMapping("/discounts/find-by-city")
+    public Page<DiscountEntity> findDiscountByCity(@RequestParam(required = false) final String city,
+                                                   @RequestParam(required = false, defaultValue = "0") final int page,
+                                                   @RequestParam(required = false, defaultValue = "6") final int size,
+                                                   @RequestParam(required = false, defaultValue = "dateBegin") final String sort) {
+        final Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByLocation(city).and(getLastAdded()));
+        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(sort)));
+    }
+
+    /**
+     * Gets {@link DiscountEntity} with {@link DiscountEntity#categories} title equals to "category"
+     * in descending order by {@link DiscountEntity#dateBegin}
+     *
+     * @param category is name of category which mast be equal to one of the
+     *                {@link DiscountEntity#categories} title. Default - all
+     * @param page is number of page to start returned result from
+     * @param size is number of elements per page that needs to return
+     * @param sort is the field by which to sort elements in returned list
+     */
+    @Operation(summary = "This is method to get discounts within certain category and ordered by descending beginDate")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Discounts have been received",
+                    content = @Content)
+    })
+    @GetMapping("/discounts/find-by-category")
+    public Page<DiscountEntity> findDiscountByCategory(@RequestParam(required = false) final String category,
+                                                       @RequestParam(required = false, defaultValue = "0") final int page,
+                                                       @RequestParam(required = false, defaultValue = "6") final int size,
+                                                       @RequestParam(required = false, defaultValue = "dateBegin") final String sort) {
+        final Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByCategory(category).and(getLastAdded()));
+        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(sort)));
+    }
+
+    /**
+     * Find {@link DiscountEntity} with {@link DiscountEntity#type} like "%type%"
+     * in descending order by {@link DiscountEntity#dateBegin}
+     *
+     * @param type is partial mask of "Type of company or service" which mast be contained in
+     *              {@link DiscountEntity#type}. Default - all
+     * @param page is number of page to start returned result from
+     * @param size is number of elements per page that needs to return
+     * @param sort is the field by which to sort elements in returned list
+     */
+    @Operation(summary = "This is method to find discounts by %type% mask ordered by descending beginDate")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Discounts have been received",
+                    content = @Content)
+    })
+    @GetMapping("/discounts/find-by-type")
+    public Page<DiscountEntity> findDiscountByType(@RequestParam(required = false) final String type,
+                                                   @RequestParam(required = false, defaultValue = "0") final int page,
+                                                   @RequestParam(required = false, defaultValue = "6") final int size,
+                                                   @RequestParam(required = false, defaultValue = "dateBegin") final String sort) {
+        final Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByType(type).and(getLastAdded()));
+        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(sort)));
+    }
+
+    /**
+     * Find {@link DiscountEntity} with {@link DiscountEntity#sizeDiscount} like "%sizeDiscount%"
+     * in descending order by {@link DiscountEntity#dateBegin}
+     *
+     * @param sizeDiscount is partial mask which mast be contained in
+     *              {@link DiscountEntity#sizeDiscount}. Default - all
+     * @param page is number of page to start returned result from
+     * @param size is number of elements per page that needs to return
+     * @param sort is the field by which to sort elements in returned list
+     */
+    @Operation(summary = "This is method to find discounts by %sizeDiscount% mask ordered by descending beginDate")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Discounts have been received",
+                    content = @Content)
+    })
+    @GetMapping("/discounts/find-by-size")
+    public Page<DiscountEntity> findDiscountBySize(@RequestParam(required = false) final String sizeDiscount,
+                                                   @RequestParam(required = false, defaultValue = "0") final int page,
+                                                   @RequestParam(required = false, defaultValue = "6") final int size,
+                                                   @RequestParam(required = false, defaultValue = "dateBegin") final String sort) {
+        final Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getBySize(sizeDiscount).and(getLastAdded()));
+        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(sort)));
+    }
+
+    /**
+     * Find {@link DiscountEntity} based on equals to category and like %sizeDiscount%
+     *
+     * @param category is name of category which mast be equal to one of the
+     *                {@link DiscountEntity#categories} title.
+     * @param sizeDiscount is string which must be contained in {@link DiscountEntity#sizeDiscount}
+     *                    or vice versa
+     * @param city is name of City where to search (optional) if certain location needed
+     * @param limit is number of {@link DiscountEntity} to return
+     * @return List of {@link DiscountEntity} suitable to search conditions
+     */
+    @Operation(summary = "This is method to find discounts in the same Category and with similar size of discount")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Discounts have been received",
+                    content = @Content)
+    })
+    @GetMapping("/discounts/find-similar")
+    public List<DiscountEntity> findSimilar(@RequestParam final String category,
+                                            @RequestParam final String sizeDiscount,
+                                            @RequestParam(required = false) final String city,
+                                            @RequestParam(required = false, defaultValue = "3") final Integer limit) {
+        return this.discountService.getSimilarDiscounts(category, sizeDiscount, city, limit);
     }
 
     /**
      * Updates {@link DiscountEntity} in the database.
      *
-     * @param id       the id of {@link DiscountEntity} that needs to update
-     * @param discount the {@link DiscountEntity} that needs to update
+     * @param id of {@link DiscountEntity} to be updated
+     * @param discount is {@link DiscountEntity} in which fields with not-null values need to be updated
      * @throws IllegalStateException if the {@link DiscountEntity} with given id was not found in the database.
+     * @return updated {@link DiscountEntity}
      */
-    @Operation(summary = "This is update the discount.")
+    @Operation(summary = "This is to update the discount.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Discount has been updated",
@@ -144,11 +263,7 @@ public class DiscountController {
     @PatchMapping("/discounts/{id}")
     public ResponseEntity<DiscountEntity> updateDiscount(@PathVariable final Long id,
                                                          @RequestBody final DiscountEntity discount) {
-        final DiscountEntity existingDiscount = this.discountService.findByIdDiscount(id).orElseThrow(() ->
-                new IllegalStateException("The discount with id: " + id + " was not found in the database"));
-        BeanUtils.copyProperties(discount, existingDiscount, "id");
-        this.discountService.updateDiscountById(id, existingDiscount);
-        return ResponseEntity.ok(this.discountService.updateDiscountById(id, existingDiscount).orElseThrow());
+        return ResponseEntity.ok(this.discountService.update(id, discount));
     }
 
     /**
@@ -165,123 +280,7 @@ public class DiscountController {
     })
     @DeleteMapping("/discounts/{id}")
     public void deleteDiscount(@PathVariable final Long id) {
-        this.discountService.findByIdDiscount(id);
-        this.discountService.deleteDiscountById(id);
+        this.discountService.delete(id);
     }
 
-    /**
-     * Filters {@link DiscountEntity} from the database by city and lastDate.
-     *
-     * @param page is the page of {@link CategoryEntity} that needs to pagination
-     * @param size is the count of {@link CategoryEntity} that needs to pagination
-     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
-     * @param city the city {@link LocationEntity} that needs to filtering
-     */
-    @Operation(summary = "This is method to filtering the discount by city and lastDate.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Discount is filtered",
-                    content = @Content)
-    })
-    @GetMapping("/discounts/filter-by-city")
-    public Page<DiscountEntity> findLastByCity(@RequestParam(required = false) final String city,
-                                               @RequestParam(required = false, defaultValue = "0") final int page,
-                                               @RequestParam(required = false, defaultValue = "6") final int size,
-                                               @RequestParam(required = false, defaultValue = "dateBegin") final String sort) {
-        final Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByLocation(city).and(getLastAdded()));
-        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(sort)));
-    }
-
-
-    /**
-     * Filters {@link DiscountEntity} from the database by category and lastDate.
-     *
-     * @param page     is the page of {@link CategoryEntity} that needs to pagination
-     * @param size     is the count of {@link CategoryEntity} that needs to pagination
-     * @param sort     is the sort of {@link CategoryEntity} that needs to pagination
-     * @param category the city {@link LocationEntity} that needs to filtering
-     */
-    @Operation(summary = "This is method to filtering the discount by category and lastDate.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Discount is filtered",
-                    content = @Content)
-    })
-    @GetMapping("/discounts/filter-by-category")
-    public Page<DiscountEntity> findLastByCategory(@RequestParam(required = false) final String category,
-                                                   @RequestParam(required = false, defaultValue = "0") final int page,
-                                                   @RequestParam(required = false, defaultValue = "6") final int size,
-                                                   @RequestParam(required = false, defaultValue = "dateBegin") final String sort) {
-        final Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByCategory(category).and(getLastAdded()));
-        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(sort)));
-    }
-
-    /**
-     * Filters {@link DiscountEntity} from the database by type and lastDate.
-     *
-     * @param page is the page of {@link CategoryEntity} that needs to pagination
-     * @param size is the count of {@link CategoryEntity} that needs to pagination
-     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
-     * @param type the type {@link DiscountEntity} that needs to filtering
-     */
-    @Operation(summary = "This is method to filtering the discount by type and lastDate.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Discounts are filtered",
-                    content = @Content)
-    })
-    @GetMapping("/discounts/filter-by-type")
-    public Page<DiscountEntity> findLastByType(@RequestParam(required = false) final String type,
-                                               @RequestParam(required = false, defaultValue = "0") final int page,
-                                               @RequestParam(required = false, defaultValue = "6") final int size,
-                                               @RequestParam(required = false, defaultValue = "dateBegin") final String sort) {
-        final Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByType(type).and(getLastAdded()));
-        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(sort)));
-    }
-
-    /**
-     * Filters {@link DiscountEntity} from the database by discountSize and lastDate.
-     *
-     * @param page is the page of {@link CategoryEntity} that needs to pagination
-     * @param size is the count of {@link CategoryEntity} that needs to pagination
-     * @param sort is the sort of {@link CategoryEntity} that needs to pagination
-     * @param size the size {@link DiscountEntity} that needs to filtering
-     */
-    @Operation(summary = "This is method to filtering the discount by size and lastDate.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Discounts are filtered",
-                    content = @Content)
-    })
-    @GetMapping("/discounts/filter-by-size")
-    public Page<DiscountEntity> findLastBySize(@RequestParam(required = false) final String sizeDiscount,
-                                               @RequestParam(required = false, defaultValue = "0") final int page,
-                                               @RequestParam(required = false, defaultValue = "6") final int size,
-                                               @RequestParam(required = false, defaultValue = "dateBegin") final String sort) {
-        final Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getBySize(sizeDiscount).and(getLastAdded()));
-        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(sort)));
-    }
-
-    /**
-     * Find similar {@link DiscountEntity}'s based on "category" and "size of discount"
-     *
-     * @param category     string with category name in which to search
-     * @param sizeDiscount string which must be contained in {@link DiscountEntity}'s size or vice versa
-     * @param city         is name of City where to search (optional) if certain location needed
-     * @param limit        count {@link DiscountEntity} to return
-     * @return List of {@link DiscountEntity} suitable to search conditions
-     */
-    @Operation(summary = "This is method to find discounts in the same \"Category\" and with similar size of discount")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Discounts are filtered",
-                    content = @Content)
-    })
-    @GetMapping("/discounts/filter-similar")
-    public List<DiscountEntity> findSimilar(@RequestParam final String category,
-                                            @RequestParam final String sizeDiscount,
-                                            @RequestParam(required = false) final String city,
-                                            @RequestParam(required = false, defaultValue = "3") final Integer limit) {
-        return this.discountService.getSimilarDiscounts(category, sizeDiscount, city, limit);
-    }
 }

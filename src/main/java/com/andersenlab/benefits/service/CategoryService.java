@@ -18,6 +18,7 @@ import java.util.Optional;
 public interface CategoryService extends CrudService<CategoryEntity> {
 
     /**
+<<<<<<< HEAD
      * @param id the id of {@link CategoryEntity} in the database, not null
      * @param {@link CategoryEntity} stored in the database, not null
      * @return {@link CategoryEntity} with specified title, error if nothing found
@@ -25,6 +26,8 @@ public interface CategoryService extends CrudService<CategoryEntity> {
     CategoryEntity update(final Long id, final CategoryEntity category);
 
     /**
+=======
+>>>>>>> adc26eac69ae689fc8c1c668b0bfb70ba14c0d48
      * Method to get {@link CategoryEntity} with EAGER fetch associated {@link DiscountEntity}
      *
      * @param id the id of {@link CategoryEntity} need to load, not null
