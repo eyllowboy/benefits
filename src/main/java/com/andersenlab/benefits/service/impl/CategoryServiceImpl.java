@@ -9,7 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Optional;
+
 import static com.andersenlab.benefits.service.impl.ValidateUtils.*;
 
 
@@ -33,8 +35,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public CategoryEntity update(final Long id, final CategoryEntity categoryEntity) {
         final Optional<CategoryEntity> theSameTitle = this.categoryRepository.findByTitle(categoryEntity.getTitle());
-        if (theSameTitle.isPresent() && !theSameTitle.get().getId().equals(id))
+        if (theSameTitle.isPresent() && !theSameTitle.get().getId().equals(id)) {
             throw new IllegalStateException(errAlreadyExistMessage("category", "category title", categoryEntity.getTitle()));
+        }
         final CategoryEntity existingCategory = findById(id);
         BeanUtils.copyProperties(categoryEntity, existingCategory, "id");
         final CategoryEntity validatedCategory = new CategoryEntity(id, existingCategory.getTitle());
@@ -69,8 +72,9 @@ public class CategoryServiceImpl implements CategoryService {
     public void delete(final Long id) {
         final CategoryEntity existingCategory = findById(id);
         final Optional<CategoryEntity> categoryEntity = this.findWithAssociatedDiscounts(id);
-        if (categoryEntity.isPresent() && categoryEntity.get().getDiscounts().size() > 0)
-            throw new IllegalStateException(errAssociatedEntity("category","discount"));
+        if (categoryEntity.isPresent() && categoryEntity.get().getDiscounts().size() > 0) {
+            throw new IllegalStateException(errAssociatedEntity("category", "discount"));
+        }
         this.categoryRepository.delete(existingCategory);
     }
 

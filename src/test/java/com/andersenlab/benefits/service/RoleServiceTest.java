@@ -1,6 +1,5 @@
 package com.andersenlab.benefits.service;
 
-import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.repository.RoleRepository;
 import com.andersenlab.benefits.service.impl.RoleServiceImpl;
@@ -14,7 +13,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.*;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
@@ -123,9 +121,11 @@ public class RoleServiceTest {
         final RoleEntity role = rolesList.get(rolePos);
         final RoleEntity roletheSameCode = new RoleEntity(role.getName(),role.getCode());
         roletheSameCode.setId(99L);
+
         // when
         when(this.roleRepository.findByCode(anyString())).thenReturn(Optional.of(roletheSameCode));
         final IllegalStateException exception = assertThrows(IllegalStateException.class, () -> this.roleService.update(role.getId(), role));
+
         // then
         assertTrue(exception.getMessage().contains(role.getCode() + " already exist in database"));
     }

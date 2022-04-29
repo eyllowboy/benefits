@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import javax.transaction.Transactional;
 import java.util.Objects;
 import java.util.Optional;
+
 import static com.andersenlab.benefits.service.impl.ValidateUtils.*;
 
 
@@ -57,8 +59,9 @@ public class RoleServiceImpl implements RoleService {
     public RoleEntity update(final Long id, final RoleEntity roleEntity) {
         if (!Objects.isNull(roleEntity.getCode())) {
             final Optional<RoleEntity> theSameCodeRole = this.roleRepository.findByCode(roleEntity.getCode());
-            if (theSameCodeRole.isPresent() && (!theSameCodeRole.get().getId().equals(id)))
+            if (theSameCodeRole.isPresent() && (!theSameCodeRole.get().getId().equals(id))) {
                 throw new IllegalStateException(errAlreadyExistMessage("role", "role code", roleEntity.getCode()));
+            }
         }
         final RoleEntity existingRole = this.roleRepository.findById(id).orElseThrow(() ->
                 new IllegalStateException(errIdNotFoundMessage("role", roleEntity.getId())));
@@ -72,8 +75,9 @@ public class RoleServiceImpl implements RoleService {
     public void delete(final Long id) {
         final RoleEntity existingRole = findById(id);
         final Optional<RoleEntity> roleEntity = this.findWithAssociatedUsers(id);
-        if (roleEntity.isPresent() && roleEntity.get().getUsers().size() > 0)
+        if (roleEntity.isPresent() && roleEntity.get().getUsers().size() > 0) {
             throw new IllegalStateException(errAssociatedEntity("role", "discount"));
+        }
         this.roleRepository.delete(existingRole);
     }
 

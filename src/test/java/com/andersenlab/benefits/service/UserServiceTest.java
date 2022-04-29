@@ -85,8 +85,10 @@ public class UserServiceTest {
         when(this.roleRepository.findById(anyLong())).thenReturn(Optional.of(user.getRoleEntity()));
         when(this.userRepository.findById(anyLong())).thenReturn(Optional.of(user));
         when(this.locationRepository.findById(anyLong())).thenReturn(Optional.of(user.getLocation()));
+
         // when
         this.userService.save(user);
+
         // then
         verify(this.userRepository, times(1)).save(eq(user));
     }
@@ -98,8 +100,10 @@ public class UserServiceTest {
         final List<UserEntity> usersList = getUserList();
         final UserEntity user = usersList.get(userPos);
         when(this.userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+
         // when
         this.userService.delete(user.getId());
+
         // then
         verify(this.userRepository, times(1)).delete(eq(user));
     }
@@ -131,8 +135,10 @@ public class UserServiceTest {
         when(this.roleRepository.findById(anyLong())).thenReturn(Optional.of(user.getRoleEntity()));
         when(this.userRepository.findById(anyLong())).thenReturn(Optional.of(user));
         when(this.locationRepository.findById(anyLong())).thenReturn(Optional.of(user.getLocation()));
+
         // when
         this.userService.update((long) userPos, user);
+
         // then
         verify(this.userRepository, times(1)).save(eq(user));
     }

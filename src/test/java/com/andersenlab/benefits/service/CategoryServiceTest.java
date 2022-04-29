@@ -43,9 +43,11 @@ public class CategoryServiceTest {
                 new CategoryEntity("Категория 2"),
                 new CategoryEntity("Категория 3"));
         final Page<CategoryEntity> pageOfCategory = new PageImpl<>(categories);
+
         // when
         when(this.categoryRepository.findAll(PageRequest.of(0, 3))).thenReturn(pageOfCategory);
         final Page<CategoryEntity> foundCategory = this.categoryService.findAll(PageRequest.of(0, 3));
+
         // then
         assertEquals(pageOfCategory, foundCategory);
         verify(this.categoryRepository, times(1)).findAll(PageRequest.of(0, 3));
@@ -55,9 +57,11 @@ public class CategoryServiceTest {
     public void whenFindById() {
         // given
         final CategoryEntity categoryEntity = new CategoryEntity("Категория 10");
+
         // when
         when(this.categoryRepository.findById(1L)).thenReturn(Optional.of(categoryEntity));
         final CategoryEntity foundCategory = this.categoryService.findById(1L);
+
         // then
         assertEquals(categoryEntity, foundCategory);
         verify(this.categoryRepository, times(1)).findById(1L);
@@ -67,9 +71,11 @@ public class CategoryServiceTest {
     public void whenAddCategory() {
         // given
         final CategoryEntity categoryEntity = new CategoryEntity("Категория 100");
+
         // when
         when(this.categoryRepository.save(any(CategoryEntity.class))).thenReturn(categoryEntity);
         final CategoryEntity savedCategory = this.categoryService.save(categoryEntity);
+
         // then
         assertEquals(categoryEntity, savedCategory);
         verify(this.categoryRepository, times(1)).save(categoryEntity);
@@ -80,10 +86,12 @@ public class CategoryServiceTest {
         // given
         final CategoryEntity category = new CategoryEntity("Category55");
         category.setId(10L);
+
         // when
         when(this.categoryRepository.findByTitle(anyString())).thenReturn(Optional.empty());
         when(this.categoryRepository.findById(anyLong())).thenReturn(Optional.of(category));
         this.categoryService.update(category.getId(), category);
+
         // then
         verify(this.categoryRepository, times(1)).save(eq(category));
     }
@@ -95,9 +103,11 @@ public class CategoryServiceTest {
         category.setId(10L);
         final CategoryEntity categorytheSameTitle = new CategoryEntity("Category55");
         categorytheSameTitle.setId(11L);
+
         // when
         when(this.categoryRepository.findByTitle(anyString())).thenReturn(Optional.of(categorytheSameTitle));
         final IllegalStateException exception = assertThrows(IllegalStateException.class, () -> this.categoryService.update(category.getId(), category));
+
         // then
         assertTrue(exception.getMessage().contains(category.getTitle() + " already exist in database"));
     }
@@ -107,9 +117,11 @@ public class CategoryServiceTest {
         // given
         final CategoryEntity category = new CategoryEntity("Category55");
         category.setId(10L);
+
         // when
         when(this.categoryRepository.findById(anyLong())).thenReturn(Optional.of(category));
         this.categoryService.delete(10L);
+
         // then
         verify(this.categoryRepository, times(1)).delete(eq(category));
     }
