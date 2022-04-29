@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
     public UserEntity createNewUser(final String login, final String password) {
         this.userRepository.findByLogin(login).ifPresent(foundUser -> {
             throw new IllegalStateException(errAlreadyExistMessage("User", "login", login));});
-        final RoleEntity role = this.roleRepository.findByName("ROLE_USER").orElseThrow(() ->
+        final RoleEntity role = this.roleRepository.findByCode("ROLE_USER").orElseThrow(() ->
                 new IllegalStateException("No suitable role for ordinary users"));
         final LocationEntity location = this.locationRepository.findByCity("Белоруссия", "Минск").orElseThrow(() ->
                 new IllegalStateException("No base location Белоруссия/Минск found"));

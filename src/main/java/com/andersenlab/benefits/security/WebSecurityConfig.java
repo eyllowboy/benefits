@@ -60,9 +60,9 @@ public class WebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
                 // users
                 .antMatchers(HttpMethod.GET, "/users").hasAnyRole("ADMIN", "MODERATOR", "USER")
                 .antMatchers(HttpMethod.GET, "/users/**").hasAnyRole("ADMIN", "MODERATOR", "USER")
-                .antMatchers(HttpMethod.POST, "/users").hasRole("USER")
+                .antMatchers(HttpMethod.POST, "/users").permitAll()
                 .antMatchers(HttpMethod.PATCH, "/users").hasRole("USER")
-                .antMatchers(HttpMethod.DELETE, "/users/**").hasRole("USER")
+                .antMatchers(HttpMethod.DELETE, "/users/**").permitAll()
                 // discounts
                 .antMatchers(HttpMethod.GET, "/discounts").hasAnyRole("ADMIN", "MODERATOR", "USER")
                 .antMatchers(HttpMethod.GET, "/discounts/**").hasAnyRole("ADMIN", "MODERATOR", "USER")

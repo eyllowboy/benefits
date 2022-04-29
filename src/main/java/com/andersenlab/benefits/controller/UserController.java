@@ -16,16 +16,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -154,19 +151,6 @@ public class UserController {
                                               @RequestParam final String password) {
         return new ResponseEntity<>(this.userService.createNewUser(login, password), HttpStatus.CREATED);
     }
-//    public ResponseEntity<UserEntity> addUser(@Valid @RequestBody final UserEntity user) {
-//        this.userService.findByLogin(user.getLogin()).ifPresent(foundUser -> {
-//            throw new IllegalStateException("User with such 'login' is already exists");}
-//        );
-//        this.roleService.findById(user.getRoleEntity().getId()).orElseThrow(() -> {
-//            throw new IllegalStateException("Role with this id was not found in the database");}
-//        );
-//        this.locationService.findById(user.getLocation().getId()).orElseThrow(() -> {
-//            throw new IllegalStateException("Location with this id was not found in the database");}
-//        );
-//        final UserEntity savedUserEntity = this.userService.save(user);
-//        return new ResponseEntity<>(savedUserEntity, HttpStatus.CREATED);
-//    }
 
     /**
      * Gets {@link UserEntity} from the database.
