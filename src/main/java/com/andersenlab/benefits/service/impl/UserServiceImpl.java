@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 import java.util.*;
 
 import static com.andersenlab.benefits.service.impl.ValidateUtils.errAlreadyExistMessage;
+import static com.andersenlab.benefits.service.impl.ValidateUtils.errIdNotFoundMessage;
 import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntityFieldsAnnotations;
 
 /**
@@ -60,8 +61,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<UserEntity> findById(final Long id) {
-        return this.userRepository.findById(id);
+    public UserEntity findById(final Long id) {
+        return this.userRepository.findById(id).orElseThrow(() ->
+                new IllegalStateException(errIdNotFoundMessage("User", id)));
     }
 
     @Override
@@ -75,7 +77,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalStateException(errAlreadyExistMessage("User", "login", login));});
         final RoleEntity role = this.roleRepository.findByCode("ROLE_USER").orElseThrow(() ->
                 new IllegalStateException("No suitable role for ordinary users"));
-        final LocationEntity location = this.locationRepository.findByCity("Белоруссия", "Минск").orElseThrow(() ->
+        final LocationEntity location = this.locationRepository.findByCity("Минск").orElseThrow(() ->
                 new IllegalStateException("No base location Белоруссия/Минск found"));
         final UserEntity user = new UserEntity(login, role, location);
         validateEntityFieldsAnnotations(user, true);
@@ -90,16 +92,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUserEntity(final Long id, final String login, final RoleEntity roleEntity, final LocationEntity location) {
-        final UserEntity user = new UserEntity(id, login, roleEntity, location);
+    public UserEntity update(final Long id, final UserEntity user) {
         validateEntityFieldsAnnotations(user, false);
         this.userRepository.updateUserEntity(user.getId(), user.getLogin(), user.getRoleEntity(), user.getLocation());
+        return user;
     }
 
     @Override
     public void delete(final Long id) {
         final UserEntity user = this.userRepository.findById(id).orElseThrow(() ->
-                new IllegalStateException(ValidateUtils.errNotFoundMessage("User", id)));
+                new IllegalStateException(ValidateUtils.errIdNotFoundMessage("User", id)));
         try (final Response ignored = deleteKeycloakUser(user)) {
             this.userRepository.delete(user);
         }

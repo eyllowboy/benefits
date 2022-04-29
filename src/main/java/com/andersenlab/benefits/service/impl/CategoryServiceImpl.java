@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import static com.andersenlab.benefits.service.impl.ValidateUtils.errIdNotFoundMessage;
 import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntityFieldsAnnotations;
 
 /***
@@ -30,16 +31,17 @@ public class CategoryServiceImpl implements CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
+    @Override
     public Optional<CategoryEntity> findByTitle(final String title) {
         return this.categoryRepository.findByTitle(title);
     }
 
     @Override
     @Transactional
-    public void updateCategoryEntity(final Long id, final String title) {
-        final CategoryEntity validatedCategory = new CategoryEntity(id, title);
-        validateEntityFieldsAnnotations(validatedCategory, false);
-        this.categoryRepository.updateCategoryEntity(validatedCategory.getId(), validatedCategory.getTitle());
+    public CategoryEntity update(final Long id, final CategoryEntity category) {
+        validateEntityFieldsAnnotations(category, false);
+        this.categoryRepository.updateCategoryEntity(category.getId(), category.getTitle());
+        return category;
     }
 
     @Override
@@ -48,8 +50,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Optional<CategoryEntity> findById(final Long id) {
-        return this.categoryRepository.findById(id);
+    public CategoryEntity findById(final Long id) {
+        return this.categoryRepository.findById(id).orElseThrow(() ->
+                new IllegalStateException(errIdNotFoundMessage("Category", id)));
     }
 
     @Override

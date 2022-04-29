@@ -1,12 +1,14 @@
 package com.andersenlab.benefits.service;
 
-import com.andersenlab.benefits.domain.*;
-import com.andersenlab.benefits.repository.*;
+import com.andersenlab.benefits.domain.DiscountEntity;
+import com.andersenlab.benefits.domain.DiscountType;
+
+import com.andersenlab.benefits.repository.DiscountRepository;
+import com.andersenlab.benefits.repository.DiscountSpec;
 import com.andersenlab.benefits.service.impl.DiscountServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -17,13 +19,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.function.BiFunction;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Optional;
 
-import static java.lang.Math.random;
-import static java.sql.Timestamp.valueOf;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -35,142 +35,47 @@ import static com.andersenlab.benefits.service.ServiceTestUtils.*;
         classes = {DiscountService.class, DiscountServiceImpl.class})
 class DiscountServiceTest {
     private final DiscountServiceImpl discountService;
-    private final List<CompanyEntity> companies = new ArrayList<>();
-    private final List<LocationEntity> locations = new ArrayList<>();
-    private final List<CategoryEntity> categories = new ArrayList<>();
     private final List<DiscountEntity> discounts = new ArrayList<>();
 
     @MockBean
     private final DiscountRepository discountRepository;
-
     @MockBean
-    private final LocationRepository locationRepository;
-
+    private final CompanyService companyService;
     @MockBean
-    private final CategoryRepository categoryRepository;
-
+    private final LocationService locationService;
     @MockBean
-    private final CompanyRepository companyRepository;
+    private final CategoryService categoryService;
 
     @Autowired
     public DiscountServiceTest(final DiscountServiceImpl discountService,
                                final DiscountRepository discountRepository,
-                               final LocationRepository locationRepository,
-                               final CategoryRepository categoryRepository,
-                               final CompanyRepository companyRepository) {
+                               final CompanyService companyService,
+                               final LocationService locationService,
+                               final CategoryService categoryService) {
         this.discountService = discountService;
         this.discountRepository = discountRepository;
-        this.locationRepository = locationRepository;
-        this.categoryRepository = categoryRepository;
-        this.companyRepository = companyRepository;
-    }
-
-    private CompanyEntity getCompany() {
-        final long num = (long) (random() * 10 + 1);
-        return (new CompanyEntity(
-                "Company" + num,
-                "Description" + num,
-                "Address" + num,
-                "Phone" + num,
-                "Link" + num
-        ));
-    }
-
-    private DiscountEntity getDiscount(final long num) {
-        return new DiscountEntity(
-                num,
-                "Type" + num,
-                "Description" + num,
-                "Condition" + num,
-                "Size" + num,
-                DiscountType.DISCOUNT,
-                valueOf("2022-01-01 00:00:00"),
-                valueOf("2022-12-31 00:00:00"),
-                "Image" + num,
-                getLocationList(),
-                getCategoryList(),
-                getCompany());
-    }
-
-    private List<DiscountEntity> getDiscountList(final int discountsCount) {
-        final List<DiscountEntity> result = new ArrayList<>();
-        for (long i = 1; i <= discountsCount; i++) {
-            result.add(getDiscount(i));
-        }
-        return result;
-    }
-
-    private boolean isDiscountsEquals(final DiscountEntity discount1, final DiscountEntity discount2) {
-        if (discount1 == discount2) return true;
-        if (Objects.isNull(discount1) || discount1.getClass() != discount2.getClass()) {
-            return false;
-        }
-        return (
-                discount1.getType().equals(discount2.getType()) &&
-                        discount1.getDescription().equals(discount2.getDescription()) &&
-                        discount1.getDiscount_condition().equals(discount2.getDiscount_condition()) &&
-                        discount1.getSizeDiscount().equals(discount2.getSizeDiscount()) &&
-                        discount1.getImageDiscount().equals(discount2.getImageDiscount()) &&
-                        isCompaniesEquals(discount1.getCompany(), discount2.getCompany())
-        );
-    }
-
-    private boolean isCompaniesEquals(final CompanyEntity company1, final CompanyEntity company2) {
-        return (
-                company1.getTitle().equals(company2.getTitle()) &&
-                        company1.getAddress().equals(company2.getAddress()) &&
-                        company1.getDescription().equals(company2.getDescription()) &&
-                        company1.getPhone().equals(company2.getPhone()) &&
-                        company1.getLink().equals(company2.getLink())
-        );
-    }
-
-    private <E> E saveItem(final Collection<E> collection, final E item, final BiFunction<E, E, Boolean> compareMethod) {
-        final E result = collection.stream().filter(element -> compareMethod.apply(item, element)).findFirst().orElse(item);
-        if (result == item) {
-            collection.add(item);
-            try {
-                final Method setId = Arrays.stream(item.getClass().getMethods()).filter(method ->
-                        Objects.equals(method.getName(), "setId")).findFirst().orElse(null);
-                if (!Objects.isNull(setId))
-                    setId.invoke(item, (long) collection.size());
-            } catch (InvocationTargetException | IllegalAccessException ex) {
-                return result;
-            }
-        }
-        return result;
+        this.companyService = companyService;
+        this.locationService = locationService;
+        this.categoryService = categoryService;
     }
 
     @BeforeEach
     public void ResetData() {
-        this.companies.clear();
-        this.locations.clear();
-        this.categories.clear();
         this.discounts.clear();
 
-        when(this.companyRepository.save(any())).thenAnswer(invocation ->
-                saveItem(this.companies, invocation.getArgument(0), this::isCompaniesEquals));
-
-        when(this.locationRepository.save(any())).thenAnswer(invocation ->
-                saveItem(this.locations, invocation.getArgument(0), Objects::equals));
-
-        when(this.categoryRepository.save(any())).thenAnswer(invocation ->
-                saveItem(this.categories, invocation.getArgument(0), Objects::equals));
-
         when(this.discountRepository.save(any())).thenAnswer(invocation ->
-                saveItem(this.discounts, invocation.getArgument(0), this::isDiscountsEquals));
+                saveItem(this.discounts, invocation.getArgument(0), ServiceTestUtils::isDiscountsEquals));
         when(this.discountRepository.saveAll(anyList())).thenAnswer(invocation -> {
             final List<DiscountEntity> discountsToSave = invocation.getArgument(0);
-                discountsToSave.forEach(item -> saveItem(this.discounts, item, this::isDiscountsEquals));
-                return discountsToSave;
+            discountsToSave.forEach(item -> saveItem(this.discounts, item, ServiceTestUtils::isDiscountsEquals));
+            return discountsToSave;
         });
         when(this.discountRepository.findAll()).thenReturn(this.discounts);
         when(this.discountRepository.findById(anyLong())).thenAnswer(invocation ->
-            this.discounts.stream().filter(discount ->
-                Objects.equals(discount.getId(), invocation.getArgument(0))).findFirst());
-        doAnswer(invocation -> this.discounts.remove(this.discounts.stream().filter(discount ->
-                    Objects.equals(discount.getId(), invocation.getArgument(0))).findFirst().orElseThrow()))
-            .when(this.discountRepository).deleteById(anyLong());
+                this.discounts.stream().filter(discount ->
+                        Objects.equals(discount.getId(), invocation.getArgument(0))).findFirst());
+        doAnswer(invocation -> this.discounts.remove((DiscountEntity) invocation.getArgument(0)))
+                .when(this.discountRepository).delete(any(DiscountEntity.class));
         when(this.discountRepository.findAll(any(Specification.class))).thenAnswer(invocation -> {
             final Object parameters = invocation.getArgument(0);
             final Field argument = parameters.getClass().getDeclaredField("arg$1");
@@ -190,12 +95,13 @@ class DiscountServiceTest {
     @Test
     public void whenFindAllSuccess() {
         // given
-        final int listLength = 10;
-        final List<DiscountEntity> discountList = this.discountRepository.saveAll(getDiscountList(listLength));
+        final List<DiscountEntity> discountList = this.discountRepository.saveAll(getDiscountList());
         final Page<DiscountEntity> pageOfDiscount = new PageImpl<>(discountList);
+
         // when
         when(this.discountRepository.findAll(PageRequest.of(0,10))).thenReturn(pageOfDiscount);
         final Page<DiscountEntity> foundCategory = this.discountRepository.findAll(PageRequest.of(0,10));
+
         // then
         assertEquals(pageOfDiscount, foundCategory);
         verify(this.discountRepository, times(1)).findAll(PageRequest.of(0,10));
@@ -204,93 +110,86 @@ class DiscountServiceTest {
     @Test
     public void whenFindByIdSuccess() {
         // given
-        final int listLength = 10;
-        final List<DiscountEntity> discountList = this.discountRepository.saveAll(getDiscountList(listLength));
-        final DiscountEntity discount = discountList.get((int)(random() * (listLength - 1) + 1));
-        System.out.println(discountList.toString());
+        final List<DiscountEntity> discountList = this.discountRepository.saveAll(getDiscountList());
+        final DiscountEntity discount = discountList.get(getRndEntityPos());
 
-        //when
-        final Optional<DiscountEntity> foundDiscount = this.discountService.findByIdDiscount(discount.getId());
+        // when
+        final DiscountEntity foundDiscount = this.discountService.findById(discount.getId());
 
-        //then
-        assertEquals(discount, foundDiscount.orElseThrow());
+        // then
+        assertEquals(discount, foundDiscount);
         verify(this.discountRepository, times(1)).findById(discount.getId());
     }
 
-    @Test
+    @Test()
     public void whenFindByIdNotPresent() {
         // given
-        final int listLength = 10;
-        final List<DiscountEntity> discountList = this.discountRepository.saveAll(getDiscountList(listLength));
-        final long id = discountList.get(listLength - 1).getId() + 1;
+        final List<DiscountEntity> discountList = this.discountRepository.saveAll(getDiscountList());
+        final long id = discountList.get(discountList.size() - 1).getId() + 1;
 
-        //when
-        final Optional<DiscountEntity> foundDiscount = this.discountService.findByIdDiscount(id);
+        // when
+        final Throwable thrown = assertThrows(IllegalStateException.class, () ->
+                this.discountService.findById(id));
 
-        //then
-        assertEquals(Optional.empty(), foundDiscount);
+        // then
+        assertNotNull(thrown.getMessage());
         verify(this.discountRepository, times(1)).findById(id);
     }
 
     @Test
     public void whenCreateDiscountSuccess() {
         // given
-        final int listLength = 5;
-        final List<DiscountEntity> discountList = this.discountRepository.saveAll(getDiscountList(listLength));
-        final DiscountEntity newDiscount = getDiscount(discountList.get(listLength - 1).getId() + 1);
+        final List<DiscountEntity> discountList = this.discountRepository.saveAll(getDiscountList());
+        final DiscountEntity newDiscount = getDiscount(discountList.get(discountList.size() - 1).getId() + 1);
 
-        //when
-        final Optional<DiscountEntity> discountSaved = this.discountService.createDiscount(newDiscount);
+        // when
+        final DiscountEntity discountSaved = this.discountService.save(newDiscount);
 
-        //then
-        assertTrue(isDiscountsEquals(newDiscount, discountSaved.orElseThrow()));
+        // then
+        assertTrue(isDiscountsEquals(newDiscount, discountSaved));
         verify(this.discountRepository, times(1)).save(newDiscount);
     }
 
     @Test
     public void whenUpdateDiscountSuccess() {
         // given
-        final int listLength = 5;
-        final List<DiscountEntity> discountList = this.discountRepository.saveAll(getDiscountList(listLength));
-        final DiscountEntity discountToUpdate = discountList.get((int)(random() * (listLength - 1) + 1));
+        final List<DiscountEntity> discountList = this.discountRepository.saveAll(getDiscountList());
+        final DiscountEntity discountToUpdate = discountList.get(getRndEntityPos());
         discountToUpdate.setDiscount_type(DiscountType.GIFT);
         discountToUpdate.setDescription("newDescription");
 
-        //when
-        final DiscountEntity discountUpdated = this.discountService
-                .updateDiscountById(discountToUpdate.getId(), discountToUpdate).orElseThrow();
+        // when
+        final DiscountEntity discountUpdated = this.discountService.update(discountToUpdate.getId(), discountToUpdate);
 
-        //then
+        // then
         assertTrue(isDiscountsEquals(discountToUpdate, discountUpdated));
     }
 
     @Test
     public void whenDeleteDiscountSuccess() {
         // given
-        final int listLength = 10;
-        final List<DiscountEntity> discountList = this.discountRepository.saveAll(getDiscountList(listLength));
-        final DiscountEntity discountToDelete = discountList.get((int)(random() * (listLength - 1) + 1));
+        final List<DiscountEntity> discountList = this.discountRepository.saveAll(getDiscountList());
+        final DiscountEntity discountToDelete = discountList.get(getRndEntityPos());
 
         // when
-        this.discountService.deleteDiscountById(discountToDelete.getId());
+        this.discountService.delete(discountToDelete.getId());
 
-        //then
-        assertEquals(listLength - 1, this.discountRepository.findAll().size());
+        // then
+        assertEquals(discountList.size() - 1, this.discountRepository.findAll().size());
         assertEquals(Optional.empty(), this.discountRepository.findById(discountToDelete.getId()));
-        verify(this.discountRepository, times(1)).deleteById(discountToDelete.getId());
+        verify(this.discountRepository, times(1)).delete(discountToDelete);
     }
 
     @Test
     public void whenFindWithCriteria() {
         // given
-        final int listLength = 10;
-        final List<DiscountEntity> discountEntities = this.discountRepository.saveAll(getDiscountList(listLength));
+        final List<DiscountEntity> discountEntities = this.discountRepository.saveAll(getDiscountList());
         final Page<DiscountEntity> pageOfDiscounts = new PageImpl<>(discountEntities);
         final Specification<DiscountEntity> spec = Specification.where(
                 DiscountSpec.getByLocation("City").and(getLastAdded()));
+        when(this.discountRepository.findAll(spec, PageRequest.of(0, 10))).thenReturn(pageOfDiscounts);
 
         // when
-        when(this.discountRepository.findAll(spec, PageRequest.of(0, 10))).thenReturn(pageOfDiscounts);
         final Page<DiscountEntity> foundDiscounts = this.discountService.getDiscountsByCriteria(spec,PageRequest.of(0,10));
 
         // then
@@ -300,7 +199,7 @@ class DiscountServiceTest {
 
     @Test
     public void whenFindWithCriteriaEmptyResponse() {
-
+        // given
         final List<DiscountEntity> listOfDiscount = List.of(new DiscountEntity());
         final Page<DiscountEntity> pageOfDiscounts = new PageImpl<>(listOfDiscount);
         final Specification<DiscountEntity> spec = Specification.where(

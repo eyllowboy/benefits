@@ -22,13 +22,6 @@ public interface RoleService extends CrudService<RoleEntity> {
     Optional<RoleEntity> findByCode(final String code);
     
     /**
-     * @param id the id of {@link RoleEntity} in the database, not null
-     * @param name the name of {@link RoleEntity} stored in the database, not null
-     * @param code the unique string representation for a {@link RoleEntity}, not null
-     */
-    void updateRoleEntity(final Long id, final String name, final String code);
-
-    /**
      * Method to get {@link RoleEntity} with EAGER fetch associated {@link UserEntity}
      * @param id the id of {@link RoleEntity} need to load, not null
      * @return {@link RoleEntity} with given id, error if id role found

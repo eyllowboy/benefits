@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface CompanyRepository extends JpaRepository<CompanyEntity, Long> {
-    Optional<CompanyEntity> findCompanyEntityByTitle(final String title);
+    Optional<CompanyEntity> findByTitle(final String title);
 
     @Query("FROM CompanyEntity c JOIN FETCH c.discounts WHERE c.id = :id")
     Optional<CompanyEntity> findWithAssociatedDiscounts(@Param(value = "id") final Long id);

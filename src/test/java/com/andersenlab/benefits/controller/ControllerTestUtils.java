@@ -68,6 +68,13 @@ public class ControllerTestUtils {
                         )));
     }
 
+    public List<CompanyEntity> getCompanyList() {
+        final List<CompanyEntity> result = new ArrayList<>(this.listLength);
+        for (long i = 1; i <= this.listLength; i++)
+            result.add(getCompany(i));
+        return result;
+    }
+
     public Set<CategoryEntity> getCategoryList() {
         final Set<CategoryEntity> result = new LinkedHashSet<>();
         final int size = (int) (random() * (this.listLength - 1) + 1);

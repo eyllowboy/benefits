@@ -92,10 +92,10 @@ public class RoleController {
             if (theSameCodeRole.isPresent() && (!theSameCodeRole.get().getId().equals(id)))
                 throw new IllegalStateException("Role with such 'code' is already exists");
         }
-        final RoleEntity existingRole = this.roleService.findById(id)
-            .orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
+        final RoleEntity existingRole = this.roleService.findById(id);
+//            .orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
         BeanUtils.copyProperties(roleEntity, existingRole, "id");
-        this.roleService.updateRoleEntity(id, existingRole.getName(), existingRole.getCode());
+        this.roleService.update(id, existingRole);
         return ResponseEntity.ok(existingRole);
     }
 
@@ -134,10 +134,10 @@ public class RoleController {
     })
     @GetMapping("/roles/{id}")
     public RoleEntity getRole(@PathVariable @DecimalMin("1") final Long id) {
-        final Optional<RoleEntity> roleEntity = this.roleService.findById(id);
+        return this.roleService.findById(id);
 
-        return roleEntity.orElseThrow(
-                () -> new IllegalStateException("Role with this id was not found in the database"));
+//        return roleEntity.orElseThrow(
+//                () -> new IllegalStateException("Role with this id was not found in the database"));
     }
 
     /**
@@ -154,8 +154,9 @@ public class RoleController {
     })
     @DeleteMapping("/roles/{id}")
     public void deleteRole(@PathVariable @DecimalMin("1") final Long id) {
-        this.roleService.findById(id).orElseThrow(() ->
-                new IllegalStateException("Role with this id was not found in the database"));
+        this.roleService.findById(id);
+//                .orElseThrow(() ->
+//                new IllegalStateException("Role with this id was not found in the database"));
         final Optional<RoleEntity> roleEntity = this.roleService.findWithAssociatedUsers(id);
         if (roleEntity.isPresent() && roleEntity.get().getUsers().size() > 0)
                 throw new IllegalStateException("There is active users with this Role in database");

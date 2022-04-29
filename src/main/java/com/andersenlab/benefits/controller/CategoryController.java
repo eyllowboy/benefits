@@ -81,8 +81,9 @@ public class CategoryController {
     })
     @GetMapping("/categories/{id}")
     public CategoryEntity getCategoryById(@PathVariable final Long id) {
-        return (this.categoryService.findById(id)).orElseThrow(
-                () -> new IllegalStateException("Category with this id was not found in the database"));
+        return (this.categoryService.findById(id));
+//        .orElseThrow(
+//                () -> new IllegalStateException("Category with this id was not found in the database"));
     }
 
     /**
@@ -106,10 +107,10 @@ public class CategoryController {
         final Optional<CategoryEntity> theSameTitle = this.categoryService.findByTitle(category.getTitle());
         if (theSameTitle.isPresent() && !theSameTitle.get().getId().equals(id))
             throw new IllegalStateException("Category with title '" + category.getTitle() + "' already exists");
-        final CategoryEntity existingCategory = this.categoryService.findById(id)
-                .orElseThrow(() -> new IllegalStateException("Category with this id was not found in the database"));
+        final CategoryEntity existingCategory = this.categoryService.findById(id);
+//                .orElseThrow(() -> new IllegalStateException("Category with this id was not found in the database"));
         BeanUtils.copyProperties(category, existingCategory, "id");
-        this.categoryService.updateCategoryEntity(existingCategory.getId(), existingCategory.getTitle());
+        this.categoryService.update(id, existingCategory);
         return ResponseEntity.ok(existingCategory);
     }
 
@@ -130,8 +131,9 @@ public class CategoryController {
     })
     @DeleteMapping("/categories/{id}")
     public void deleteCategory(@PathVariable final Long id) {
-        this.categoryService.findById(id).orElseThrow(() ->
-                new IllegalStateException("Category with id: '" + id + "' was not found in the database"));
+        this.categoryService.findById(id);
+//                .orElseThrow(() ->
+//                new IllegalStateException("Category with id: '" + id + "' was not found in the database"));
         final Optional<CategoryEntity> categoryEntity = this.categoryService.findWithAssociatedDiscounts(id);
         if (categoryEntity.isPresent() && categoryEntity.get().getDiscounts().size() > 0)
             throw new IllegalStateException("There is active discounts in this Category in database");

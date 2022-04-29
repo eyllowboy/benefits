@@ -73,7 +73,7 @@ public class UserServiceTest {
         });
 
         // when
-        final UserEntity foundUserEntity = this.userService.findById((long) userPos).orElseThrow();
+        final UserEntity foundUserEntity = this.userService.findById((long) userPos);
 
         // then
         assertEquals(usersList.get(userPos), foundUserEntity);
@@ -152,7 +152,7 @@ public class UserServiceTest {
         }).when(this.userRepository).updateUserEntity(anyLong(), anyString(), any(), any());
 
         // when
-        this.userService.updateUserEntity((long) userPos, user.getLogin(), user.getRoleEntity(), user.getLocation());
+        this.userService.update((long) userPos, user);
 
         // then
         assertEquals(user, usersList.get(userPos));
