@@ -85,7 +85,7 @@ public class UserControllerTest {
 	@BeforeEach
 	public void clearData() {
 		this.ctu.clearTables();
-		this.roleRepository.save(new RoleEntity("ROLE_USER", "Role code"));
+		this.roleRepository.save(new RoleEntity("Role name", "ROLE_USER"));
 		this.locationRepository.save(new LocationEntity("Белоруссия", "Минск"));
 	}
 
@@ -144,7 +144,7 @@ public class UserControllerTest {
 	@Test
 	public void whenAddUserIsSuccess() throws Exception {
 		// given
-		final String roleName = "ROLE_USER";
+		final String roleCode = "ROLE_USER";
 		final String cityName = "Минск";
 		final UserEntity user = this.ctu.getUser(this.ctu.getRndEntityPos());
 		final MvcResult result;
@@ -161,7 +161,7 @@ public class UserControllerTest {
 		assertEquals(201, result.getResponse().getStatus());
 		assertEquals(1, this.userRepository.findAll().size());
 		final UserEntity savedUser = this.ctu.getUserFromJson(new JSONObject(result.getResponse().getContentAsString()));
-		assertEquals(roleName, savedUser.getRoleEntity().getName());
+		assertEquals(roleCode, savedUser.getRoleEntity().getCode());
 		assertEquals(cityName, savedUser.getLocation().getCity());
 		this.userService.delete(this.ctu.getUserFromJson(new JSONObject(result.getResponse().getContentAsString())).getId());
 	}
