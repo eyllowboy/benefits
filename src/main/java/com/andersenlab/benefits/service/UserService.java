@@ -14,6 +14,14 @@ import java.util.Optional;
 @Service
 public interface UserService extends CrudService<UserEntity> {
 
+    /**
+     */
+    UserEntity createNewUser(final String login, final String password);
+
+    /**
+     * @param login the unique string representation to identify the {@link UserEntity}, not null
+     * @return the {@link UserEntity} corresponding given login from database, error if the login not found
+     */
 
 }
 

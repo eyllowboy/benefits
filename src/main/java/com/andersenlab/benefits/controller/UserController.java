@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.DecimalMin;
 
@@ -102,8 +103,8 @@ public class UserController {
     /**
      * Create {@link UserEntity} in the database.
      *
-     * @param user new {@link UserEntity} to be added
-     * @return ResponseEntity containing {@link UserEntity}
+     * @param login of new {@link UserEntity}
+     * @param password of user just for authorization
      * @throws IllegalStateException if:
      *                               <ul>
      *                               <li>{@link UserEntity} with {@link UserEntity#getLogin()} field is already exists
@@ -121,8 +122,10 @@ public class UserController {
                     content = @Content)
     })
     @PostMapping("/users")
-    public ResponseEntity<UserEntity> addUser(@RequestBody final UserEntity user) {
-        return new ResponseEntity<>(this.userService.save(user), HttpStatus.CREATED);
+    @Transactional
+    public ResponseEntity<UserEntity> addUser(@RequestParam final String login,
+                                              @RequestParam final String password) {
+        return new ResponseEntity<>(this.userService.createNewUser(login, password), HttpStatus.CREATED);
     }
 
     /**

@@ -11,6 +11,7 @@ import java.util.Optional;
 @Repository
 public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
     Optional<RoleEntity> findByCode(final String code);
+    Optional<RoleEntity> findByName(final String name);
 
     @Query("from RoleEntity r join fetch r.users where r.id = :id")
     Optional<RoleEntity> findWithAssociatedUsers(@Param(value = "id") final Long id);

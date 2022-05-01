@@ -34,8 +34,10 @@ public class UserServiceTest {
     private final LocationRepository locationRepository;
 
     @Autowired
-    public UserServiceTest(final UserServiceImpl userService,final UserRepository userRepository,
-                           final RoleRepository roleRepository, final LocationRepository locationRepository) {
+    public UserServiceTest(final UserServiceImpl userService,
+                           final UserRepository userRepository,
+                           final RoleRepository roleRepository,
+                           final LocationRepository locationRepository) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
