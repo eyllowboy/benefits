@@ -15,13 +15,11 @@ import java.util.Optional;
 public interface UserService extends CrudService<UserEntity> {
 
     /**
+     * Method to create new {@link UserEntity}
+     * @param login the unique string representation to identify the {@link UserEntity}, not null
+     * @param password of new User
+     * @throws IllegalStateException if user with the same login already exists
+     * @return created {@link UserEntity} with Role ROLE_USER and Location "Белоруссия/Минск"
      */
     UserEntity createNewUser(final String login, final String password);
-
-    /**
-     * @param login the unique string representation to identify the {@link UserEntity}, not null
-     * @return the {@link UserEntity} corresponding given login from database, error if the login not found
-     */
-
 }
-
