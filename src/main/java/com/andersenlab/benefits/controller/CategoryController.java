@@ -8,19 +8,20 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * The controller for handling requests for {@link CategoryEntity}.
@@ -28,10 +29,22 @@ import java.util.Optional;
  * @author Denis Popov
  * @version 1.0
  */
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "401",
+                description = "Unauthorized",
+                content = @Content),
+        @ApiResponse(responseCode = "403",
+                description = "Forbidden",
+                content = @Content),
+        @ApiResponse(responseCode = "500",
+                description = "Internal Server Error",
+                content = @Content)
+})
 @Tag(name = "Category controller", description = "Controller for performing operations on categories.")
 @RestController
 @SecurityRequirement(name = "benefits")
 public class CategoryController {
+
     private final CategoryService categoryService;
 
     @Autowired
@@ -43,7 +56,11 @@ public class CategoryController {
      * Create {@link CategoryEntity} in the database.
      *
      * @param category new {@link CategoryEntity} to be added
-     * @throws IllegalStateException if {@link CategoryEntity} with these parameters already exists.
+     * @return {@link CategoryEntity}
+     * @throws IllegalStateException if: <ul>
+     *                               <li>{@link CategoryEntity} with given id was not found in the database
+     *                               <li>{@link CategoryEntity} with {@link CategoryEntity#getTitle()} ()} field is already exists
+     *                               </ul>
      */
     @Operation(summary = "This is to create new category")
     @ApiResponses(value = {
@@ -55,12 +72,8 @@ public class CategoryController {
                     content = @Content)
     })
     @PostMapping("/categories")
-    public ResponseEntity<CategoryEntity> addCategory(@Valid @RequestBody final CategoryEntity category) {
-        this.categoryService.findByTitle(category.getTitle()).ifPresent(categoryEntity -> {
-            throw new IllegalStateException("Category with title '" + category.getTitle() + "' already exists");
-        });
-        final CategoryEntity savedCategoryEntity = this.categoryService.save(category);
-        return new ResponseEntity<>(savedCategoryEntity, HttpStatus.CREATED);
+    public ResponseEntity<CategoryEntity> addCategory(@RequestBody final CategoryEntity category) {
+        return new ResponseEntity<>(this.categoryService.save(category), HttpStatus.CREATED);
     }
 
     /**
@@ -81,16 +94,19 @@ public class CategoryController {
     })
     @GetMapping("/categories/{id}")
     public CategoryEntity getCategoryById(@PathVariable final Long id) {
-        return (this.categoryService.findById(id));
-//        .orElseThrow(
-//                () -> new IllegalStateException("Category with this id was not found in the database"));
+        return this.categoryService.findById(id);
     }
 
     /**
      * Updates {@link CategoryEntity} in the database.
      *
+     * @param id       is the id of {@link CategoryEntity} that needs to update
      * @param category the {@link CategoryEntity} that needs to update
-     * @throws IllegalStateException if the {@link CategoryEntity} with given id was not found in the database.
+     * @return {@link CategoryEntity}
+     * @throws IllegalStateException if: <ul>
+     *                               <li>{@link CategoryEntity} with given id was not found in the database
+     *                               <li>{@link CategoryEntity} with {@link CategoryEntity#getTitle()} field is already exists
+     *                               </ul>
      */
     @Operation(summary = "This is to update the category")
     @ApiResponses(value = {
@@ -104,14 +120,7 @@ public class CategoryController {
     @PatchMapping("/categories/{id}")
     public ResponseEntity<CategoryEntity> updateCategory(@PathVariable final Long id,
                                                          @RequestBody final CategoryEntity category) {
-        final Optional<CategoryEntity> theSameTitle = this.categoryService.findByTitle(category.getTitle());
-        if (theSameTitle.isPresent() && !theSameTitle.get().getId().equals(id))
-            throw new IllegalStateException("Category with title '" + category.getTitle() + "' already exists");
-        final CategoryEntity existingCategory = this.categoryService.findById(id);
-//                .orElseThrow(() -> new IllegalStateException("Category with this id was not found in the database"));
-        BeanUtils.copyProperties(category, existingCategory, "id");
-        this.categoryService.update(id, existingCategory);
-        return ResponseEntity.ok(existingCategory);
+        return ResponseEntity.ok(this.categoryService.update(id, category));
     }
 
     /**
@@ -131,19 +140,16 @@ public class CategoryController {
     })
     @DeleteMapping("/categories/{id}")
     public void deleteCategory(@PathVariable final Long id) {
-        this.categoryService.findById(id);
-//                .orElseThrow(() ->
-//                new IllegalStateException("Category with id: '" + id + "' was not found in the database"));
-        final Optional<CategoryEntity> categoryEntity = this.categoryService.findWithAssociatedDiscounts(id);
-        if (categoryEntity.isPresent() && categoryEntity.get().getDiscounts().size() > 0)
-            throw new IllegalStateException("There is active discounts in this Category in database");
         this.categoryService.delete(id);
     }
 
     /**
      * Get list of all {@link CategoryEntity} from database.
      *
-     * @return a list of {@link CategoryEntity} from database.
+     * @param page is number of page to start returned result from
+     * @param size is number of elements per page that needs to return
+     * @param sort is the field by which to sort elements in returned page
+     * @return a page of {@link CategoryEntity} from database.
      */
     @Operation(summary = "This is to fetch all the stored categories")
     @ApiResponses(value = {

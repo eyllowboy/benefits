@@ -1,7 +1,5 @@
 package com.andersenlab.benefits.service;
 
-import com.andersenlab.benefits.domain.LocationEntity;
-import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +13,7 @@ import java.util.Optional;
  */
 @Service
 public interface UserService extends CrudService<UserEntity> {
+
     /**
      */
     UserEntity createNewUser(final String login, final String password);
@@ -23,5 +22,6 @@ public interface UserService extends CrudService<UserEntity> {
      * @param login the unique string representation to identify the {@link UserEntity}, not null
      * @return the {@link UserEntity} corresponding given login from database, error if the login not found
      */
-    Optional<UserEntity> findByLogin(final String login);
+
 }
+

@@ -14,7 +14,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * A controller for handling requests for {@link LocationEntity}.
@@ -116,11 +123,11 @@ public class LocationController {
                     description = "Location has been received",
                     content = @Content)
     })
+
     @GetMapping("/locations/{country}/{city}")
     public LocationEntity getLocationByCountryAndCity(@PathVariable final String country,
                                                       @PathVariable final String city) {
-        return (this.locationService.findByCity(country, city));
-    }
+        return (this.locationService.findByCity(country, city));    }
 
     /**
      * Get list of all {@link LocationEntity} in specified county from database.
@@ -137,6 +144,7 @@ public class LocationController {
                     description = "Details of all locations in specified country",
                     content = @Content(mediaType = "application/json"))
     })
+
     @GetMapping(value = "/locations/country")
     public Page<LocationEntity> findLocationByCountry(@RequestParam final String country,
                                                       @RequestParam(required = false, defaultValue = "0") final int page,
