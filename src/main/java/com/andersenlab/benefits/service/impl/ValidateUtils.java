@@ -44,8 +44,9 @@ public class ValidateUtils {
         while (tmpValue.contains("  ")) {
             tmpValue = tmpValue.replace("  ", " ");
         }
-        if (tmpValue.isEmpty() || tmpValue.equals(" "))
+        if (tmpValue.isEmpty() || tmpValue.equals(" ")) {
             throw new IllegalStateException(errNoData(entityName, fieldName));
+        }
         return tmpValue;
     }
 
@@ -56,8 +57,9 @@ public class ValidateUtils {
         final Size size = field.getAnnotation(Size.class);
         if (validateNull
                 && (!Objects.isNull(nb) && (Objects.isNull(value) || Objects.equals(value, "")))
-                || ((!Objects.isNull(nn) || !Objects.isNull(ne)) && Objects.isNull(value)))
+                || ((!Objects.isNull(nn) || !Objects.isNull(ne)) && Objects.isNull(value))) {
             throw new IllegalStateException(errNoData(entityName, field.getName()));
+        }
         if (!Objects.isNull(size)
                 && value instanceof String
                 && (((String) value).length() < size.min() || ((String) value).length() > size.max())) {

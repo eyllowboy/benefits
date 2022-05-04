@@ -66,9 +66,10 @@ public class LocationServiceImpl implements LocationService {
     public LocationEntity update(final Long id, final LocationEntity location) {
         if (!Objects.isNull(location.getCity())) {
             final Optional<LocationEntity> theSameLocation = this.locationRepository.findByCity(location.getCity());
-            if (theSameLocation.isPresent() && !theSameLocation.get().getId().equals(id))
+            if (theSameLocation.isPresent() && !theSameLocation.get().getId().equals(id)) {
                 throw new IllegalStateException(
                         errAlreadyExistMessage("Location", "city name", location.getCity()));
+            }
         }
         final LocationEntity existingLocation = findById(id);
         BeanUtils.copyProperties(location, existingLocation, "id");

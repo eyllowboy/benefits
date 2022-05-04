@@ -29,7 +29,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.andersenlab.benefits.service.impl.ValidateUtils.*;
+import static com.andersenlab.benefits.service.impl.ValidateUtils.errAlreadyExistMessage;
+import static com.andersenlab.benefits.service.impl.ValidateUtils.errIdNotFoundMessage;
+import static com.andersenlab.benefits.service.impl.ValidateUtils.validateEntityFieldsAnnotations;
 
 /**
  * An implementation for performing operations on a {@link UserEntity}.
