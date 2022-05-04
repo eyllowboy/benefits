@@ -2,12 +2,14 @@ package com.andersenlab.benefits.controller;
 
 import com.andersenlab.benefits.domain.DiscountEntity;
 import com.andersenlab.benefits.domain.LocationEntity;
-import com.andersenlab.benefits.repository.*;
+import com.andersenlab.benefits.repository.DiscountRepository;
+import com.andersenlab.benefits.repository.LocationRepository;
 import com.andersenlab.benefits.support.RestResponsePage;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static com.andersenlab.benefits.service.impl.ValidateUtils.*;
@@ -107,7 +110,8 @@ public class LocationControllerTest {
                 .andReturn();
         // then
         final RestResponsePage<LocationEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(foundCompany, pageResult);
     }
@@ -121,6 +125,7 @@ public class LocationControllerTest {
                         .param("country", "Country5")
                         .with(csrf()))
                 .andDo(print())
+
                 // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()));
@@ -156,6 +161,7 @@ public class LocationControllerTest {
         // when
         final NestedServletException NestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(get("/locations/{id}", notExistId).with(csrf())));
+
         // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
         assertEquals(errIdNotFoundMessage("Location", notExistId),
@@ -214,6 +220,7 @@ public class LocationControllerTest {
                         .content(this.objectMapper.writeValueAsString(location))
                         .with(csrf()))
                 .andDo(print())
+
                 // then
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$", notNullValue()))
@@ -246,7 +253,8 @@ public class LocationControllerTest {
         // given
         final LocationEntity location = this.locationRepository
                 .findByCountryAndCity("Country5", "City5").orElseThrow();
-        location.setCountry("Россия");
+        location.setCity("NewCity");
+        location.setCountry("NewCountry");
         final String locationEntity = this.objectMapper.writeValueAsString(location);
 
         // when
@@ -256,8 +264,12 @@ public class LocationControllerTest {
                         .content(locationEntity)
                         .with(csrf()))
                 .andDo(print())
+
                 // then
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(location.getId().intValue())))
+                .andExpect(jsonPath("$.city", is("NewCity")))
+                .andExpect(jsonPath("$.country", is("NewCountry")));
     }
 
     @Test
@@ -285,7 +297,7 @@ public class LocationControllerTest {
     public void whenDeleteLocationWithoutDiscountsSuccess() throws Exception {
         // given
         final LocationEntity location = this.ctu.getLocation(this.ctu.getRndEntityPos());
-
+        final int sizeBeforeDelete= this.locationRepository.findAll().size();
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .delete("/locations/{id}", location.getId())
@@ -294,6 +306,8 @@ public class LocationControllerTest {
                 .andDo(print())
                 // then
                 .andExpect(status().isOk());
+        assertEquals(Optional.empty(), this.locationRepository.findById(location.getId()));
+        assertEquals(sizeBeforeDelete - 1, this.locationRepository.findAll().size());
     }
 
     @Test

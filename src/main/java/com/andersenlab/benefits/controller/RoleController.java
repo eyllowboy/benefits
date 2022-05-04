@@ -25,8 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.DecimalMin;
 
-;
-
 /**
  * A controller for handling requests for {@link RoleEntity}.
  *

@@ -1,15 +1,18 @@
 package com.andersenlab.benefits.controller;
 
-import com.andersenlab.benefits.domain.*;
-import com.andersenlab.benefits.repository.*;
+import com.andersenlab.benefits.domain.DiscountEntity;
+import com.andersenlab.benefits.repository.DiscountRepository;
 import com.andersenlab.benefits.support.RestResponsePage;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,12 +28,13 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 import static com.andersenlab.benefits.service.impl.ValidateUtils.errIdNotFoundMessage;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @SpringBootTest
@@ -81,16 +85,17 @@ public class DiscountControllerTest {
 
         // when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                    .get("/discounts?page=0&size=" + rndSize)
-                    .with(csrf())
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
-                    .andReturn();
+                        .get("/discounts?page=0&size=" + rndSize)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andReturn();
 
         // then
 
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(rndSize, pageResult.getContent().size());
     }
@@ -104,16 +109,15 @@ public class DiscountControllerTest {
 
         // when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                    .get("/discounts/{id}", discount.getId())
-                    .with(csrf())
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
-                    .andReturn();
+                        .get("/discounts/{id}", discount.getId())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andReturn();
         // then
         assertEquals(200, result.getResponse().getStatus());
         assertTrue(this.ctu.isDiscountsEquals(
-                discount,
-                this.ctu.getDiscountFromJson(new JSONObject(result.getResponse().getContentAsString()))));
+                discount, this.ctu.getDiscountFromJson(new JSONObject(result.getResponse().getContentAsString()))));
     }
 
     @Test
@@ -127,8 +131,7 @@ public class DiscountControllerTest {
 
         // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
-        assertEquals(errIdNotFoundMessage("Discount", id),
-                NestedServletException.getCause().getMessage());
+        assertEquals(errIdNotFoundMessage("Discount", id), NestedServletException.getCause().getMessage());
     }
 
     @Test
@@ -139,19 +142,18 @@ public class DiscountControllerTest {
 
         // when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                    .post("/discounts")
-                    .with(csrf())
-                    .content(this.objectMapper.writeValueAsString(discount))
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
-                    .andReturn();
+                        .post("/discounts")
+                        .with(csrf())
+                        .content(this.objectMapper.writeValueAsString(discount))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andReturn();
 
         // then
         assertEquals(201, result.getResponse().getStatus());
         assertEquals(1, this.discountRepository.findAll().size());
         assertTrue(this.ctu.isDiscountsEquals(
-                discount,
-                this.ctu.getDiscountFromJson(new JSONObject(result.getResponse().getContentAsString()))));
+                discount, this.ctu.getDiscountFromJson(new JSONObject(result.getResponse().getContentAsString()))));
     }
 
     @Test
@@ -164,12 +166,12 @@ public class DiscountControllerTest {
 
         // when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                    .patch("/discounts/{id}", discount.getId())
-                    .with(csrf())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(this.objectMapper.writeValueAsString(discount)))
-                    .andDo(print())
-                    .andReturn();
+                        .patch("/discounts/{id}", discount.getId())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(discount)))
+                .andDo(print())
+                .andReturn();
 
         // then
         assertEquals(200, result.getResponse().getStatus());
@@ -189,10 +191,10 @@ public class DiscountControllerTest {
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders
-                    .patch("/discounts/{id}", discount.getId())
-                    .with(csrf())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(this.objectMapper.writeValueAsString(discount))));
+                        .patch("/discounts/{id}", discount.getId())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(discount))));
 
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
@@ -210,10 +212,10 @@ public class DiscountControllerTest {
 
         // when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                    .delete("/discounts/{id}", discount.getId())
-                    .with(csrf())
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andReturn();
+                        .delete("/discounts/{id}", discount.getId())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
 
         // then
         assertEquals(200, result.getResponse().getStatus());
@@ -230,13 +232,12 @@ public class DiscountControllerTest {
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders
-                    .delete("/discounts/{id}", id)
-                    .with(csrf())));
+                        .delete("/discounts/{id}", id)
+                        .with(csrf())));
 
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-        assertEquals(errIdNotFoundMessage("Discount", id),
-                nestedServletException.getCause().getMessage());
+        assertEquals(errIdNotFoundMessage("Discount", id), nestedServletException.getCause().getMessage());
     }
 
     @Test
@@ -249,17 +250,18 @@ public class DiscountControllerTest {
 
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                    .get("/discounts/find-by-city")
-                    .param("city", city)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .with(csrf()))
-                    .andDo(print())
-                    .andReturn();
+                        .get("/discounts/find-by-city")
+                        .param("city", city)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
+                .andDo(print())
+                .andReturn();
 
         // then
         assertEquals(200, result.getResponse().getStatus());
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
         pageResult.getContent().forEach(item -> assertTrue(item.getArea().stream()
                 .anyMatch(areaCity -> areaCity.getCity().equals(city))));
     }
@@ -274,18 +276,19 @@ public class DiscountControllerTest {
 
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                    .get("/discounts/find-by-category")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .param("category", category)
-                    .with(csrf()))
-                    .andDo(print())
-                    .andReturn();
+                        .get("/discounts/find-by-category")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("category", category)
+                        .with(csrf()))
+                .andDo(print())
+                .andReturn();
 
         // then
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
-        pageResult.getContent().forEach(item ->assertTrue(item.getCategories().stream()
-                .anyMatch(areaCategory ->areaCategory.getTitle().equals(category))));
+                new TypeReference<>() {
+                });
+        pageResult.getContent().forEach(item -> assertTrue(item.getCategories().stream()
+                .anyMatch(areaCategory -> areaCategory.getTitle().equals(category))));
     }
 
     @Test
@@ -297,18 +300,19 @@ public class DiscountControllerTest {
 
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                    .get("/discounts/find-by-type")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .param("type", discount.getType())
-                    .with(csrf()))
-                    .andDo(print())
-                    .andReturn();
+                        .get("/discounts/find-by-type")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("type", discount.getType())
+                        .with(csrf()))
+                .andDo(print())
+                .andReturn();
 
         // then
         assertEquals(200, result.getResponse().getStatus());
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
-        pageResult.getContent().forEach(item ->assertEquals(item.getType(), discount.getType()));
+                new TypeReference<>() {
+                });
+        pageResult.getContent().forEach(item -> assertEquals(item.getType(), discount.getType()));
     }
 
     @Test
@@ -320,18 +324,19 @@ public class DiscountControllerTest {
 
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                    .get("/discounts/find-by-size")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .param("sizeDiscount", discount.getSizeDiscount())
-                    .with(csrf()))
-                    .andDo(print())
-                    .andReturn();
+                        .get("/discounts/find-by-size")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("sizeDiscount", discount.getSizeDiscount())
+                        .with(csrf()))
+                .andDo(print())
+                .andReturn();
 
         // then
         assertEquals(200, result.getResponse().getStatus());
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
-        pageResult.getContent().forEach(item ->assertEquals(item.getSizeDiscount(), discount.getSizeDiscount()));
+                new TypeReference<>() {
+                });
+        pageResult.getContent().forEach(item -> assertEquals(item.getSizeDiscount(), discount.getSizeDiscount()));
     }
 
     @Test
@@ -343,16 +348,17 @@ public class DiscountControllerTest {
 
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                    .get("/discounts/find-by-city")
-                    .param("city", city)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .with(csrf()))
-                    .andDo(print())
-                    .andReturn();
+                        .get("/discounts/find-by-city")
+                        .param("city", city)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
+                .andDo(print())
+                .andReturn();
 
         // then
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, pageResult.getContent().size());
     }
@@ -366,16 +372,17 @@ public class DiscountControllerTest {
 
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                    .get("/discounts/find-by-category")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .param("category", category)
-                    .with(csrf()))
-                    .andDo(print())
-                    .andReturn();
+                        .get("/discounts/find-by-category")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("category", category)
+                        .with(csrf()))
+                .andDo(print())
+                .andReturn();
 
         // then
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, pageResult.getContent().size());
     }
@@ -389,16 +396,17 @@ public class DiscountControllerTest {
 
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                    .get("/discounts/find-by-type")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .param("type", type)
-                    .with(csrf()))
-                    .andDo(print())
-                    .andReturn();
+                        .get("/discounts/find-by-type")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("type", type)
+                        .with(csrf()))
+                .andDo(print())
+                .andReturn();
 
         // then
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, pageResult.getContent().size());
     }
@@ -412,16 +420,17 @@ public class DiscountControllerTest {
 
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                    .get("/discounts/find-by-size")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .param("sizeDiscount", discountSize)
-                    .with(csrf()))
-                    .andDo(print())
-                    .andReturn();
+                        .get("/discounts/find-by-size")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("sizeDiscount", discountSize)
+                        .with(csrf()))
+                .andDo(print())
+                .andReturn();
 
         // then
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, pageResult.getContent().size());
     }
@@ -440,14 +449,14 @@ public class DiscountControllerTest {
 
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                    .get("/discounts/find-similar")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .param("category", title)
-                    .param("sizeDiscount", size)
-                    .param("limit", "3")
-                    .with(csrf()))
-                    .andDo(print())
-                    .andReturn();
+                        .get("/discounts/find-similar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("category", title)
+                        .param("sizeDiscount", size)
+                        .param("limit", "3")
+                        .with(csrf()))
+                .andDo(print())
+                .andReturn();
 
         // then
         assertEquals(200, result.getResponse().getStatus());
@@ -469,10 +478,10 @@ public class DiscountControllerTest {
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders
-                    .post("/discounts")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(this.objectMapper.writeValueAsString(discount))
-                    .with(csrf())));
+                        .post("/discounts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(discount))
+                        .with(csrf())));
 
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
@@ -517,10 +526,10 @@ public class DiscountControllerTest {
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders
-                    .post("/discounts")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(this.objectMapper.writeValueAsString(discount))
-                    .with(csrf())));
+                        .post("/discounts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(discount))
+                        .with(csrf())));
 
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
@@ -538,10 +547,10 @@ public class DiscountControllerTest {
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders
-                    .patch("/discounts/{id}", discount.getId())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(this.objectMapper.writeValueAsString(discount))
-                    .with(csrf())));
+                        .patch("/discounts/{id}", discount.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(discount))
+                        .with(csrf())));
 
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());

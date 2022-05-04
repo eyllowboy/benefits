@@ -1,6 +1,10 @@
 package com.andersenlab.benefits.service.impl;
 
-import com.andersenlab.benefits.domain.*;
+import com.andersenlab.benefits.domain.CategoryEntity;
+import com.andersenlab.benefits.domain.CompanyEntity;
+import com.andersenlab.benefits.domain.DiscountEntity;
+import com.andersenlab.benefits.domain.DiscountType;
+import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.repository.CategoryRepository;
 import com.andersenlab.benefits.repository.CompanyRepository;
 import com.andersenlab.benefits.repository.DiscountRepository;
@@ -12,17 +16,33 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.*;
-import java.io.*;
+import javax.validation.ConstraintViolation;
+import javax.validation.Valid;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import static java.time.temporal.TemporalAdjusters.firstDayOfYear;
 import static java.time.temporal.TemporalAdjusters.lastDayOfYear;
+
 
 /***
  * Implementation for performing import CSV files

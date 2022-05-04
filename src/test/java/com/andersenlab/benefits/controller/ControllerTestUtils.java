@@ -1,7 +1,18 @@
 package com.andersenlab.benefits.controller;
 
-import com.andersenlab.benefits.domain.*;
-import com.andersenlab.benefits.repository.*;
+import com.andersenlab.benefits.domain.CategoryEntity;
+import com.andersenlab.benefits.domain.CompanyEntity;
+import com.andersenlab.benefits.domain.DiscountEntity;
+import com.andersenlab.benefits.domain.DiscountType;
+import com.andersenlab.benefits.domain.LocationEntity;
+import com.andersenlab.benefits.domain.RoleEntity;
+import com.andersenlab.benefits.domain.UserEntity;
+import com.andersenlab.benefits.repository.CategoryRepository;
+import com.andersenlab.benefits.repository.CompanyRepository;
+import com.andersenlab.benefits.repository.DiscountRepository;
+import com.andersenlab.benefits.repository.LocationRepository;
+import com.andersenlab.benefits.repository.RoleRepository;
+import com.andersenlab.benefits.repository.UserRepository;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,7 +21,11 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.random;

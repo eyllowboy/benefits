@@ -91,11 +91,12 @@ public class UserControllerTest {
     }
 
     @Test
-    public void whenGetSomeSizeAllUsers() throws Exception {
+    public void whenGetSomeSizeUsers() throws Exception {
         // given
         final int rndSize = (int) (random() * (5 - 1) + 1);
         final Page<UserEntity> foundUsers = this.userRepository.findAll(PageRequest.of(0, rndSize));
         final MvcResult result;
+
         // when
         result = this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/users?page=0&size=" + rndSize)
@@ -103,6 +104,7 @@ public class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andReturn();
+
         // then
         final RestResponsePage<UserEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<>() {
@@ -196,7 +198,6 @@ public class UserControllerTest {
 
     @Test
     public void whenAddUserAndRoleIsNotExists() {
-
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
                 () -> this.mockMvc.perform(MockMvcRequestBuilders
@@ -208,8 +209,7 @@ public class UserControllerTest {
 
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-        assertEquals("No suitable role for ordinary users",
-                nestedServletException.getCause().getMessage());
+        assertEquals("No suitable role for ordinary users", nestedServletException.getCause().getMessage());
     }
 
     @Test
@@ -420,6 +420,7 @@ public class UserControllerTest {
                     .with(csrf()));
 
         });
+
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
         assertEquals("Incorrect field login data size - must be between 3 and 20", nestedServletException.getCause().getMessage());

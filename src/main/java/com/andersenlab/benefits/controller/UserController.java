@@ -17,7 +17,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import javax.validation.constraints.DecimalMin;
 
 /**
@@ -73,7 +81,8 @@ public class UserController {
 
     /**
      * Updates {@link UserEntity} in the database.
-     * @param id is the id of {@link UserEntity} that needs to update
+     *
+     * @param id         is the id of {@link UserEntity} that needs to update
      * @param userEntity the {@link UserEntity} that needs to update
      * @return ResponseEntity containing {@link UserEntity}
      * @throws IllegalStateException if:
@@ -103,8 +112,10 @@ public class UserController {
     /**
      * Create {@link UserEntity} in the database.
      *
-     * @param login of new {@link UserEntity}
+     * @Operation(summary = "This is to authenticate new user")
+     * @param login    of new {@link UserEntity}
      * @param password of user just for authorization
+     * description = "User has been authenticated",
      * @throws IllegalStateException if:
      *                               <ul>
      *                               <li>{@link UserEntity} with {@link UserEntity#getLogin()} field is already exists
@@ -132,8 +143,8 @@ public class UserController {
      * Gets {@link UserEntity} from the database.
      *
      * @param id the id of {@link UserEntity} that needs to get
-     * @throws IllegalStateException if the given id was not found in the database
      * @return {@link UserEntity}
+     * @throws IllegalStateException if the given id was not found in the database
      */
     @Operation(summary = "This is to get the user")
     @ApiResponses(value = {

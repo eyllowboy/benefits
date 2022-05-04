@@ -2,7 +2,8 @@ package com.andersenlab.benefits.controller;
 
 import com.andersenlab.benefits.domain.CompanyEntity;
 import com.andersenlab.benefits.domain.DiscountEntity;
-import com.andersenlab.benefits.repository.*;
+import com.andersenlab.benefits.repository.CompanyRepository;
+import com.andersenlab.benefits.repository.DiscountRepository;
 import com.andersenlab.benefits.support.RestResponsePage;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,14 +29,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import static com.andersenlab.benefits.service.impl.ValidateUtils.*;
-import static java.lang.Math.random;
-
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static com.andersenlab.benefits.service.impl.ValidateUtils.*;
+import static java.lang.Math.random;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -90,10 +88,10 @@ class CompanyControllerTest {
 
         // when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                .post("/companies")
-                .content(this.objectMapper.writeValueAsString(company))
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(csrf()))
+                        .post("/companies")
+                        .content(this.objectMapper.writeValueAsString(company))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
                 .andDo(print())
                 .andReturn();
 
@@ -101,8 +99,7 @@ class CompanyControllerTest {
         assertEquals(201, result.getResponse().getStatus());
         assertEquals(1, this.companyRepository.findAll().size());
         assertTrue(this.ctu.isCompaniesEquals(
-                company,
-                this.ctu.getCompanyFromJson(new JSONObject(result.getResponse().getContentAsString()))));
+                company, this.ctu.getCompanyFromJson(new JSONObject(result.getResponse().getContentAsString()))));
     }
 
     @Test
@@ -113,17 +110,16 @@ class CompanyControllerTest {
 
         // when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                .get("/companies/{id}", company.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(csrf()))
+                        .get("/companies/{id}", company.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
                 .andDo(print())
                 .andReturn();
 
         // then
         assertEquals(200, result.getResponse().getStatus());
         assertTrue(this.ctu.isCompaniesEquals(
-                company,
-                this.ctu.getCompanyFromJson(new JSONObject(result.getResponse().getContentAsString()))));
+                company, this.ctu.getCompanyFromJson(new JSONObject(result.getResponse().getContentAsString()))));
     }
 
     @Test
@@ -136,15 +132,16 @@ class CompanyControllerTest {
 
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                .get("/companies?page=0&size=" + rndSize)
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(csrf()))
+                        .get("/companies?page=0&size=" + rndSize)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
                 .andDo(print())
                 .andReturn();
 
         // then
         final RestResponsePage<CompanyEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(foundCompany, pageResult);
     }
@@ -158,10 +155,8 @@ class CompanyControllerTest {
         final NestedServletException NestedServletException = assertThrows(NestedServletException.class,
                 () -> this.mockMvc.perform(get("/companies/{id}", id).with(csrf())));
         //then
-        assertEquals(IllegalStateException.class,
-                NestedServletException.getCause().getClass());
-        assertEquals(errIdNotFoundMessage("Company", id),
-                NestedServletException.getCause().getMessage());
+        assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
+        assertEquals(errIdNotFoundMessage("Company", id), NestedServletException.getCause().getMessage());
     }
 
     @Test
@@ -173,18 +168,16 @@ class CompanyControllerTest {
 
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                .patch("/companies/{id}", company.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(this.objectMapper.writeValueAsString(company))
-                .with(csrf()))
+                        .patch("/companies/{id}", company.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(company))
+                        .with(csrf()))
                 .andDo(print())
                 .andReturn();
 
         //then
         assertEquals(200, result.getResponse().getStatus());
-        assertTrue(this.ctu.isCompaniesEquals(
-                company,
-                this.companyRepository.findById(company.getId()).orElseThrow()));
+        assertTrue(this.ctu.isCompaniesEquals(company, this.companyRepository.findById(company.getId()).orElseThrow()));
     }
 
     @Test
@@ -197,10 +190,10 @@ class CompanyControllerTest {
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
                 () -> this.mockMvc.perform(MockMvcRequestBuilders
-                    .patch("/companies/{id}", company.getId())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(this.objectMapper.writeValueAsString(company))
-                    .with(csrf())));
+                        .patch("/companies/{id}", company.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(company))
+                        .with(csrf())));
 
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
@@ -217,11 +210,11 @@ class CompanyControllerTest {
 
         // when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                    .delete("/companies/{id}", company.getId())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .with(csrf()))
-                    .andDo(print())
-                    .andReturn();
+                        .delete("/companies/{id}", company.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
+                .andDo(print())
+                .andReturn();
 
         // then
         assertEquals(200, result.getResponse().getStatus());
@@ -256,9 +249,9 @@ class CompanyControllerTest {
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders
-                    .delete("/companies/{id}", company.getId())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .with(csrf())));
+                        .delete("/companies/{id}", company.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf())));
 
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
@@ -276,11 +269,11 @@ class CompanyControllerTest {
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders
-                    .post("/companies")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(this.objectMapper.writeValueAsString(company))
-                    .with(csrf()))
-                    .andReturn());
+                                .post("/companies")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(this.objectMapper.writeValueAsString(company))
+                                .with(csrf()))
+                        .andReturn());
 
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
@@ -298,11 +291,11 @@ class CompanyControllerTest {
 
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
-                    .post("/companies")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(this.objectMapper.writeValueAsString(company))
-                    .with(csrf()))
-                    .andReturn();
+                        .post("/companies")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(company))
+                        .with(csrf()))
+                .andReturn();
 
         // then
         assertEquals(201, result.getResponse().getStatus());
@@ -324,11 +317,11 @@ class CompanyControllerTest {
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
                 this.mockMvc.perform(MockMvcRequestBuilders
-                    .post("/companies")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(this.objectMapper.writeValueAsString(company))
-                    .with(csrf()))
-                    .andReturn());
+                                .post("/companies")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(this.objectMapper.writeValueAsString(company))
+                                .with(csrf()))
+                        .andReturn());
 
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());

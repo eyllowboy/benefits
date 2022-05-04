@@ -2,7 +2,8 @@ package com.andersenlab.benefits.controller;
 
 import com.andersenlab.benefits.domain.CategoryEntity;
 import com.andersenlab.benefits.domain.DiscountEntity;
-import com.andersenlab.benefits.repository.*;
+import com.andersenlab.benefits.repository.CategoryRepository;
+import com.andersenlab.benefits.repository.DiscountRepository;
 import com.andersenlab.benefits.support.RestResponsePage;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,16 +29,13 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 import static java.lang.Math.random;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -203,7 +201,7 @@ public class CategoryControllerTest {
                 // then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(category.getId().intValue())))
-                .andExpect(jsonPath("$.title", is(this.categoryRepository.findById(category.getId()).orElseThrow().getTitle())));
+                .andExpect(jsonPath("$.title", is("UpdatedCategory")));
     }
 
     @Test
@@ -231,14 +229,19 @@ public class CategoryControllerTest {
         // given
         final Optional<CategoryEntity> LastCategoryFromContainer = this.categoryRepository.findByTitle("Category5");
         final Long lastIdEntity = LastCategoryFromContainer.get().getId();
+        final int sizeBeforeDelete = this.categoryRepository.findAll().size();
+
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .delete("/categories/{id}", lastIdEntity)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andDo(print())
+
                 // then
                 .andExpect(status().isOk());
+        assertEquals(Optional.empty(), this.categoryRepository.findById(lastIdEntity));
+        assertEquals(sizeBeforeDelete - 1, this.categoryRepository.findAll().size());
     }
 
     @Test
