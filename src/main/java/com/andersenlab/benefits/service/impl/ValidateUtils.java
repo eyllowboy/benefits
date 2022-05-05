@@ -8,11 +8,8 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.Optional;
 
 public class ValidateUtils {
     public static String errIdNotFoundMessage(final String entityName, final Long id) {
@@ -55,8 +52,7 @@ public class ValidateUtils {
         final NotNull nn = field.getAnnotation(NotNull.class);
         final NotEmpty ne = field.getAnnotation(NotEmpty.class);
         final Size size = field.getAnnotation(Size.class);
-        if (validateNull
-                && (!Objects.isNull(nb) && (Objects.isNull(value) || Objects.equals(value, "")))
+        if (validateNull && (!Objects.isNull(nb) && (Objects.isNull(value) || Objects.equals(value, "")))
                 || ((!Objects.isNull(nn) || !Objects.isNull(ne)) && Objects.isNull(value))) {
             throw new IllegalStateException(errNoData(entityName, field.getName()));
         }

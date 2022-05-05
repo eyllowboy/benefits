@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
-
 @Repository
 public interface CompanyRepository extends JpaRepository<CompanyEntity, Long> {
     Optional<CompanyEntity> findByTitle(final String title);

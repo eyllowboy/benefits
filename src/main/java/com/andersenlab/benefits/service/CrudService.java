@@ -4,11 +4,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-
 /**
  * Basic interface for performing СRUD operations on database entities.
+ *
  * @author Andrei Rabchun
  * @version 1.0
  */

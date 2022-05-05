@@ -3,7 +3,6 @@ package com.andersenlab.benefits.service;
 import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import org.springframework.stereotype.Service;
-
 import java.util.Optional;
 
 /**
@@ -14,13 +13,14 @@ import java.util.Optional;
  */
 @Service
 public interface RoleService extends CrudService<RoleEntity> {
-    
+
     /**
-     * @param code the unique string representation to identify the role, not null
+     * @param id the id of {@link RoleEntity} in the database, not null
+     * @param {@link RoleEntity} stored in the database, not null
      * @return {@link RoleEntity} corresponding given code from database, error if the code not found
      */
-    Optional<RoleEntity> findByCode(final String code);
-    
+    RoleEntity update(final Long id, final RoleEntity roleEntity);
+
     /**
      * Method to get {@link RoleEntity} with EAGER fetch associated {@link UserEntity}
      * @param id the id of {@link RoleEntity} need to load, not null

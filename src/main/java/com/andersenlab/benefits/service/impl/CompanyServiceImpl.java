@@ -8,11 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.Optional;
-
 import static com.andersenlab.benefits.service.impl.ValidateUtils.*;
+
 
 /**
  * The implementation for performing operations on a {@link CompanyEntity}

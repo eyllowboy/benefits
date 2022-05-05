@@ -1,6 +1,5 @@
 package com.andersenlab.benefits.service;
 
-import com.andersenlab.benefits.domain.CompanyEntity;
 import com.andersenlab.benefits.domain.LocationEntity;
 import com.andersenlab.benefits.repository.LocationRepository;
 import com.andersenlab.benefits.service.impl.LocationServiceImpl;
@@ -15,9 +14,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import java.util.*;
-
 import static com.andersenlab.benefits.service.ServiceTestUtils.*;
 import static com.andersenlab.benefits.service.impl.ValidateUtils.errIdNotFoundMessage;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;

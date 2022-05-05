@@ -1,11 +1,7 @@
 package com.andersenlab.benefits.service;
 
-import com.andersenlab.benefits.domain.LocationEntity;
-import com.andersenlab.benefits.domain.RoleEntity;
 import com.andersenlab.benefits.domain.UserEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 /**
  * An interface for performing unique operations on a {@link UserEntity}.
@@ -15,13 +11,13 @@ import java.util.Optional;
  */
 @Service
 public interface UserService extends CrudService<UserEntity> {
-    /**
-     */
-    UserEntity createNewUser(final String login, final String password);
 
     /**
+     * Method to create new {@link UserEntity}
      * @param login the unique string representation to identify the {@link UserEntity}, not null
-     * @return the {@link UserEntity} corresponding given login from database, error if the login not found
+     * @param password of new User
+     * @throws IllegalStateException if user with the same login already exists
+     * @return created {@link UserEntity} with Role ROLE_USER and Location "Белоруссия/Минск"
      */
-    Optional<UserEntity> findByLogin(final String login);
+    UserEntity createNewUser(final String login, final String password);
 }

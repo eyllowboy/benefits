@@ -8,21 +8,22 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * A controller for handling requests for {@link RoleEntity}.
@@ -53,13 +54,19 @@ public class RoleController {
     }
 
     /**
-     * @return a list of {@link RoleEntity} from database.
+     * @param page is number of page to start returned result from
+     * @param size is number of elements per page that needs to return
+     * @param sort is the field by which to sort elements in returned page
+     * @return a page of {@link RoleEntity} from database.
      */
     @Operation(summary = "This is to fetch all the roles stored in DB")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Details of all the roles",
-                    content = @Content(mediaType = "application/json"))
+                    content = @Content),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
+                    content = @Content)
     })
     @GetMapping("/roles")
     public Page<RoleEntity> getRoles(@RequestParam(required = false, defaultValue = "0") final int page,
@@ -71,6 +78,7 @@ public class RoleController {
     /**
      * Updates {@link RoleEntity} in the database.
      *
+     * @param id         is the id of {@link RoleEntity} that needs to update
      * @param roleEntity the {@link RoleEntity} that needs to update
      * @throws IllegalStateException if:
      *                               <ul>
@@ -82,62 +90,60 @@ public class RoleController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Role has been updated",
+                    content = @Content),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
                     content = @Content)
     })
     @PatchMapping("/roles/{id}")
     public ResponseEntity<RoleEntity> updateRole(@PathVariable final Long id,
                                                  @RequestBody final RoleEntity roleEntity) {
-        if (!Objects.isNull(roleEntity.getCode())) {
-            final Optional<RoleEntity> theSameCodeRole = this.roleService.findByCode(roleEntity.getCode());
-            if (theSameCodeRole.isPresent() && (!theSameCodeRole.get().getId().equals(id)))
-                throw new IllegalStateException("Role with such 'code' is already exists");
-        }
-        final RoleEntity existingRole = this.roleService.findById(id);
-//            .orElseThrow(() -> new IllegalStateException("Role with this id was not found in the database"));
-        BeanUtils.copyProperties(roleEntity, existingRole, "id");
-        this.roleService.update(id, existingRole);
-        return ResponseEntity.ok(existingRole);
+        return ResponseEntity.ok(this.roleService.update(id, roleEntity));
     }
 
     /**
      * Create {@link RoleEntity} in the database.
      *
      * @param role new {@link RoleEntity} to be added
-     * @throws IllegalStateException if {@link RoleEntity} with {@link RoleEntity#getCode()} field is already exists
+     * @return post {@link RoleEntity}
+     * @throws IllegalStateException if:<ul>
+     *                               <li>{@link RoleEntity} with given id was not found in the database
+     *                               <li>{@link RoleEntity} with {@link RoleEntity#getCode()} field is already exists
+     *                               </ul>
      */
     @Operation(summary = "This is to create new role")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201",
                     description = "Role has been created",
+                    content = @Content),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
                     content = @Content)
     })
     @PostMapping("/roles")
-    public ResponseEntity<RoleEntity> addRole(@Valid @RequestBody final RoleEntity role) {
-        this.roleService.findByCode(role.getCode()).ifPresent(roleEntity -> {
-                    throw new IllegalStateException("Role with such 'code' is already exists");}
-        );
-        final RoleEntity savedRoleEntity = this.roleService.save(role);
-        return new ResponseEntity<>(savedRoleEntity, HttpStatus.CREATED);
+    public ResponseEntity<RoleEntity> addRole(@RequestBody final RoleEntity role) {
+        return new ResponseEntity<>(this.roleService.save(role), HttpStatus.CREATED);
     }
 
     /**
      * Gets {@link RoleEntity} from the database.
      *
      * @param id the id of {@link RoleEntity} that needs to get
+     * @return {@link RoleEntity}
      * @throws IllegalStateException if the given id was not found in the database
      */
     @Operation(summary = "This is to get the role")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Role has been received",
+                    content = @Content),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
                     content = @Content)
     })
     @GetMapping("/roles/{id}")
     public RoleEntity getRole(@PathVariable @DecimalMin("1") final Long id) {
         return this.roleService.findById(id);
-
-//        return roleEntity.orElseThrow(
-//                () -> new IllegalStateException("Role with this id was not found in the database"));
     }
 
     /**
@@ -150,16 +156,13 @@ public class RoleController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Role has been removed",
+                    content = @Content),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Server Error",
                     content = @Content)
     })
     @DeleteMapping("/roles/{id}")
     public void deleteRole(@PathVariable @DecimalMin("1") final Long id) {
-        this.roleService.findById(id);
-//                .orElseThrow(() ->
-//                new IllegalStateException("Role with this id was not found in the database"));
-        final Optional<RoleEntity> roleEntity = this.roleService.findWithAssociatedUsers(id);
-        if (roleEntity.isPresent() && roleEntity.get().getUsers().size() > 0)
-                throw new IllegalStateException("There is active users with this Role in database");
         this.roleService.delete(id);
     }
 }

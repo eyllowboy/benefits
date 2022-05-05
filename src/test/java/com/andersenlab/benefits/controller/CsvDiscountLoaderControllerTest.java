@@ -1,7 +1,10 @@
 package com.andersenlab.benefits.controller;
 
-import com.andersenlab.benefits.domain.*;
-import com.andersenlab.benefits.repository.*;
+import com.andersenlab.benefits.domain.CompanyEntity;
+import com.andersenlab.benefits.domain.DiscountEntity;
+import com.andersenlab.benefits.domain.LocationEntity;
+import com.andersenlab.benefits.repository.CompanyRepository;
+import com.andersenlab.benefits.repository.DiscountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +21,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
