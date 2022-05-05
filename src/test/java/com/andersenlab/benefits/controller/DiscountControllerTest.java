@@ -132,6 +132,7 @@ public class DiscountControllerTest {
         // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
         assertEquals(errIdNotFoundMessage("Discount", id), NestedServletException.getCause().getMessage());
+        assertEquals(Optional.empty(), this.discountRepository.findById(id));
     }
 
     @Test
@@ -176,8 +177,7 @@ public class DiscountControllerTest {
         // then
         assertEquals(200, result.getResponse().getStatus());
         assertTrue(this.ctu.isDiscountsEquals(
-                discount,
-                this.discountRepository.findById(discount.getId()).orElseThrow()));
+                discount, this.discountRepository.findById(discount.getId()).orElseThrow()));
     }
 
     @Test

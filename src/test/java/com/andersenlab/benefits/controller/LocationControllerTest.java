@@ -34,7 +34,6 @@ import java.util.Set;
 
 import static com.andersenlab.benefits.service.impl.ValidateUtils.*;
 import static java.lang.Math.random;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -117,38 +116,40 @@ public class LocationControllerTest {
     }
 
     @Test
-    public void whenGetAllLocationsInCountrySuccess() throws Exception {
+    public void whenGetLocationsByCountrySuccess() throws Exception {
+        final MvcResult result;
         // when
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/locations")
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/locations/country")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("country", "Country5")
                         .with(csrf()))
-                .andDo(print())
+                .andReturn();
 
-                // then
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", notNullValue()));
+        // then
+        final RestResponsePage<LocationEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+        pageResult.getContent().forEach(location -> assertEquals(location.getCountry(), "Country5"));
     }
 
     @Test
     public void whenGetLocationByIdSuccess() throws Exception {
         // given
-        final LocationEntity location = this.locationRepository
-                .findByCountryAndCity("Country5", "City5").orElseThrow();
+        final LocationEntity location = this.locationRepository.findByCountryAndCity("Country5", "City5").orElseThrow();
+        final MvcResult result;
 
         // when
-        this.mockMvc.perform(MockMvcRequestBuilders
+        result = this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/locations/{id}", location.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
-                .andDo(print())
-                // then
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", notNullValue()))
-                .andExpect(jsonPath("$.id", is(location.getId().intValue())))
-                .andExpect(jsonPath("$.country", is(location.getCountry())))
-                .andExpect(jsonPath("$.city", is(location.getCity())));
+                .andReturn();
+
+        // then
+        final LocationEntity getByIdLocation = this.ctu.getLocationFromJson(new JSONObject(result.getResponse().getContentAsString()));
+        assertEquals(200, result.getResponse().getStatus());
+        assertEquals(location, getByIdLocation);
     }
 
     @Test
@@ -169,24 +170,27 @@ public class LocationControllerTest {
     }
 
     @Test
-    public void whenGetLocationByCitySuccess() throws Exception {
+    public void whenGetLocationByCityAndCountrySuccess() throws Exception {
         // given
         final LocationEntity location = this.locationRepository
                 .findByCountryAndCity("Country5", "City5").orElseThrow();
         final String country = location.getCountry();
         final String city = location.getCity();
+        final MvcResult result;
 
         // when
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/locations/{country}/{city}", "Country5", "City5")
+        result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/locations/{country}/{city}", country, city)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andDo(print())
-                // then
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", notNullValue()))
-                .andExpect(jsonPath("$.country", is(country)))
-                .andExpect(jsonPath("$.city", is(city)));
+                .andReturn();
+        // then
+        final LocationEntity getLocationByCountryAndCity = this.ctu.getLocationFromJson(new JSONObject(result.getResponse().getContentAsString()));
+        assertEquals(200, result.getResponse().getStatus());
+        assertEquals(getLocationByCountryAndCity.getCountry(), country);
+        assertEquals(getLocationByCountryAndCity.getCity(), city);
+
     }
 
     @Test
@@ -212,20 +216,20 @@ public class LocationControllerTest {
     public void whenAddLocationSuccess() throws Exception {
         // given
         final LocationEntity location = new LocationEntity("Россия", "Пермь");
-
+        final MvcResult result;
         // when
-        this.mockMvc.perform(MockMvcRequestBuilders
+        result = this.mockMvc.perform(MockMvcRequestBuilders
                         .post("/locations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(location))
                         .with(csrf()))
-                .andDo(print())
+                .andReturn();
 
-                // then
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$", notNullValue()))
-                .andExpect(jsonPath("$.country", is(location.getCountry())))
-                .andExpect(jsonPath("$.city", is(location.getCity())));
+        // then
+        final LocationEntity addLocation = this.ctu.getLocationFromJson(new JSONObject(result.getResponse().getContentAsString()));
+        assertEquals(201, result.getResponse().getStatus());
+        assertEquals(addLocation.getCountry(), "Россия");
+        assertEquals(addLocation.getCity(), "Пермь");
     }
 
     @Test
@@ -256,20 +260,21 @@ public class LocationControllerTest {
         location.setCity("NewCity");
         location.setCountry("NewCountry");
         final String locationEntity = this.objectMapper.writeValueAsString(location);
+        final MvcResult result;
 
         // when
-        this.mockMvc.perform(MockMvcRequestBuilders
+        result = this.mockMvc.perform(MockMvcRequestBuilders
                         .patch("/locations/{id}", location.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(locationEntity)
                         .with(csrf()))
-                .andDo(print())
+                .andReturn();
 
-                // then
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(location.getId().intValue())))
-                .andExpect(jsonPath("$.city", is("NewCity")))
-                .andExpect(jsonPath("$.country", is("NewCountry")));
+        // then
+        final LocationEntity updatedLocation = this.ctu.getLocationFromJson(new JSONObject(result.getResponse().getContentAsString()));
+        assertEquals(200, result.getResponse().getStatus());
+        assertEquals(updatedLocation.getCountry(), "NewCountry");
+        assertEquals(updatedLocation.getCity(), "NewCity");
     }
 
     @Test
@@ -297,7 +302,7 @@ public class LocationControllerTest {
     public void whenDeleteLocationWithoutDiscountsSuccess() throws Exception {
         // given
         final LocationEntity location = this.ctu.getLocation(this.ctu.getRndEntityPos());
-        final int sizeBeforeDelete= this.locationRepository.findAll().size();
+        final int sizeBeforeDelete = this.locationRepository.findAll().size();
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
                         .delete("/locations/{id}", location.getId())

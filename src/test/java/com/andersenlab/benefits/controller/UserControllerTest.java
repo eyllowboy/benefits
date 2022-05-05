@@ -42,7 +42,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-
 @SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
@@ -141,6 +140,7 @@ public class UserControllerTest {
 
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
+        assertEquals(Optional.empty(), this.userRepository.findById(Long.MAX_VALUE));
         assertEquals("user with id: " + Long.MAX_VALUE + " was not found in the database",
                 nestedServletException.getCause().getMessage());
     }
@@ -164,6 +164,7 @@ public class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(user)))
                 .andReturn();
+
         // then
         assertEquals(201, result.getResponse().getStatus());
         assertEquals(2, this.userRepository.findAll().size());
@@ -180,6 +181,7 @@ public class UserControllerTest {
         user.setRoleEntity(role);
         user.setLocation(location);
         this.userRepository.save(user);
+
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class,
                 () -> this.mockMvc.perform(MockMvcRequestBuilders
