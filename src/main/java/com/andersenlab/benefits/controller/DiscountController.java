@@ -150,7 +150,7 @@ public class DiscountController {
                                                    @RequestParam(required = false, defaultValue = "6") final int size,
                                                    @RequestParam(required = false, defaultValue = "dateBegin") final String sort) {
         final Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByLocation(city).and(getLastAdded()));
-        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(sort)));
+        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sort)));
     }
 
     /**
@@ -175,7 +175,7 @@ public class DiscountController {
                                                        @RequestParam(required = false, defaultValue = "6") final int size,
                                                        @RequestParam(required = false, defaultValue = "dateBegin") final String sort) {
         final Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByCategory(category).and(getLastAdded()));
-        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(sort)));
+        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sort)));
     }
 
     /**
@@ -199,8 +199,11 @@ public class DiscountController {
                                                    @RequestParam(required = false, defaultValue = "0") final int page,
                                                    @RequestParam(required = false, defaultValue = "6") final int size,
                                                    @RequestParam(required = false, defaultValue = "dateBegin") final String sort) {
-        final Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getByType(type).and(getLastAdded()));
-        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(sort)));
+        final Specification<DiscountEntity> spec = Specification
+                .where(DiscountSpec.getByType(type)
+                        .or(DiscountSpec.getByCompanyTitle(type))
+                        .and(getLastAdded()));
+        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sort)));
     }
 
     /**
@@ -225,7 +228,7 @@ public class DiscountController {
                                                    @RequestParam(required = false, defaultValue = "6") final int size,
                                                    @RequestParam(required = false, defaultValue = "dateBegin") final String sort) {
         final Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getBySize(sizeDiscount).and(getLastAdded()));
-        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(sort)));
+        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sort)));
     }
 
     /**
@@ -289,5 +292,4 @@ public class DiscountController {
     public void deleteDiscount(@PathVariable final Long id) {
         this.discountService.delete(id);
     }
-
 }

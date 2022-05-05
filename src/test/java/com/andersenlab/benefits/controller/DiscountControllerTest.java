@@ -1,6 +1,7 @@
 package com.andersenlab.benefits.controller;
 
 import com.andersenlab.benefits.domain.DiscountEntity;
+import com.andersenlab.benefits.repository.CompanyRepository;
 import com.andersenlab.benefits.repository.DiscountRepository;
 import com.andersenlab.benefits.support.RestResponsePage;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -32,7 +33,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.andersenlab.benefits.service.impl.ValidateUtils.errIdNotFoundMessage;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -46,16 +49,19 @@ public class DiscountControllerTest {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
     private final DiscountRepository discountRepository;
+    private final CompanyRepository companyRepository;
     private final ControllerTestUtils ctu;
 
     @Autowired
     public DiscountControllerTest(final MockMvc mockMvc,
                                   final ObjectMapper objectMapper,
                                   final DiscountRepository discountRepository,
+                                  final CompanyRepository companyRepository,
                                   final ControllerTestUtils ctu) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
         this.discountRepository = discountRepository;
+        this.companyRepository = companyRepository;
         this.ctu = ctu;
     }
 
@@ -241,7 +247,7 @@ public class DiscountControllerTest {
     }
 
     @Test
-    void whenFindByCityAndDateSuccess() throws Exception {
+    void whenFindByCitySuccess() throws Exception {
         // given
         final DiscountEntity discount = this.discountRepository.saveAll(
                 this.ctu.getDiscountList()).get(this.ctu.getRndEntityPos() - 1);
@@ -267,7 +273,7 @@ public class DiscountControllerTest {
     }
 
     @Test
-    void whenFindByCategoryAndDateSuccess() throws Exception {
+    void whenFindByCategorySuccess() throws Exception {
         // given
         final DiscountEntity discount = this.discountRepository.saveAll(
                 this.ctu.getDiscountList()).get(this.ctu.getRndEntityPos() - 1);
@@ -292,17 +298,20 @@ public class DiscountControllerTest {
     }
 
     @Test
-    void whenFindByTypeAndDateSuccess() throws Exception {
+    void whenFindByTypeSuccess() throws Exception {
         // given
+        final String searchedString = "Type1";
         final DiscountEntity discount = this.discountRepository.saveAll(
                 this.ctu.getDiscountList()).get(this.ctu.getRndEntityPos() - 1);
+        discount.getCompany().setTitle(searchedString);
+        this.companyRepository.save(discount.getCompany());
         final MvcResult result;
 
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/discounts/find-by-type")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("type", discount.getType())
+                        .param("type", searchedString)
                         .with(csrf()))
                 .andDo(print())
                 .andReturn();
@@ -310,9 +319,11 @@ public class DiscountControllerTest {
         // then
         assertEquals(200, result.getResponse().getStatus());
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
-        pageResult.getContent().forEach(item -> assertEquals(item.getType(), discount.getType()));
+                new TypeReference<>() {});
+        pageResult.getContent().forEach(item ->
+                assertTrue(item.getType().contains(searchedString)
+                        || item.getCompany().getTitle().contains(searchedString)));
+        assertTrue(pageResult.getContent().contains(discount));
     }
 
     @Test
@@ -340,7 +351,7 @@ public class DiscountControllerTest {
     }
 
     @Test
-    void whenFindByCityAndDateEmptyResponse() throws Exception {
+    void whenFindByCityEmptyResponse() throws Exception {
         // given
         this.discountRepository.saveAll(this.ctu.getDiscountList());
         final String city = "Unknown City";
@@ -364,7 +375,7 @@ public class DiscountControllerTest {
     }
 
     @Test
-    void whenFindByCategoryAndDateEmptyResponse() throws Exception {
+    void whenFindByCategoryEmptyResponse() throws Exception {
         // given
         this.discountRepository.saveAll(this.ctu.getDiscountList());
         final String category = "Unknown Category";
@@ -388,7 +399,7 @@ public class DiscountControllerTest {
     }
 
     @Test
-    void whenFindByTypeAndDateEmptyResponse() throws Exception {
+    void whenFindByTypeEmptyResponse() throws Exception {
         // given
         this.discountRepository.saveAll(this.ctu.getDiscountList());
         final String type = "Unknown Type";
