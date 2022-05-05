@@ -364,7 +364,7 @@ public class RoleControllerTest {
         });
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-        assertEquals("Incorrect field name data size - must be between 3 and 25", nestedServletException.getCause().getMessage());
+        assertTrue(nestedServletException.getCause().getMessage().contains("must be between"));
     }
 
     @ParameterizedTest

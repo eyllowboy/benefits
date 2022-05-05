@@ -36,8 +36,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.lang.Math.random;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -425,7 +424,6 @@ public class UserControllerTest {
 
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-        assertEquals("Incorrect field login data size - must be between 3 and 20", nestedServletException.getCause().getMessage());
-
+        assertTrue(nestedServletException.getCause().getMessage().contains("must be between"));
     }
 }

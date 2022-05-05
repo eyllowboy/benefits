@@ -359,7 +359,7 @@ public class CategoryControllerTest {
 
         // then
         assertEquals(IllegalStateException.class, exception.getCause().getClass());
-        assertTrue(exception.getMessage().contains("Incorrect field title data size - must be between 3 and 20"));
+        assertTrue(exception.getMessage().contains("must be between"));
     }
 
     @ParameterizedTest
@@ -379,6 +379,6 @@ public class CategoryControllerTest {
 
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-        assertTrue(nestedServletException.getCause().getMessage().contains("Incorrect field title data size - must be between 3 and 20"));
+        assertTrue(nestedServletException.getCause().getMessage().contains("must be between"));
     }
 }

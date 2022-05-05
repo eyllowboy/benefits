@@ -19,3 +19,5 @@ databaseChangeLog:
       file: db/changelog/db.changelog-location_discount.yaml
   - include:
       file: db/changelog/db.changelog-category_discount.yaml
+  - include:
+      file: db/changelog/changeset/change-column-size-discounts.yaml

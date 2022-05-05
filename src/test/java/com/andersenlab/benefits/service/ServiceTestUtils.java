@@ -104,12 +104,15 @@ public class ServiceTestUtils {
     }
 
     public static DiscountEntity getDiscount(final long num) {
+        final int sizeMax = (int) (random() * 99 + 1);
+        final int sizeMin = (int) (random() * (99 - sizeMax) + 1);
         return new DiscountEntity(
                 num,
                 "Type" + num,
                 "Description" + num,
                 "Condition" + num,
-                "Size" + num,
+                sizeMin,
+                sizeMax,
                 DiscountType.DISCOUNT,
                 valueOf("2022-01-01 00:00:00"),
                 valueOf("2022-12-31 00:00:00"),
@@ -139,7 +142,8 @@ public class ServiceTestUtils {
                 discount.getCompany().getAddress() + ";" +
                 discount.getCompany().getPhone() + ";" +
                 discount.getCompany().getLink() + ";" +
-                discount.getSizeDiscount() + ";" +
+                discount.getSizeMin() + ";" +
+                discount.getSizeMax() + ";" +
                 discount.getDiscount_type() + ";" +
                 discount.getDescription() + ";" +
                 discount.getDiscount_condition() + ";" +
@@ -150,7 +154,7 @@ public class ServiceTestUtils {
     }
 
     public static MockMultipartFile newMockMultipartFile(final List<DiscountEntity> discounts) {
-        final StringBuilder contents = new StringBuilder("number;company_title;type;category;image;company_description;company_address;company_phone;links;size;discount_type;discount_description;discount_condition;start_date;end_date;location");
+        final StringBuilder contents = new StringBuilder("number;company_title;type;category;image;company_description;company_address;company_phone;links;min_sizeDiscount;max_sizeDiscount;discount_type;discount_description;discount_condition;start_date;end_date;location");
         discounts.forEach(discount -> contents.append("\n").append(discountToString(discount)));
         return (new MockMultipartFile(
                 "file",
@@ -170,7 +174,8 @@ public class ServiceTestUtils {
                 discount1.getType().equals(discount2.getType()) &&
                         discount1.getDescription().equals(discount2.getDescription()) &&
                         discount1.getDiscount_condition().equals(discount2.getDiscount_condition()) &&
-                        discount1.getSizeDiscount().equals(discount2.getSizeDiscount()) &&
+                        discount1.getSizeMin().equals(discount2.getSizeMin()) &&
+                        discount1.getSizeMax().equals(discount2.getSizeMax()) &&
                         discount1.getImageDiscount().equals(discount2.getImageDiscount()) &&
                         isCompaniesEquals(discount1.getCompany(), discount2.getCompany())
         );
