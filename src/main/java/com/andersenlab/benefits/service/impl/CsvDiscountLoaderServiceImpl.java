@@ -62,7 +62,8 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 		put("companyAddress",		"company_address");
 		put("companyPhone",			"company_phone");
 		put("links",				"links");
-		put("discountSize", 		"size");
+		put("sizeMin", 				"min_sizeDiscount");
+		put("sizeMax", 				"max_sizeDiscount");
 		put("discountType", 		"discount_type");
 		put("discountDescription",	"discount_description");
 		put("discountCondition",	"discount_condition");
@@ -200,6 +201,17 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 		return result;
 	}
 
+	private int getSizeDiscount(final String sizeDiscount) {
+		try {
+			if (Objects.isNull(sizeDiscount)) {
+				return 0;
+			}
+			return Integer.parseInt(sizeDiscount);
+		} catch (final NumberFormatException ex) {
+			throw new IllegalStateException("Incorrect discount size " + sizeDiscount);
+		}
+	}
+
 	private DiscountEntity getDiscount(final Map<String, String> row, final CompanyEntity companyEntity) throws IllegalStateException {
 		final Set<LocationEntity> locations = getLocation(row);
 		final Set<CategoryEntity> categories = getCategory(row);
@@ -207,7 +219,8 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 		discountEntity.setType(row.get(this.suitableHeader.get("type")));
 		discountEntity.setDescription(row.get(this.suitableHeader.get("discountDescription")));
 		discountEntity.setDiscount_condition(row.get(this.suitableHeader.get("discountCondition")));
-		discountEntity.setSizeDiscount(row.get(this.suitableHeader.get("discountSize")));
+		discountEntity.setSizeMin(getSizeDiscount(row.get(this.suitableHeader.get("sizeMin"))));
+		discountEntity.setSizeMax(getSizeDiscount(row.get(this.suitableHeader.get("sizeMax"))));
 		discountEntity.setDiscount_type(DiscountType.valueOf(row.get(this.suitableHeader.get("discountType"))));
 		discountEntity.setDateBegin(getDate(row.get(this.suitableHeader.get("startDate")), true));
 		discountEntity.setDateFinish(getDate(row.get(this.suitableHeader.get("endDate")), false));
@@ -230,11 +243,12 @@ public class CsvDiscountLoaderServiceImpl implements CsvDiscountLoaderService {
 	private boolean equalDiscounts(final DiscountEntity discount1, final DiscountEntity discount2) throws IllegalStateException {
 		return ((discount1 == discount2) ||
 				(discount1.getType().equals(discount2.getType()) &&
-						discount1.getDescription().equals(discount2.getDescription()) &&
-						discount1.getDiscount_condition().equals(discount2.getDiscount_condition()) &&
-						discount1.getSizeDiscount().equals(discount2.getSizeDiscount()) &&
-						discount1.getImageDiscount().equals(discount2.getImageDiscount()) &&
-						equalCompanies(discount1.getCompany(), discount2.getCompany())
+				discount1.getDescription().equals(discount2.getDescription()) &&
+				discount1.getDiscount_condition().equals(discount2.getDiscount_condition()) &&
+				discount1.getSizeMin().equals(discount2.getSizeMin()) &&
+				discount1.getSizeMax().equals(discount2.getSizeMax()) &&
+				discount1.getImageDiscount().equals(discount2.getImageDiscount()) &&
+				equalCompanies(discount1.getCompany(), discount2.getCompany())
 				));
 	}
 

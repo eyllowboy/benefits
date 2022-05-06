@@ -8,8 +8,7 @@ import com.andersenlab.benefits.domain.CompanyEntity_;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Order;
+import javax.persistence.criteria.*;
 import java.util.Date;
 
 @Component
@@ -50,8 +49,10 @@ public class DiscountSpec {
         };
     }
 
-    public static Specification<DiscountEntity> getBySize(final String sizeDiscount) {
-        return (root, query, criteriaBuilder) ->
-                criteriaBuilder.like(root.get(DiscountEntity_.SIZE_DISCOUNT), "%" + sizeDiscount + "%");
+    public static Specification<DiscountEntity> getBySize(final int sizeDiscount) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.between(
+                root.get(DiscountEntity_.SIZE_MIN),
+                root.get(DiscountEntity_.SIZE_MAX),
+                criteriaBuilder.literal(sizeDiscount));
     }
 }

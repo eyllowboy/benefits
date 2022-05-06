@@ -1,19 +1,15 @@
 package com.andersenlab.benefits.controller;
 
-import com.andersenlab.benefits.domain.DiscountEntity;
-import com.andersenlab.benefits.repository.CompanyRepository;
-import com.andersenlab.benefits.repository.DiscountRepository;
+import com.andersenlab.benefits.domain.*;
+import com.andersenlab.benefits.repository.*;
 import com.andersenlab.benefits.support.RestResponsePage;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,15 +25,14 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static com.andersenlab.benefits.service.impl.ValidateUtils.errIdNotFoundMessage;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @SpringBootTest
@@ -49,19 +44,16 @@ public class DiscountControllerTest {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
     private final DiscountRepository discountRepository;
-    private final CompanyRepository companyRepository;
     private final ControllerTestUtils ctu;
 
     @Autowired
     public DiscountControllerTest(final MockMvc mockMvc,
                                   final ObjectMapper objectMapper,
                                   final DiscountRepository discountRepository,
-                                  final CompanyRepository companyRepository,
                                   final ControllerTestUtils ctu) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
         this.discountRepository = discountRepository;
-        this.companyRepository = companyRepository;
         this.ctu = ctu;
     }
 
@@ -100,8 +92,7 @@ public class DiscountControllerTest {
         // then
 
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
+                new TypeReference<>() {});
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(rndSize, pageResult.getContent().size());
     }
@@ -123,7 +114,8 @@ public class DiscountControllerTest {
         // then
         assertEquals(200, result.getResponse().getStatus());
         assertTrue(this.ctu.isDiscountsEquals(
-                discount, this.ctu.getDiscountFromJson(new JSONObject(result.getResponse().getContentAsString()))));
+                discount,
+                this.ctu.getDiscountFromJson(new JSONObject(result.getResponse().getContentAsString()))));
     }
 
     @Test
@@ -137,8 +129,8 @@ public class DiscountControllerTest {
 
         // then
         assertEquals(IllegalStateException.class, NestedServletException.getCause().getClass());
-        assertEquals(errIdNotFoundMessage("Discount", id), NestedServletException.getCause().getMessage());
-        assertEquals(Optional.empty(), this.discountRepository.findById(id));
+        assertEquals(errIdNotFoundMessage("Discount", id),
+                NestedServletException.getCause().getMessage());
     }
 
     @Test
@@ -160,7 +152,8 @@ public class DiscountControllerTest {
         assertEquals(201, result.getResponse().getStatus());
         assertEquals(1, this.discountRepository.findAll().size());
         assertTrue(this.ctu.isDiscountsEquals(
-                discount, this.ctu.getDiscountFromJson(new JSONObject(result.getResponse().getContentAsString()))));
+                discount,
+                this.ctu.getDiscountFromJson(new JSONObject(result.getResponse().getContentAsString()))));
     }
 
     @Test
@@ -183,7 +176,8 @@ public class DiscountControllerTest {
         // then
         assertEquals(200, result.getResponse().getStatus());
         assertTrue(this.ctu.isDiscountsEquals(
-                discount, this.discountRepository.findById(discount.getId()).orElseThrow()));
+                discount,
+                this.discountRepository.findById(discount.getId()).orElseThrow()));
     }
 
     @Test
@@ -243,7 +237,8 @@ public class DiscountControllerTest {
 
         // then
         assertEquals(IllegalStateException.class, nestedServletException.getCause().getClass());
-        assertEquals(errIdNotFoundMessage("Discount", id), nestedServletException.getCause().getMessage());
+        assertEquals(errIdNotFoundMessage("Discount", id),
+                nestedServletException.getCause().getMessage());
     }
 
     @Test
@@ -266,8 +261,7 @@ public class DiscountControllerTest {
         // then
         assertEquals(200, result.getResponse().getStatus());
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
+                new TypeReference<>() {});
         pageResult.getContent().forEach(item -> assertTrue(item.getArea().stream()
                 .anyMatch(areaCity -> areaCity.getCity().equals(city))));
     }
@@ -291,27 +285,23 @@ public class DiscountControllerTest {
 
         // then
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
-        pageResult.getContent().forEach(item -> assertTrue(item.getCategories().stream()
-                .anyMatch(areaCategory -> areaCategory.getTitle().equals(category))));
+                new TypeReference<>() {});
+        pageResult.getContent().forEach(item ->assertTrue(item.getCategories().stream()
+                .anyMatch(areaCategory ->areaCategory.getTitle().equals(category))));
     }
 
     @Test
     void whenFindByTypeSuccess() throws Exception {
         // given
-        final String searchedString = "Type1";
         final DiscountEntity discount = this.discountRepository.saveAll(
                 this.ctu.getDiscountList()).get(this.ctu.getRndEntityPos() - 1);
-        discount.getCompany().setTitle(searchedString);
-        this.companyRepository.save(discount.getCompany());
         final MvcResult result;
 
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/discounts/find-by-type")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("type", searchedString)
+                        .param("type", discount.getType())
                         .with(csrf()))
                 .andDo(print())
                 .andReturn();
@@ -320,10 +310,7 @@ public class DiscountControllerTest {
         assertEquals(200, result.getResponse().getStatus());
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<>() {});
-        pageResult.getContent().forEach(item ->
-                assertTrue(item.getType().contains(searchedString)
-                        || item.getCompany().getTitle().contains(searchedString)));
-        assertTrue(pageResult.getContent().contains(discount));
+        pageResult.getContent().forEach(item ->assertEquals(item.getType(), discount.getType()));
     }
 
     @Test
@@ -331,13 +318,14 @@ public class DiscountControllerTest {
         // given
         final DiscountEntity discount = this.discountRepository.saveAll(
                 this.ctu.getDiscountList()).get(this.ctu.getRndEntityPos() - 1);
+        final Integer discountSize = discount.getSizeMin();
         final MvcResult result;
 
         //when
         result = this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/discounts/find-by-size")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("sizeDiscount", discount.getSizeDiscount())
+                        .param("sizeDiscount", "" + discountSize)
                         .with(csrf()))
                 .andDo(print())
                 .andReturn();
@@ -345,9 +333,8 @@ public class DiscountControllerTest {
         // then
         assertEquals(200, result.getResponse().getStatus());
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
-        pageResult.getContent().forEach(item -> assertEquals(item.getSizeDiscount(), discount.getSizeDiscount()));
+                new TypeReference<>() {});
+        pageResult.getContent().forEach(item ->assertTrue(discountSize >= item.getSizeMin() && discountSize <= item.getSizeMax()));
     }
 
     @Test
@@ -368,8 +355,7 @@ public class DiscountControllerTest {
 
         // then
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
+                new TypeReference<>() {});
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, pageResult.getContent().size());
     }
@@ -392,8 +378,7 @@ public class DiscountControllerTest {
 
         // then
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
+                new TypeReference<>() {});
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, pageResult.getContent().size());
     }
@@ -416,8 +401,7 @@ public class DiscountControllerTest {
 
         // then
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
+                new TypeReference<>() {});
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, pageResult.getContent().size());
     }
@@ -426,7 +410,7 @@ public class DiscountControllerTest {
     void whenFindBySizeDiscountEmptyResponse() throws Exception {
         // given
         this.discountRepository.saveAll(this.ctu.getDiscountList());
-        final String discountSize = "Empty Discount Size";
+        final String discountSize = "-100";
         final MvcResult result;
 
         //when
@@ -440,20 +424,19 @@ public class DiscountControllerTest {
 
         // then
         final RestResponsePage<DiscountEntity> pageResult = this.objectMapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
+                new TypeReference<>() {});
         assertEquals(200, result.getResponse().getStatus());
         assertEquals(0, pageResult.getContent().size());
     }
 
     @ParameterizedTest
     @CsvSource({
-            "Category1, Size1",
-            "Category2, Size2",
-            "Category3, Size3",
-            "Category4, Size4"
+            "Category1, 10",
+            "Category2, 11",
+            "Category3, 12",
+            "Category4, 13"
     })
-    void whenFindSimilar(final String title, final String size) throws Exception {
+    void whenFindSimilar(final String title, final Integer size) throws Exception {
         // given
         this.discountRepository.saveAll(this.ctu.getDiscountList());
         final MvcResult result;
@@ -463,7 +446,7 @@ public class DiscountControllerTest {
                         .get("/discounts/find-similar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("category", title)
-                        .param("sizeDiscount", size)
+                        .param("sizeDiscount", "" + size)
                         .param("limit", "3")
                         .with(csrf()))
                 .andDo(print())
@@ -475,8 +458,7 @@ public class DiscountControllerTest {
         foundDiscounts.forEach(discount ->
                 assertTrue(discount.getCategories().stream().anyMatch(category ->
                         category.getTitle().contains(title))
-                        && (discount.getSizeDiscount().contains(size)
-                        || size.contains(discount.getSizeDiscount()))));
+                        && (size >= discount.getSizeMin() && size <= discount.getSizeMax())));
     }
 
     @ParameterizedTest
@@ -532,7 +514,7 @@ public class DiscountControllerTest {
         // given
         final String fieldValue = "a".repeat(stringSize);
         final DiscountEntity discount = this.ctu.getDiscount(this.ctu.getRndEntityPos());
-        discount.setSizeDiscount(fieldValue);
+        discount.setType(fieldValue);
 
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->
@@ -553,7 +535,7 @@ public class DiscountControllerTest {
         final DiscountEntity discount = this.discountRepository.saveAll(
                 this.ctu.getDiscountList()).get(this.ctu.getRndEntityPos() - 1);
         final String fieldValue = "a".repeat(stringSize);
-        discount.setSizeDiscount(fieldValue);
+        discount.setType(fieldValue);
 
         // when
         final NestedServletException nestedServletException = assertThrows(NestedServletException.class, () ->

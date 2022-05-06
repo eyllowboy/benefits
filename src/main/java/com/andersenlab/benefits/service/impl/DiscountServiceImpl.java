@@ -66,10 +66,11 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public List<DiscountEntity> getSimilarDiscounts(final String category,
-                                                    final String sizeDiscount,
+                                                    final Integer sizeDiscount,
                                                     final String city,
                                                     final Integer limit) {
-        final Specification<DiscountEntity> specificationCategory = DiscountSpec.getByCategory(category);
+        final Specification<DiscountEntity> specificationCategory = DiscountSpec.getByCategory(category)
+                .and(DiscountSpec.getBySize(sizeDiscount));
         final Specification<DiscountEntity> specificationFinal;
         if (Objects.isNull(city)) {
             specificationFinal = Specification.where(specificationCategory);
@@ -77,10 +78,7 @@ public class DiscountServiceImpl implements DiscountService {
             specificationFinal = Specification.where(specificationCategory
                     .and(DiscountSpec.getByLocation(city)));
         }
-        final List<DiscountEntity> discounts = this.discountRepository.findAll(specificationFinal);
-        return discounts.stream().filter(discount ->
-                (discount.getSizeDiscount().contains(sizeDiscount)
-                        || sizeDiscount.contains(discount.getSizeDiscount()))).limit(limit).toList();
+        return this.discountRepository.findAll(specificationFinal);
     }
 
     @Override

@@ -28,13 +28,13 @@ public interface DiscountService extends CrudService<DiscountEntity> {
      * Method to find similar discounts in certain category with similar size
      *
      * @param category string with category name in which to search
-     * @param sizeDiscount string which must be contained in {@link DiscountEntity}'s size or vice versa
+     * @param sizeDiscount integer which must be between {@link DiscountEntity#sizeMin} and {@link DiscountEntity#sizeMax}
      * @param city is name of City where to search (optional) if certain location needed
      * @param limit number of {@link DiscountEntity} to return
      * @return List of {@link DiscountEntity} suitable to search conditions
      */
     List<DiscountEntity> getSimilarDiscounts(final String category,
-                                             final String sizeDiscount,
+                                             final Integer sizeDiscount,
                                              final String city,
                                              final Integer limit);
 }

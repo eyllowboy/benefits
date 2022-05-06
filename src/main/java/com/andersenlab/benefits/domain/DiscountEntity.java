@@ -1,13 +1,15 @@
 package com.andersenlab.benefits.domain;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
+import lombok.ToString;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.AllArgsConstructor;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.util.Date;
 import java.util.Set;
 
@@ -48,11 +50,17 @@ public class DiscountEntity {
     @Column(name = "discount_condition")
     private String discount_condition;
 
-    @Schema(description = "Size of discount", type = "string", minLength = 1, maxLength = 100)
-    @Size(min = 1, max = 100, message = "Size of discount must be between 1 and 100 characters")
-    @NotBlank
-    @Column(name = "size")
-    private String sizeDiscount;
+    @Schema(description = "Minimum size of discount", type = "int")
+    @Min(value = 0, message = "Size of discount must be between 0 and 100 percents")
+    @Max(value = 100, message = "Size of discount must be between 0 and 100 percents")
+    @Column(name = "size_min")
+    private Integer sizeMin;
+
+    @Schema(description = "Maximum size of discount", type = "int")
+    @Min(value = 0, message = "Size of discount must be between 0 and 100 percents")
+    @Max(value = 100, message = "Size of discount must be between 0 and 100 percents")
+    @Column(name = "size_max")
+    private Integer sizeMax;
 
     @Schema(description = "Type of discount", type = "enum", maxLength = 10)
     @NotNull

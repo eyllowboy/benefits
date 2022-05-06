@@ -1,10 +1,7 @@
 package com.andersenlab.benefits.controller;
 
-import com.andersenlab.benefits.domain.CompanyEntity;
-import com.andersenlab.benefits.domain.DiscountEntity;
-import com.andersenlab.benefits.domain.LocationEntity;
-import com.andersenlab.benefits.repository.CompanyRepository;
-import com.andersenlab.benefits.repository.DiscountRepository;
+import com.andersenlab.benefits.domain.*;
+import com.andersenlab.benefits.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +18,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
@@ -83,14 +77,14 @@ public class CsvDiscountLoaderControllerTest {
 
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-            .multipart("/upload-csv-file")
-            .file(csvData)
-            .with(csrf()))
-            .andDo(print())
+                        .multipart("/upload-csv-file")
+                        .file(csvData)
+                        .with(csrf()))
+                .andDo(print())
 
-        // then
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$", is(result)));
+                // then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", is(result)));
         discountsAfterUpload = this.discountRepository.findAll();
         assertEquals(discounts.size(), discountsAfterUpload.size());
         for (int i = 0; i < discounts.size(); i++)
@@ -105,8 +99,8 @@ public class CsvDiscountLoaderControllerTest {
         final List<CompanyEntity> companies = this.companyRepository.findAll();
         discounts.forEach(discount -> {
             final CompanyEntity company = companies.stream().filter(item ->
-                    item.getTitle().equals(discount.getCompany().getTitle())).findFirst()
-                        .orElse(discount.getCompany());
+                            item.getTitle().equals(discount.getCompany().getTitle())).findFirst()
+                    .orElse(discount.getCompany());
             if (Objects.isNull(company.getId()))
                 this.companyRepository.save(company);
             discount.setCompany(company);
@@ -117,13 +111,13 @@ public class CsvDiscountLoaderControllerTest {
 
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-            .multipart("/upload-csv-file")
-            .file(csvData)
-            .with(csrf()))
-            .andDo(print())
-        // then
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$", is(result)));
+                        .multipart("/upload-csv-file")
+                        .file(csvData)
+                        .with(csrf()))
+                .andDo(print())
+                // then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", is(result)));
 
         assertEquals(discounts.size(), this.discountRepository.findAll().size());
     }
@@ -141,13 +135,13 @@ public class CsvDiscountLoaderControllerTest {
 
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-            .multipart("/upload-csv-file")
-            .file(csvData)
-            .with(csrf()))
-            .andDo(print())
-        // then
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$", is(result)));
+                        .multipart("/upload-csv-file")
+                        .file(csvData)
+                        .with(csrf()))
+                .andDo(print())
+                // then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", is(result)));
 
         discountsAfterUpload = this.discountRepository.findAll();
         assertEquals(discounts.size() - 1, discountsAfterUpload.size());
@@ -165,13 +159,13 @@ public class CsvDiscountLoaderControllerTest {
 
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-            .multipart("/upload-csv-file")
-            .file(csvData)
-            .with(csrf()))
-            .andDo(print())
+                        .multipart("/upload-csv-file")
+                        .file(csvData)
+                        .with(csrf()))
+                .andDo(print())
 
-        // then
-            .andExpect(jsonPath("$[0]", is("1: City Brest was not found in database")));
+                // then
+                .andExpect(jsonPath("$[0]", is("1: City Brest was not found in database")));
     }
 
     @Test
@@ -183,13 +177,13 @@ public class CsvDiscountLoaderControllerTest {
 
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-            .multipart("/upload-csv-file")
-            .file(csvData)
-            .with(csrf()))
-            .andDo(print())
+                        .multipart("/upload-csv-file")
+                        .file(csvData)
+                        .with(csrf()))
+                .andDo(print())
 
-        // then
-            .andExpect(jsonPath("$[0]", is("1: Type of company or service must be between 1 and 50 characters")));
+                // then
+                .andExpect(jsonPath("$[0]", is("1: Type of company or service must be between 1 and 50 characters")));
     }
 
     @Test
@@ -201,12 +195,12 @@ public class CsvDiscountLoaderControllerTest {
 
         // when
         this.mockMvc.perform(MockMvcRequestBuilders
-            .multipart("/upload-csv-file")
-            .file(csvData)
-            .with(csrf()))
-            .andDo(print())
-        // then
-            .andExpect(jsonPath("$[0]", is("1: Number of delimited fields does not match header")));
+                        .multipart("/upload-csv-file")
+                        .file(csvData)
+                        .with(csrf()))
+                .andDo(print())
+                // then
+                .andExpect(jsonPath("$[0]", is("1: Number of delimited fields does not match header")));
     }
 
     @Test

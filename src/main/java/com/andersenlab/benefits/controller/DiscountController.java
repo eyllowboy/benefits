@@ -207,14 +207,13 @@ public class DiscountController {
     }
 
     /**
-     * Find {@link DiscountEntity} with {@link DiscountEntity#sizeDiscount} like "%sizeDiscount%"
+     * Find {@link DiscountEntity} with sizeDiscount in {@link DiscountEntity#sizeMin} and {@link DiscountEntity#sizeMax}
      * in descending order by {@link DiscountEntity#dateBegin}
      *
-     * @param sizeDiscount is partial mask which mast be contained in
-     *                     {@link DiscountEntity#sizeDiscount}. Default - all
-     * @param page         is number of page to start returned result from
-     * @param size         is number of elements per page that needs to return
-     * @param sort         is the field by which to sort elements in returned list
+     * @param sizeDiscount which must be in {@link DiscountEntity#sizeMin} and {@link DiscountEntity#sizeMax}
+     * @param page is number of page to start returned result from
+     * @param size is number of elements per page that needs to return
+     * @param sort is the field by which to sort elements in returned list
      */
     @Operation(summary = "This is method to find discounts by %sizeDiscount% mask ordered by descending beginDate")
     @ApiResponses(value = {
@@ -223,26 +222,25 @@ public class DiscountController {
                     content = @Content)
     })
     @GetMapping("/discounts/find-by-size")
-    public Page<DiscountEntity> findDiscountBySize(@RequestParam(required = false) final String sizeDiscount,
+    public Page<DiscountEntity> findDiscountBySize(@RequestParam(required = false) final int sizeDiscount,
                                                    @RequestParam(required = false, defaultValue = "0") final int page,
                                                    @RequestParam(required = false, defaultValue = "6") final int size,
                                                    @RequestParam(required = false, defaultValue = "dateBegin") final String sort) {
         final Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getBySize(sizeDiscount).and(getLastAdded()));
-        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sort)));
+        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(sort)));
     }
 
     /**
-     * Find {@link DiscountEntity} based on equals to category and like %sizeDiscount%
+     * Find {@link DiscountEntity} based on equals to category and sizeDiscount in {@link DiscountEntity#sizeMin} and {@link DiscountEntity#sizeMax}
      *
-     * @param category     is name of category which mast be equal to one of the
-     *                     {@link DiscountEntity#categories} title.
-     * @param sizeDiscount is string which must be contained in {@link DiscountEntity#sizeDiscount}
-     *                     or vice versa
-     * @param city         is name of City where to search (optional) if certain location needed
-     * @param limit        is number of {@link DiscountEntity} to return
+     * @param category is name of category which must be equal to one of the
+     *                {@link DiscountEntity#categories} title.
+     * @param sizeDiscount which must be in {@link DiscountEntity#sizeMin} and {@link DiscountEntity#sizeMax}
+     * @param city is name of City where to search (optional) if certain location needed
+     * @param limit is number of {@link DiscountEntity} to return
      * @return List of {@link DiscountEntity} suitable to search conditions
      */
-    @Operation(summary = "This is method to find discounts in the same Category and with similar size of discount")
+    @Operation(summary = "This is method to find discounts in the same Category with size in min/max discount range")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Discounts have been received",
@@ -250,7 +248,7 @@ public class DiscountController {
     })
     @GetMapping("/discounts/find-similar")
     public List<DiscountEntity> findSimilar(@RequestParam final String category,
-                                            @RequestParam final String sizeDiscount,
+                                            @RequestParam final int sizeDiscount,
                                             @RequestParam(required = false) final String city,
                                             @RequestParam(required = false, defaultValue = "3") final Integer limit) {
         return this.discountService.getSimilarDiscounts(category, sizeDiscount, city, limit);

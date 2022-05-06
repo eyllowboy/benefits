@@ -9,6 +9,8 @@ import com.andersenlab.benefits.service.impl.DiscountServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -16,7 +18,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.util.NestedServletException;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -29,6 +34,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static com.andersenlab.benefits.repository.DiscountSpec.getLastAdded;
 import static com.andersenlab.benefits.service.ServiceTestUtils.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(properties = "spring.main.lazy-initialization=true",
@@ -212,5 +218,19 @@ class DiscountServiceTest {
         // then
         assertEquals(1, foundDiscounts.getTotalElements());
         verify(this.discountRepository, times(1)).findAll(spec,PageRequest.of(0, 10));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"-1", "101", "250"})
+    public void whenAddDiscountWrongSizeValue(final Integer size) {
+        final DiscountEntity discountToAdd = getDiscount(getRndEntityPos());
+        discountToAdd.setSizeMin(size);
+
+        // when
+        final IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+                this.discountService.save(discountToAdd));
+
+        // then
+        assertTrue(exception.getMessage().contains("must be between"));
     }
 }

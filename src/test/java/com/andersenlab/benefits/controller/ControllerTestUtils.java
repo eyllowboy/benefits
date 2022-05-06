@@ -1,18 +1,7 @@
 package com.andersenlab.benefits.controller;
 
-import com.andersenlab.benefits.domain.CategoryEntity;
-import com.andersenlab.benefits.domain.CompanyEntity;
-import com.andersenlab.benefits.domain.DiscountEntity;
-import com.andersenlab.benefits.domain.DiscountType;
-import com.andersenlab.benefits.domain.LocationEntity;
-import com.andersenlab.benefits.domain.RoleEntity;
-import com.andersenlab.benefits.domain.UserEntity;
-import com.andersenlab.benefits.repository.CategoryRepository;
-import com.andersenlab.benefits.repository.CompanyRepository;
-import com.andersenlab.benefits.repository.DiscountRepository;
-import com.andersenlab.benefits.repository.LocationRepository;
-import com.andersenlab.benefits.repository.RoleRepository;
-import com.andersenlab.benefits.repository.UserRepository;
+import com.andersenlab.benefits.domain.*;
+import com.andersenlab.benefits.repository.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,11 +10,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.random;
@@ -149,6 +134,8 @@ public class ControllerTestUtils {
     }
 
     public DiscountEntity getDiscount(final long num) {
+        final int sizeMax = (int) (random() * 99 + 1);
+        final int sizeMin = (int) (random() * (99 - sizeMax) + 1);
         return (this.discountRepository.findAll().stream().filter(item ->
                         Objects.equals(item.getId(), num)).findFirst()
                 .orElse(
@@ -157,7 +144,8 @@ public class ControllerTestUtils {
                                 "Type" + num,
                                 "Description" + num,
                                 "Condition" + num,
-                                "Size" + num,
+                                sizeMin,
+                                sizeMax,
                                 DiscountType.DISCOUNT,
                                 valueOf("2022-01-01 00:00:00"),
                                 valueOf("2022-12-31 00:00:00"),
@@ -186,7 +174,8 @@ public class ControllerTestUtils {
                         discount.getCompany().getAddress() + ";" +
                         discount.getCompany().getPhone() + ";" +
                         discount.getCompany().getLink() + ";" +
-                        discount.getSizeDiscount() + ";" +
+                        discount.getSizeMin() + ";" +
+                        discount.getSizeMax() + ";" +
                         discount.getDiscount_type() + ";" +
                         discount.getDescription() + ";" +
                         discount.getDiscount_condition() + ";" +
@@ -197,7 +186,7 @@ public class ControllerTestUtils {
     }
 
     public MockMultipartFile newMockMultipartFile(final List<DiscountEntity> discounts) {
-        final StringBuilder contents = new StringBuilder("number;company_title;type;category;image;company_description;company_address;company_phone;links;size;discount_type;discount_description;discount_condition;start_date;end_date;location");
+        final StringBuilder contents = new StringBuilder("number;company_title;type;category;image;company_description;company_address;company_phone;links;min_sizeDiscount;max_sizeDiscount;discount_type;discount_description;discount_condition;start_date;end_date;location");
         discounts.forEach(discount -> contents.append("\n").append(discountToString(discount)));
         return (new MockMultipartFile(
                 "file",
@@ -227,7 +216,8 @@ public class ControllerTestUtils {
                 discount1.getType().equals(discount2.getType()) &&
                         discount1.getDescription().equals(discount2.getDescription()) &&
                         discount1.getDiscount_condition().equals(discount2.getDiscount_condition()) &&
-                        discount1.getSizeDiscount().equals(discount2.getSizeDiscount()) &&
+                        discount1.getSizeMin().equals(discount2.getSizeMin()) &&
+                        discount1.getSizeMax().equals(discount2.getSizeMax()) &&
                         discount1.getImageDiscount().equals(discount2.getImageDiscount()) &&
                         isCompaniesEquals(discount1.getCompany(), discount2.getCompany())
         );
@@ -342,7 +332,8 @@ public class ControllerTestUtils {
                         discount.getString("type"),
                         discount.getString("description"),
                         discount.getString("discount_condition"),
-                        discount.getString("sizeDiscount"),
+                        getSizeDiscount(discount.getString("sizeMin")),
+                        getSizeDiscount(discount.getString("sizeMax")),
                         DiscountType.valueOf(discount.getString("discount_type")),
                         valueOf(discount.getString("dateBegin")),
                         valueOf(discount.getString("dateFinish")),
@@ -365,5 +356,16 @@ public class ControllerTestUtils {
             result.add(getDiscountFromJson(jsonObjects.getJSONObject(i)));
         }
         return result;
+    }
+
+    private int getSizeDiscount(final String sizeDiscount) {
+        try {
+            if (Objects.isNull(sizeDiscount)) {
+                return 0;
+            }
+            return Integer.parseInt(sizeDiscount);
+        } catch (final NumberFormatException ex) {
+            throw new IllegalStateException("Incorrect discount size " + sizeDiscount);
+        }
     }
 }

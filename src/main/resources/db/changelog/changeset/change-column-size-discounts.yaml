@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: change-column-size-discounts
+      author: panamarou
+      changes:
+        - dropColumn:
+            tableName: discounts
+            columnName: size
+        - addColumn:
+            tableName: discounts
+            columns:
+              - column:
+                  name: size_min
+                  type: integer
+        - addColumn:
+            tableName: discounts
+            columns:
+              - column:
+                  name: size_max
+                  type: integer

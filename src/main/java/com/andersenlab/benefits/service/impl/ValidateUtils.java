@@ -3,10 +3,7 @@ package com.andersenlab.benefits.service.impl;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Objects;
@@ -29,7 +26,11 @@ public class ValidateUtils {
     }
 
     public static String errIncorrectSize(final String field, final int minSize, final int maxSize) {
-        return String.format("Incorrect field %s data size - must be between %d and %d", field, minSize, maxSize);
+        return String.format("Incorrect field %s data length - must be between %d and %d", field, minSize, maxSize);
+    }
+
+    public static String errIncorrectValue(final String field, final int minSize, final int maxSize) {
+        return String.format("Incorrect field %s data value - must be between %d and %d", field, minSize, maxSize);
     }
 
     public static String errNoData(final String entity, final String field) {
@@ -52,6 +53,8 @@ public class ValidateUtils {
         final NotNull nn = field.getAnnotation(NotNull.class);
         final NotEmpty ne = field.getAnnotation(NotEmpty.class);
         final Size size = field.getAnnotation(Size.class);
+        final Min sizeMin = field.getAnnotation(Min.class);
+        final Max sizeMax = field.getAnnotation(Max.class);
         if (validateNull && (!Objects.isNull(nb) && (Objects.isNull(value) || Objects.equals(value, "")))
                 || ((!Objects.isNull(nn) || !Objects.isNull(ne)) && Objects.isNull(value))) {
             throw new IllegalStateException(errNoData(entityName, field.getName()));
@@ -60,6 +63,11 @@ public class ValidateUtils {
                 && value instanceof String
                 && (((String) value).length() < size.min() || ((String) value).length() > size.max())) {
             throw new IllegalStateException(errIncorrectSize(field.getName(), size.min(), size.max()));
+        }
+        if (!Objects.isNull(sizeMin) && !Objects.isNull(sizeMax)
+                && value instanceof Integer
+                && ((Integer) value < sizeMin.value() || (Integer) value > sizeMax.value())) {
+            throw new IllegalStateException(errIncorrectValue(field.getName(), (int) sizeMin.value(), (int) sizeMax.value()));
         }
     }
 
