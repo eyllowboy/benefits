@@ -225,9 +225,10 @@ public class DiscountController {
     public Page<DiscountEntity> findDiscountBySize(@RequestParam(required = false) final int sizeDiscount,
                                                    @RequestParam(required = false, defaultValue = "0") final int page,
                                                    @RequestParam(required = false, defaultValue = "6") final int size,
-                                                   @RequestParam(required = false, defaultValue = "dateBegin") final String sort) {
+                                                   @RequestParam(required = false, defaultValue = "sizeMax") final String sort,
+                                                   @RequestParam(required = false, defaultValue = "DESC") final Sort.Direction direction) {
         final Specification<DiscountEntity> spec = Specification.where(DiscountSpec.getBySize(sizeDiscount).and(getLastAdded()));
-        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(sort)));
+        return this.discountService.getDiscountsByCriteria(spec, PageRequest.of(page, size, Sort.by(direction, sort)));
     }
 
     /**

@@ -104,15 +104,15 @@ public class ServiceTestUtils {
     }
 
     public static DiscountEntity getDiscount(final long num) {
-        final int sizeMax = (int) (random() * 99 + 1);
-        final int sizeMin = (int) (random() * (99 - sizeMax) + 1);
+        final int sizeA = (int) (random() * 99 + 1);
+        final int sizeB = (int) (random() * 99 + 1);
         return new DiscountEntity(
                 num,
                 "Type" + num,
                 "Description" + num,
                 "Condition" + num,
-                sizeMin,
-                sizeMax,
+                Math.min(sizeA, sizeB),
+                Math.max(sizeA, sizeB),
                 DiscountType.DISCOUNT,
                 valueOf("2022-01-01 00:00:00"),
                 valueOf("2022-12-31 00:00:00"),
